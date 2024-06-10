@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mickael/dev/engine-3d
+CMAKE_SOURCE_DIR = /home/aluno/tmig
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mickael/dev/engine-3d
+CMAKE_BINARY_DIR = /home/aluno/tmig
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mickael/dev/engine-3d/CMakeFiles /home/mickael/dev/engine-3d//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/aluno/tmig/CMakeFiles /home/aluno/tmig//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mickael/dev/engine-3d/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/aluno/tmig/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -117,17 +117,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named engine-3d
+# Target rules for targets named tmig
 
 # Build rule for target.
-engine-3d: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 engine-3d
-.PHONY : engine-3d
+tmig: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tmig
+.PHONY : tmig
 
 # fast build rule for target.
-engine-3d/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/build
-.PHONY : engine-3d/fast
+tmig/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/build
+.PHONY : tmig/fast
 
 #=============================================================================
 # Target rules for targets named tests
@@ -147,7 +147,7 @@ external/glad/glad.o: external/glad/glad.c.o
 
 # target to build an object file
 external/glad/glad.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/external/glad/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/external/glad/glad.c.o
 .PHONY : external/glad/glad.c.o
 
 external/glad/glad.i: external/glad/glad.c.i
@@ -155,7 +155,7 @@ external/glad/glad.i: external/glad/glad.c.i
 
 # target to preprocess a source file
 external/glad/glad.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/external/glad/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/external/glad/glad.c.i
 .PHONY : external/glad/glad.c.i
 
 external/glad/glad.s: external/glad/glad.c.s
@@ -163,7 +163,7 @@ external/glad/glad.s: external/glad/glad.c.s
 
 # target to generate assembly for a file
 external/glad/glad.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/external/glad/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/external/glad/glad.c.s
 .PHONY : external/glad/glad.c.s
 
 external/stb/stb_image.o: external/stb/stb_image.c.o
@@ -171,7 +171,7 @@ external/stb/stb_image.o: external/stb/stb_image.c.o
 
 # target to build an object file
 external/stb/stb_image.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/external/stb/stb_image.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/external/stb/stb_image.c.o
 .PHONY : external/stb/stb_image.c.o
 
 external/stb/stb_image.i: external/stb/stb_image.c.i
@@ -179,7 +179,7 @@ external/stb/stb_image.i: external/stb/stb_image.c.i
 
 # target to preprocess a source file
 external/stb/stb_image.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/external/stb/stb_image.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/external/stb/stb_image.c.i
 .PHONY : external/stb/stb_image.c.i
 
 external/stb/stb_image.s: external/stb/stb_image.c.s
@@ -187,7 +187,7 @@ external/stb/stb_image.s: external/stb/stb_image.c.s
 
 # target to generate assembly for a file
 external/stb/stb_image.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/external/stb/stb_image.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/external/stb/stb_image.c.s
 .PHONY : external/stb/stb_image.c.s
 
 src/camera.o: src/camera.cpp.o
@@ -195,7 +195,7 @@ src/camera.o: src/camera.cpp.o
 
 # target to build an object file
 src/camera.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/camera.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/camera.cpp.o
 .PHONY : src/camera.cpp.o
 
 src/camera.i: src/camera.cpp.i
@@ -203,7 +203,7 @@ src/camera.i: src/camera.cpp.i
 
 # target to preprocess a source file
 src/camera.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/camera.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/camera.cpp.i
 .PHONY : src/camera.cpp.i
 
 src/camera.s: src/camera.cpp.s
@@ -211,39 +211,183 @@ src/camera.s: src/camera.cpp.s
 
 # target to generate assembly for a file
 src/camera.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/camera.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/camera.cpp.s
 .PHONY : src/camera.cpp.s
 
-src/shader.o: src/shader.cpp.o
-.PHONY : src/shader.o
+src/entity.o: src/entity.cpp.o
+.PHONY : src/entity.o
 
 # target to build an object file
-src/shader.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/shader.cpp.o
-.PHONY : src/shader.cpp.o
+src/entity.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/entity.cpp.o
+.PHONY : src/entity.cpp.o
 
-src/shader.i: src/shader.cpp.i
-.PHONY : src/shader.i
+src/entity.i: src/entity.cpp.i
+.PHONY : src/entity.i
 
 # target to preprocess a source file
-src/shader.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/shader.cpp.i
-.PHONY : src/shader.cpp.i
+src/entity.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/entity.cpp.i
+.PHONY : src/entity.cpp.i
 
-src/shader.s: src/shader.cpp.s
-.PHONY : src/shader.s
+src/entity.s: src/entity.cpp.s
+.PHONY : src/entity.s
 
 # target to generate assembly for a file
-src/shader.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/shader.cpp.s
-.PHONY : src/shader.cpp.s
+src/entity.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/entity.cpp.s
+.PHONY : src/entity.cpp.s
+
+src/gl/ebo.o: src/gl/ebo.cpp.o
+.PHONY : src/gl/ebo.o
+
+# target to build an object file
+src/gl/ebo.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/ebo.cpp.o
+.PHONY : src/gl/ebo.cpp.o
+
+src/gl/ebo.i: src/gl/ebo.cpp.i
+.PHONY : src/gl/ebo.i
+
+# target to preprocess a source file
+src/gl/ebo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/ebo.cpp.i
+.PHONY : src/gl/ebo.cpp.i
+
+src/gl/ebo.s: src/gl/ebo.cpp.s
+.PHONY : src/gl/ebo.s
+
+# target to generate assembly for a file
+src/gl/ebo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/ebo.cpp.s
+.PHONY : src/gl/ebo.cpp.s
+
+src/gl/shader.o: src/gl/shader.cpp.o
+.PHONY : src/gl/shader.o
+
+# target to build an object file
+src/gl/shader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/shader.cpp.o
+.PHONY : src/gl/shader.cpp.o
+
+src/gl/shader.i: src/gl/shader.cpp.i
+.PHONY : src/gl/shader.i
+
+# target to preprocess a source file
+src/gl/shader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/shader.cpp.i
+.PHONY : src/gl/shader.cpp.i
+
+src/gl/shader.s: src/gl/shader.cpp.s
+.PHONY : src/gl/shader.s
+
+# target to generate assembly for a file
+src/gl/shader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/shader.cpp.s
+.PHONY : src/gl/shader.cpp.s
+
+src/gl/texture.o: src/gl/texture.cpp.o
+.PHONY : src/gl/texture.o
+
+# target to build an object file
+src/gl/texture.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/texture.cpp.o
+.PHONY : src/gl/texture.cpp.o
+
+src/gl/texture.i: src/gl/texture.cpp.i
+.PHONY : src/gl/texture.i
+
+# target to preprocess a source file
+src/gl/texture.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/texture.cpp.i
+.PHONY : src/gl/texture.cpp.i
+
+src/gl/texture.s: src/gl/texture.cpp.s
+.PHONY : src/gl/texture.s
+
+# target to generate assembly for a file
+src/gl/texture.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/texture.cpp.s
+.PHONY : src/gl/texture.cpp.s
+
+src/gl/vao.o: src/gl/vao.cpp.o
+.PHONY : src/gl/vao.o
+
+# target to build an object file
+src/gl/vao.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/vao.cpp.o
+.PHONY : src/gl/vao.cpp.o
+
+src/gl/vao.i: src/gl/vao.cpp.i
+.PHONY : src/gl/vao.i
+
+# target to preprocess a source file
+src/gl/vao.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/vao.cpp.i
+.PHONY : src/gl/vao.cpp.i
+
+src/gl/vao.s: src/gl/vao.cpp.s
+.PHONY : src/gl/vao.s
+
+# target to generate assembly for a file
+src/gl/vao.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/vao.cpp.s
+.PHONY : src/gl/vao.cpp.s
+
+src/gl/vbo.o: src/gl/vbo.cpp.o
+.PHONY : src/gl/vbo.o
+
+# target to build an object file
+src/gl/vbo.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/vbo.cpp.o
+.PHONY : src/gl/vbo.cpp.o
+
+src/gl/vbo.i: src/gl/vbo.cpp.i
+.PHONY : src/gl/vbo.i
+
+# target to preprocess a source file
+src/gl/vbo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/vbo.cpp.i
+.PHONY : src/gl/vbo.cpp.i
+
+src/gl/vbo.s: src/gl/vbo.cpp.s
+.PHONY : src/gl/vbo.s
+
+# target to generate assembly for a file
+src/gl/vbo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/gl/vbo.cpp.s
+.PHONY : src/gl/vbo.cpp.s
+
+src/mesh.o: src/mesh.cpp.o
+.PHONY : src/mesh.o
+
+# target to build an object file
+src/mesh.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/mesh.cpp.o
+.PHONY : src/mesh.cpp.o
+
+src/mesh.i: src/mesh.cpp.i
+.PHONY : src/mesh.i
+
+# target to preprocess a source file
+src/mesh.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/mesh.cpp.i
+.PHONY : src/mesh.cpp.i
+
+src/mesh.s: src/mesh.cpp.s
+.PHONY : src/mesh.s
+
+# target to generate assembly for a file
+src/mesh.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/mesh.cpp.s
+.PHONY : src/mesh.cpp.s
 
 src/window.o: src/window.cpp.o
 .PHONY : src/window.o
 
 # target to build an object file
 src/window.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/window.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/window.cpp.o
 .PHONY : src/window.cpp.o
 
 src/window.i: src/window.cpp.i
@@ -251,7 +395,7 @@ src/window.i: src/window.cpp.i
 
 # target to preprocess a source file
 src/window.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/window.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/window.cpp.i
 .PHONY : src/window.cpp.i
 
 src/window.s: src/window.cpp.s
@@ -259,7 +403,7 @@ src/window.s: src/window.cpp.s
 
 # target to generate assembly for a file
 src/window.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine-3d.dir/build.make CMakeFiles/engine-3d.dir/src/window.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tmig.dir/build.make CMakeFiles/tmig.dir/src/window.cpp.s
 .PHONY : src/window.cpp.s
 
 tests/main.o: tests/main.cpp.o
@@ -294,8 +438,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... engine-3d"
 	@echo "... tests"
+	@echo "... tmig"
 	@echo "... external/glad/glad.o"
 	@echo "... external/glad/glad.i"
 	@echo "... external/glad/glad.s"
@@ -305,9 +449,27 @@ help:
 	@echo "... src/camera.o"
 	@echo "... src/camera.i"
 	@echo "... src/camera.s"
-	@echo "... src/shader.o"
-	@echo "... src/shader.i"
-	@echo "... src/shader.s"
+	@echo "... src/entity.o"
+	@echo "... src/entity.i"
+	@echo "... src/entity.s"
+	@echo "... src/gl/ebo.o"
+	@echo "... src/gl/ebo.i"
+	@echo "... src/gl/ebo.s"
+	@echo "... src/gl/shader.o"
+	@echo "... src/gl/shader.i"
+	@echo "... src/gl/shader.s"
+	@echo "... src/gl/texture.o"
+	@echo "... src/gl/texture.i"
+	@echo "... src/gl/texture.s"
+	@echo "... src/gl/vao.o"
+	@echo "... src/gl/vao.i"
+	@echo "... src/gl/vao.s"
+	@echo "... src/gl/vbo.o"
+	@echo "... src/gl/vbo.i"
+	@echo "... src/gl/vbo.s"
+	@echo "... src/mesh.o"
+	@echo "... src/mesh.i"
+	@echo "... src/mesh.s"
 	@echo "... src/window.o"
 	@echo "... src/window.i"
 	@echo "... src/window.s"

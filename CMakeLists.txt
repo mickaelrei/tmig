@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.5...3.27.5)
 
-set(PROJECT_NAME engine-3d)
+set(PROJECT_NAME tmig)
 
 project(${PROJECT_NAME})
 
 # Warning flags
-set(FLAGS "-Wall -Wextra")
+set(FLAGS "-Wall -Wextra -fsanitize=address,undefined")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 
 # Find packages
@@ -21,9 +21,17 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
-    ${SOURCE_DIR}/window.cpp
-    ${SOURCE_DIR}/shader.cpp
+    ${SOURCE_DIR}/gl/ebo.cpp
+    ${SOURCE_DIR}/gl/shader.cpp
+    ${SOURCE_DIR}/gl/texture.cpp
+    ${SOURCE_DIR}/gl/vao.cpp
+    ${SOURCE_DIR}/gl/vbo.cpp
+
     ${SOURCE_DIR}/camera.cpp
+    ${SOURCE_DIR}/entity.cpp
+    ${SOURCE_DIR}/mesh.cpp
+    ${SOURCE_DIR}/window.cpp
+
 
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
     ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
