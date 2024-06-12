@@ -1,4 +1,0 @@
-/home/aluno/tmig/CMakeFiles/tmig.dir
-/home/aluno/tmig/CMakeFiles/tests.dir
-/home/aluno/tmig/CMakeFiles/edit_cache.dir
-/home/aluno/tmig/CMakeFiles/rebuild_cache.dir
