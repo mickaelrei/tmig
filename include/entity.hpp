@@ -22,6 +22,9 @@ public:
         const glm::vec3 &scale = glm::vec3{1.0f});
 
     void destroy();
+    
+    void setViewMatrix(const glm::mat4 &view);
+    void setProjectionMatrix(const glm::mat4 &projection);
 
     glm::vec3 getPosition() const;
     glm::mat4 getRotation() const;
@@ -37,7 +40,7 @@ public:
     void update(float dt);
     void draw(const glm::mat4 &mat = glm::mat4{1.0f});
 
-private:
+protected:
     Mesh mesh;
 
     glm::vec3 _position;
@@ -52,4 +55,8 @@ private:
     std::vector<Texture> textures;
 
     void updateModelMatrix();
+    void setup();
+
+private:
+    bool _setupCalled = false;
 };

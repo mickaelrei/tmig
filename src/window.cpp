@@ -7,6 +7,8 @@
 #include "gl/shader.hpp"
 #include "entity.hpp"
 
+#include "utils/primitives.hpp"
+
 // Window resize
 static void frameBufferSizeCallback(GLFWwindow *window, int width, int height)
 {
@@ -333,6 +335,9 @@ void Window::start()
     skyboxShader.use();
     skyboxShader.setInt("texture1", 0);
 
+    Cube cube;
+    cube.translate(glm::vec3{0.0f, 0.0f, -5.0f});
+
     float last = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
@@ -373,13 +378,16 @@ void Window::start()
 
         // Set shaders matrices
         // TODO: Make a UBO for fixed projection/view matrix uniforms
-        quadShader.use();
         quadShader.setMat4("projection", projection);
         quadShader.setMat4("view", view);
 
-        quadShader2.use();
         quadShader2.setMat4("projection", projection);
         quadShader2.setMat4("view", view);
+
+        // TODO: The cube is not being drawn; find out why
+        cube.setViewMatrix(view);
+        cube.setProjectionMatrix(projection);
+        cube.draw();
 
         // Draw containers with one/two textures
         entityFace.draw();
@@ -394,4 +402,13 @@ void Window::start()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    entityFace.destroy();
+    entityContainerFace.destroy();
+    entityContainer.destroy();
+    entityFaceContainer.destroy();
+    cube.destroy();
+
+    quadShader.destroy();
+    quadShader2.destroy();
 }

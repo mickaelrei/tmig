@@ -27,6 +27,9 @@ set(
     ${SOURCE_DIR}/gl/vao.cpp
     ${SOURCE_DIR}/gl/vbo.cpp
 
+    ${SOURCE_DIR}/utils/primitives.cpp
+    ${SOURCE_DIR}/utils/shaders.cpp
+
     ${SOURCE_DIR}/camera.cpp
     ${SOURCE_DIR}/entity.cpp
     ${SOURCE_DIR}/mesh.cpp

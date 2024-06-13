@@ -1,3 +1,6 @@
+#include <iostream>
+#include <glm/gtx/string_cast.hpp>
+
 #include <glad/glad.h>
 
 #include "entity.hpp"
@@ -17,22 +20,7 @@ Entity::Entity(const Mesh &mesh,
       shader{shader},
       textures{textures}
 {
-    updateModelMatrix();
-
-    // Create and set VBO and EBO
-    vao.bind();
-    vbo = VBO{mesh.vertices};
-    vbo.bind();
-    ebo = EBO{mesh.indices};
-    ebo.bind();
-
-    // Set vertex attributes
-    vao.vertexAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (const void *)0);
-    vao.vertexAttrib(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), (const void *)(3 * sizeof(float)));
-
-    vao.unbind();
-    vbo.unbind();
-    ebo.unbind();
+    setup();
 }
 
 void Entity::destroy()
@@ -40,6 +28,16 @@ void Entity::destroy()
     ebo.destroy();
     vbo.destroy();
     vao.destroy();
+}
+
+void Entity::setViewMatrix(const glm::mat4 &view)
+{
+    shader.setMat4("view", view);
+}
+
+void Entity::setProjectionMatrix(const glm::mat4 &projection)
+{
+    shader.setMat4("projection", projection);
 }
 
 glm::vec3 Entity::getPosition() const
@@ -89,6 +87,7 @@ void Entity::rotate(const glm::mat4 &rotation)
 
 void Entity::updateModelMatrix()
 {
+    std::cout << "pos: " << glm::to_string(_position) << "\n";
     _modelMatrix = glm::mat4{1.0f};
     _modelMatrix = glm::translate(_modelMatrix, _position);
     _modelMatrix *= _rotation;
@@ -102,12 +101,12 @@ void Entity::update(float dt)
 {
     (void)dt;
 }
+
 void Entity::draw(const glm::mat4 &mat)
 {
-    (void)mat;
-
     // Bind shader and VAO
     shader.use();
+    shader.setMat4("model", mat * _modelMatrix);
     vao.bind();
 
     // Set textures
@@ -120,4 +119,29 @@ void Entity::draw(const glm::mat4 &mat)
     // Draw
     glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
     vao.unbind();
+}
+
+void Entity::setup()
+{
+    // Setup is supposed to be called only once
+    if (_setupCalled) return;
+    _setupCalled = true;
+
+    updateModelMatrix();
+
+    // Create and set VBO and EBO
+    vao.bind();
+    vbo = VBO{mesh.vertices};
+    vbo.bind();
+    ebo = EBO{mesh.indices};
+    ebo.bind();
+
+    // Set vertex attributes
+    vao.vertexAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (const void *)0);
+    vao.vertexAttrib(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), (const void *)(sizeof(glm::vec3)));
+    vao.vertexAttrib(vbo, 2, 4, GL_FLOAT, sizeof(Vertex), (const void *)(sizeof(glm::vec3) + sizeof(glm::vec2)));
+
+    vao.unbind();
+    vbo.unbind();
+    ebo.unbind();
 }
