@@ -2,8 +2,11 @@
 
 #include <vector>
 
-class Texture
-{
+namespace tmig {
+
+namespace gl {
+
+class Texture {
 public:
     Texture();
     Texture(const std::string &path);
@@ -15,3 +18,7 @@ public:
 
     unsigned int id = 0;
 };
+
+} // namespace gl
+
+} // namespace tmig

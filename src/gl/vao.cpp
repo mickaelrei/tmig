@@ -2,6 +2,10 @@
 
 #include "gl/vao.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 VAO::VAO()
 {
     glGenVertexArrays(1, &id);
@@ -38,3 +42,7 @@ void VAO::destroy() const
 {
     glDeleteVertexArrays(1, &id);
 }
+
+} // namespace gl
+
+} // namespace tmig

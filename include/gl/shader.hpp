@@ -2,11 +2,13 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <string>
 
-class Shader
-{
+namespace tmig {
+
+namespace gl {
+
+class Shader {
 public:
     // the program id
     unsigned int id = 0;
@@ -43,3 +45,7 @@ public:
     // Set uniform mat4 in shader
     void setMat4(const std::string &name, const glm::mat4 &mat) const;
 };
+
+} // namespace gl
+
+} // namespace tmig

@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+namespace tmig {
+
 class Camera
 {
 public:
@@ -43,3 +45,5 @@ private:
     float pitch = 0.0f;
     float yaw = -90.0f;
 };
+
+} // namespace tmig

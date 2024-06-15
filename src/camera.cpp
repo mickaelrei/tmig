@@ -4,6 +4,8 @@
 #include "camera.hpp"
 #include "entity.hpp"
 
+namespace tmig {
+
 Camera::Camera()
     : Camera::Camera(glm::vec3{0.0f})
 {
@@ -77,3 +79,5 @@ void Camera::updateVectors()
     // Update view matrix
     viewMatrix = glm::lookAt(pos, pos + forward, up);
 }
+
+} // namespace tmig

@@ -5,20 +5,23 @@
 
 #include "entity.hpp"
 
+namespace tmig {
+
 Entity::Entity() {}
 
 Entity::Entity(const Mesh &mesh,
-               const Shader &shader,
-               const std::vector<Texture> &textures,
-               const glm::vec3 &pos,
-               const glm::mat4 &rotation,
-               const glm::vec3 &scale)
+    const gl::Shader &shader,
+    const std::vector<gl::Texture> &textures,
+    const glm::vec3 &pos,
+    const glm::mat4 &rotation,
+    const glm::vec3 &scale
+)
     : mesh{mesh},
-      _position{pos},
-      _rotation{rotation},
-      _scale{scale},
-      shader{shader},
-      textures{textures}
+    _position{pos},
+    _rotation{rotation},
+    _scale{scale},
+    shader{shader},
+    textures{textures}
 {
     setup();
 }
@@ -87,7 +90,6 @@ void Entity::rotate(const glm::mat4 &rotation)
 
 void Entity::updateModelMatrix()
 {
-    std::cout << "pos: " << glm::to_string(_position) << "\n";
     _modelMatrix = glm::mat4{1.0f};
     _modelMatrix = glm::translate(_modelMatrix, _position);
     _modelMatrix *= _rotation;
@@ -111,8 +113,8 @@ void Entity::draw(const glm::mat4 &mat)
 
     // Set textures
     for (unsigned int i = 0; i < textures.size(); ++i) {
-        textures[i].bind();
         textures[i].activate(i);
+        textures[i].bind();
         shader.setInt("texture" + std::to_string(i), i);
     }
 
@@ -131,9 +133,9 @@ void Entity::setup()
 
     // Create and set VBO and EBO
     vao.bind();
-    vbo = VBO{mesh.vertices};
+    vbo = gl::VBO{mesh.vertices};
     vbo.bind();
-    ebo = EBO{mesh.indices};
+    ebo = gl::EBO{mesh.indices};
     ebo.bind();
 
     // Set vertex attributes
@@ -145,3 +147,5 @@ void Entity::setup()
     vbo.unbind();
     ebo.unbind();
 }
+
+} // namespace tmig

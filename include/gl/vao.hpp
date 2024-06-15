@@ -2,6 +2,10 @@
 
 #include "vbo.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 class VAO
 {
 public:
@@ -9,8 +13,12 @@ public:
 
     void vertexAttrib(
         VBO &vbo,
-        unsigned int index, int size, unsigned int type,
-        int stride, const void *offset) const;
+        unsigned int index,
+        int size,
+        unsigned int type,
+        int stride,
+        const void *offset
+    ) const;
 
     void bind() const;
     void unbind() const;
@@ -18,3 +26,7 @@ public:
 
     unsigned int id = 0;
 };
+
+} // namespace gl
+
+} // namespace tmig

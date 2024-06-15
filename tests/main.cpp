@@ -6,7 +6,7 @@ int main()
 {
     std::cout << "Window test\n";
 
-    Window w{"window test"};
+    tmig::Window w{"window test"};
     w.start();
 
     return 0;

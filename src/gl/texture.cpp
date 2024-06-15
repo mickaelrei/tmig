@@ -5,6 +5,10 @@
 
 #include "gl/texture.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 Texture::Texture() {}
 
 Texture::Texture(const std::string &path)
@@ -75,3 +79,7 @@ void Texture::destroy() const
 {
     glDeleteTextures(1, &id);
 }
+
+} // namespace gl
+
+} // namespace tmig

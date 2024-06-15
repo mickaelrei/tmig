@@ -7,6 +7,8 @@
 
 #include "camera.hpp"
 
+namespace tmig {
+
 class Window
 {
 public:
@@ -29,3 +31,5 @@ private:
 
     GLFWwindow *window;
 };
+
+} // namespace tmig

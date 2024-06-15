@@ -1,10 +1,13 @@
 #pragma once
 
-#include <vector>
 #include <cstddef>
+#include <vector>
 
-class EBO
-{
+namespace tmig {
+
+namespace gl {
+
+class EBO {
 public:
     EBO();
     EBO(const std::vector<unsigned int> &indices);
@@ -17,3 +20,7 @@ public:
 
     unsigned int id = 0;
 };
+
+} // namespace gl
+
+} // namespace tmig

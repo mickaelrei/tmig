@@ -2,28 +2,77 @@
 
 #include "entity.hpp"
 
-class Sphere : public Entity
-{
-public:
-    Sphere(const glm::vec3 &pos, const float radius);
+namespace tmig {
 
-    float getRadius() const;
-    void setRadius(const float radius);
+namespace utils {
 
-private:
-    glm::vec3 _pos;
-    float _radius;
+Mesh sphereMesh();
+
+static const Mesh boxMesh = {
+    {
+        // Front
+        Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec2{0.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec2{1.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec2{1.0f, 1.0f}},
+        Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec2{0.0f, 1.0f}},
+
+        // Back
+        Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}},
+        Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec2{1.0f, 0.0f}},
+        Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec2{1.0f, 1.0f}},
+        Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec2{0.0f, 1.0f}},
+
+        // Left
+        Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}},
+        Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec2{1.0f, 0.0f}},
+        Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec2{1.0f, 1.0f}},
+        Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec2{0.0f, 1.0f}},
+
+        // Right
+        Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec2{0.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{1.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec2{1.0f, 1.0f}},
+        Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec2{0.0f, 1.0f}},
+
+        // Top
+        Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec2{0.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec2{1.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec2{1.0f, 1.0f}},
+        Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec2{0.0f, 1.0f}},
+
+        // Bottom
+        Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{1.0f, 0.0f}},
+        Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec2{1.0f, 1.0f}},
+        Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec2{0.0f, 1.0f}},
+    },
+    {
+        // Front
+        0, 1, 2,
+        0, 2, 3,
+
+        // Back
+        4, 5, 6,
+        4, 6, 7,
+
+        // Left
+        8, 9, 10,
+        8, 10, 11,
+
+        // Right
+        12, 13, 14,
+        12, 14, 15,
+
+        // Top
+        16, 17, 18,
+        16, 18, 19,
+
+        // Bottom
+        20, 21, 22,
+        20, 22, 23
+    }
 };
 
+} // namespace utils
 
-class Cube : public Entity
-{
-public:
-    Cube(const glm::vec3 &pos = glm::vec3{0.0f}, const glm::vec3 &size = glm::vec3{1.0f}, const glm::vec4 &color = glm::vec4{1.0f});
-
-    glm::vec4 getColor() const;
-    void setColor(const glm::vec4 &color);
-
-private:
-    glm::vec4 _color;
-};
+} // namespace tmig

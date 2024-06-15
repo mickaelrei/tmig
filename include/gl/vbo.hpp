@@ -5,6 +5,10 @@
 
 #include "structs.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 class VBO
 {
 public:
@@ -19,3 +23,7 @@ public:
 
     unsigned int id = 0;
 };
+
+} // namespace gl
+
+} // namespace tmig

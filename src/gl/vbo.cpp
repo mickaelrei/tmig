@@ -2,6 +2,10 @@
 
 #include "gl/vbo.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 VBO::VBO() {}
 
 VBO::VBO(const std::vector<Vertex> &vertices)
@@ -31,3 +35,7 @@ void VBO::destroy() const
 {
     glDeleteVertexArrays(1, &id);
 }
+
+} // namespace gl
+
+} // namespace tmig

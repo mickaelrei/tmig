@@ -1,12 +1,18 @@
 cmake_minimum_required(VERSION 2.8.5...3.27.5)
 
 set(PROJECT_NAME tmig)
-
 project(${PROJECT_NAME})
 
 # Warning flags
-set(FLAGS "-Wall -Wextra -fsanitize=address,undefined")
+set(FLAGS "-Wall -Wextra")
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif ()
+
+# Build type
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAGS} -g3 -fsanitize=address,undefined")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FLAGS} -O3")
 
 # Find packages
 set(OpenGL_GL_PREFERENCE GLVND)

@@ -2,6 +2,10 @@
 
 #include "gl/ebo.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 EBO::EBO() {}
 
 EBO::EBO(const std::vector<unsigned int> &indices)
@@ -31,3 +35,7 @@ void EBO::destroy() const
 {
     glDeleteBuffers(1, &id);
 }
+
+} // namespace gl
+
+} // namespace tmig

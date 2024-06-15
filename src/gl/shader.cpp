@@ -6,6 +6,10 @@
 
 #include "gl/shader.hpp"
 
+namespace tmig {
+
+namespace gl {
+
 Shader::Shader() {}
 
 Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath)
@@ -60,7 +64,7 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     {
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                  << infoLog << "\n";
+            << infoLog << "\n";
     };
 
     // Similiar for Fragment Shader
@@ -73,7 +77,7 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     {
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-                  << infoLog << "\n";
+            << infoLog << "\n";
     };
 
     // Shader Program
@@ -87,7 +91,7 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     {
         glGetProgramInfoLog(id, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                  << infoLog << "\n";
+            << infoLog << "\n";
     }
 
     // Delete the shaders as they're linked into our program now and no longer necessary
@@ -146,3 +150,7 @@ void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
     use();
     glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
+
+} // namespace gl
+
+} // namespace tmig
