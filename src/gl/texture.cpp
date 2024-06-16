@@ -15,6 +15,7 @@ Texture::Texture(const std::string &path)
 {
     // Try loading image
     // TODO: Move this to a separate loadImageFromFile() util function
+    stbi_set_flip_vertically_on_load(true);
     int width, height, numChannels;
     unsigned char *imageData = stbi_load(path.c_str(), &width, &height, &numChannels, 0);
     if (imageData == NULL)

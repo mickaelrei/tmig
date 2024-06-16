@@ -14,12 +14,14 @@ Entity::Entity(const Mesh &mesh,
     const std::vector<gl::Texture> &textures,
     const glm::vec3 &pos,
     const glm::mat4 &rotation,
-    const glm::vec3 &scale
+    const glm::vec3 &scale,
+    const glm::vec4 &color
 )
     : mesh{mesh},
     _position{pos},
     _rotation{rotation},
     _scale{scale},
+    _color{color},
     shader{shader},
     textures{textures}
 {
@@ -58,6 +60,11 @@ glm::vec3 Entity::getScale() const
     return _scale;
 }
 
+glm::vec4 Entity::getColor() const
+{
+    return _color;
+}
+
 void Entity::setPosition(const glm::vec3 &position)
 {
     _position = position;
@@ -75,6 +82,12 @@ void Entity::setScale(const glm::vec3 &scale)
     _scale = scale;
     updateModelMatrix();
 }
+
+void Entity::setColor(const glm::vec4 &color)
+{
+    _color = color;
+}
+
 
 void Entity::translate(const glm::vec3 &offset)
 {
@@ -109,6 +122,7 @@ void Entity::draw(const glm::mat4 &mat)
     // Bind shader and VAO
     shader.use();
     shader.setMat4("model", mat * _modelMatrix);
+    shader.setVec4("color", _color);
     vao.bind();
 
     // Set textures
@@ -141,7 +155,6 @@ void Entity::setup()
     // Set vertex attributes
     vao.vertexAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (const void *)0);
     vao.vertexAttrib(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), (const void *)(sizeof(glm::vec3)));
-    vao.vertexAttrib(vbo, 2, 4, GL_FLOAT, sizeof(Vertex), (const void *)(sizeof(glm::vec3) + sizeof(glm::vec2)));
 
     vao.unbind();
     vbo.unbind();

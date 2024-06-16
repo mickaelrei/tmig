@@ -130,81 +130,18 @@ void Window::start()
     gl::Shader quadShader2{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/fragment_shader2.glsl"};
     gl::Shader skyboxShader{"./resources/shaders/skybox_vert_shader.glsl", "./resources/shaders/skybox_frag_shader.glsl"};
 
-    stbi_set_flip_vertically_on_load(true);
+    gl::Shader noTextureShader{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/no_tex_frag_shader.glsl"};
+
     gl::Texture faceTexture{"resources/textures/awesomeface.png"};
     gl::Texture containerTexture{"resources/textures/container.jpg"};
-
-    Mesh cubeMesh{
-        {
-            // Front
-            Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec2{0.0f, 1.0f}},
-
-            // Back
-            Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec2{0.0f, 1.0f}},
-
-            // Left
-            Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec2{0.0f, 1.0f}},
-
-            // Right
-            Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec2{0.0f, 1.0f}},
-
-            // Top
-            Vertex{glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec2{0.0f, 1.0f}},
-
-            // Bottom
-            Vertex{glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec2{0.0f, 1.0f}},
-        },
-        {
-            // front
-            0, 1, 2,
-            0, 2, 3,
-
-            // back
-            4, 5, 6,
-            4, 6, 7,
-
-            // left
-            8, 9, 10,
-            8, 10, 11,
-
-            // right
-            12, 13, 14,
-            12, 14, 15,
-
-            // top
-            16, 17, 18,
-            16, 18, 19,
-
-            // bottom
-            20, 21, 22,
-            20, 22, 23
-        },
-    };
+    gl::Texture skyTexture{"resources/textures/skybox/back.jpg"};
 
     Mesh quadMesh{
         {
             Vertex{glm::vec3{-1.0f, -1.0f, 0.0f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{1.0f, -1.0f, 0.0f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{1.0f, 1.0f, 0.0f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{-1.0f, 1.0f, 0.0f}, glm::vec2{0.0f, 1.0f}},
+            Vertex{glm::vec3{ 1.0f, -1.0f, 0.0f}, glm::vec2{1.0f, 0.0f}},
+            Vertex{glm::vec3{ 1.0f,  1.0f, 0.0f}, glm::vec2{1.0f, 1.0f}},
+            Vertex{glm::vec3{-1.0f,  1.0f, 0.0f}, glm::vec2{0.0f, 1.0f}},
         },
         {
             0, 1, 2,
@@ -224,8 +161,11 @@ void Window::start()
     entityFaceContainer.translate(glm::vec3{1.5f, 1.5f, -5.0f});
 
     Entity cube{tmig::utils::boxMesh, quadShader, {containerTexture}};
-    cube.translate(glm::vec3{1.5f, 1.5f, -3.0f});
+    cube.translate(glm::vec3{1.5f, 1.5f, -7.0f});
     cube.setScale(glm::vec3{3.0f, 0.5f, 2.0f});
+
+    Entity sphere{tmig::utils::sphereMesh(), quadShader2, {containerTexture, faceTexture}};
+    sphere.translate(glm::vec3{0.0f, 0.0f, -3.0f});
 
     // Create skybox texture (its a cubemap, so normal Texture class wont work)
     unsigned int skyboxTexture;
@@ -412,9 +352,6 @@ void Window::start()
         glCullFace(GL_BACK); // not needed, GL_BACK is the default culled/ignored face
     }
 
-    // Cube cube;
-    // cube.translate(glm::vec3{0.0f, 0.0f, -5.0f});
-
     float last = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
@@ -427,6 +364,9 @@ void Window::start()
         last = t;
 
         processInput(dt);
+
+        float red = std::sin(t);
+        sphere.setColor(glm::vec4{red, 0.5f, 0.5f, 1.0f});
 
         // Get projection and view matrix
         int width, height;
@@ -461,12 +401,16 @@ void Window::start()
         quadShader2.setMat4("projection", projection);
         quadShader2.setMat4("view", view);
 
+        noTextureShader.setMat4("projection", projection);
+        noTextureShader.setMat4("view", view);
+
         // Draw containers with one/two textures
         entityFace.draw();
         entityContainer.draw();
         entityFaceContainer.draw();
         entityContainerFace.draw();
         cube.draw();
+        sphere.draw();
 
         //------------------------------------------------------
         //------------------------------------------------------
@@ -481,9 +425,14 @@ void Window::start()
     entityContainer.destroy();
     entityFaceContainer.destroy();
     cube.destroy();
+    sphere.draw();
 
     quadShader.destroy();
     quadShader2.destroy();
+    noTextureShader.destroy();
+
+    faceTexture.destroy();
+    containerTexture.destroy();
 }
 
 } // namespace tmig

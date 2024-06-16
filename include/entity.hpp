@@ -21,7 +21,9 @@ public:
         const std::vector<gl::Texture> &textures = {},
         const glm::vec3 &pos = glm::vec3{0.0f},
         const glm::mat4 &rotation = glm::mat4{1.0f},
-        const glm::vec3 &scale = glm::vec3{1.0f});
+        const glm::vec3 &scale = glm::vec3{1.0f},
+        const glm::vec4 &color = glm::vec4{1.0f}
+    );
 
     void destroy();
 
@@ -31,10 +33,12 @@ public:
     glm::vec3 getPosition() const;
     glm::mat4 getRotation() const;
     glm::vec3 getScale() const;
+    glm::vec4 getColor() const;
 
     void setPosition(const glm::vec3 &position);
     void setRotation(const glm::mat4 &rotation);
     void setScale(const glm::vec3 &scale);
+    void setColor(const glm::vec4 &color);
 
     void translate(const glm::vec3 &offset);
     void rotate(const glm::mat4 &rotation);
@@ -49,6 +53,7 @@ protected:
     glm::mat4 _rotation;
     glm::vec3 _scale;
     glm::mat4 _modelMatrix;
+    glm::vec4 _color;
 
     gl::VAO vao;
     gl::VBO vbo;
