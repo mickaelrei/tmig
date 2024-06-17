@@ -27,8 +27,8 @@ public:
 
     void destroy();
 
-    void setViewMatrix(const glm::mat4 &view);
-    void setProjectionMatrix(const glm::mat4 &projection);
+    void setViewMatrix(const glm::mat4 &view) const;
+    void setProjectionMatrix(const glm::mat4 &projection) const;
 
     glm::vec3 getPosition() const;
     glm::mat4 getRotation() const;
@@ -43,8 +43,8 @@ public:
     void translate(const glm::vec3 &offset);
     void rotate(const glm::mat4 &rotation);
 
-    void update(float dt);
-    void draw(const glm::mat4 &mat = glm::mat4{1.0f});
+    virtual void update(float dt);
+    virtual void draw(const glm::mat4 &mat = glm::mat4{1.0f}) const;
 
 protected:
     Mesh mesh;

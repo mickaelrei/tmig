@@ -10,7 +10,7 @@ Mesh sphereMesh() {
     Mesh mesh;
 
     // Sphere resolution
-    const size_t resolution = 50;
+    const size_t resolution = 20;
 
     // Add vertices
     const float thetaStep = 1.0f / (float)resolution;

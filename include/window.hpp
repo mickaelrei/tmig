@@ -1,11 +1,13 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 #include "camera.hpp"
+#include "scene.hpp"
 
 namespace tmig {
 
@@ -25,7 +27,7 @@ private:
     void processInput(float dt);
 
     std::string title;
-    Camera camera;
+    std::shared_ptr<Scene> currentScene;
 
     glm::mat4 projection;
 

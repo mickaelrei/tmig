@@ -7,6 +7,7 @@
 #include "window.hpp"
 #include "gl/shader.hpp"
 #include "entity.hpp"
+#include "utils/skybox.hpp"
 
 #include "utils/primitives.hpp"
 
@@ -72,36 +73,41 @@ void Window::getSize(int &width, int &height) const
 
 void Window::processInput(float dt)
 {
+    auto &cam = currentScene->camera;
+
+    // Check for window close
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
     }
 
+    // Camera movement
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera.moveForward(dt);
+        cam.moveForward(dt);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera.moveBack(dt);
+        cam.moveBack(dt);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera.moveRight(dt);
+        cam.moveRight(dt);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camera.moveLeft(dt);
+        cam.moveLeft(dt);
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        camera.moveUp(dt);
+        cam.moveUp(dt);
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        camera.moveDown(dt);
+        cam.moveDown(dt);
     }
 
+    // Camera rotation
     float rx = 0.0f;
     float ry = 0.0f;
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
@@ -121,11 +127,23 @@ void Window::processInput(float dt)
         rx -= 1.0f;
     }
 
-    camera.rotate(rx, ry, dt);
+    cam.rotate(rx, ry, dt);
 }
 
 void Window::start()
 {
+    // Create new scene
+    currentScene = std::make_shared<Scene>();
+    currentScene->skybox = utils::Skybox{
+        "resources/textures/skybox/right.jpg",
+        "resources/textures/skybox/left.jpg",
+        "resources/textures/skybox/top.jpg",
+        "resources/textures/skybox/bottom.jpg",
+        "resources/textures/skybox/front.jpg",
+        "resources/textures/skybox/back.jpg"
+    };
+
+    // Testing quads
     gl::Shader quadShader{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/fragment_shader.glsl"};
     gl::Shader quadShader2{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/fragment_shader2.glsl"};
     gl::Shader skyboxShader{"./resources/shaders/skybox_vert_shader.glsl", "./resources/shaders/skybox_frag_shader.glsl"};
@@ -148,196 +166,31 @@ void Window::start()
             0, 2, 3,
         },
     };
-    Entity entityFace{quadMesh, quadShader, std::vector<gl::Texture>{faceTexture}};
-    entityFace.translate(glm::vec3{-1.5f, -1.5f, -5.0f});
 
-    Entity entityContainerFace{quadMesh, quadShader2, std::vector<gl::Texture>{containerTexture, faceTexture}};
-    entityContainerFace.translate(glm::vec3{1.5f, -1.5f, -5.0f});
+    auto cube = std::make_shared<Entity>(tmig::utils::boxMesh, quadShader, std::vector<gl::Texture>{containerTexture});
+    cube->translate(glm::vec3{1.5f, 1.5f, -7.0f});
+    cube->setScale(glm::vec3{3.0f, 0.5f, 2.0f});
+    currentScene->addEntity(cube);
 
-    Entity entityContainer{quadMesh, quadShader, std::vector<gl::Texture>{containerTexture}};
-    entityContainer.translate(glm::vec3{-1.5f, 1.5f, -5.0f});
+    auto sphere = std::make_shared<Entity>(tmig::utils::sphereMesh(), quadShader2, std::vector<gl::Texture>{containerTexture, faceTexture});
+    sphere->translate(glm::vec3{0.0f, 0.0f, -3.0f});
+    currentScene->addEntity(sphere);
 
-    Entity entityFaceContainer{quadMesh, quadShader2, std::vector<gl::Texture>{faceTexture, containerTexture}};
-    entityFaceContainer.translate(glm::vec3{1.5f, 1.5f, -5.0f});
+    auto entityFace = std::make_shared<Entity>(quadMesh, quadShader, std::vector<gl::Texture>{faceTexture});
+    entityFace->translate(glm::vec3{-1.5f, -1.5f, -5.0f});
+    currentScene->addEntity(entityFace);
 
-    Entity cube{tmig::utils::boxMesh, quadShader, {containerTexture}};
-    cube.translate(glm::vec3{1.5f, 1.5f, -7.0f});
-    cube.setScale(glm::vec3{3.0f, 0.5f, 2.0f});
+    auto entityContainerFace = std::make_shared<Entity>(quadMesh, quadShader2, std::vector<gl::Texture>{containerTexture, faceTexture});
+    entityContainerFace->translate(glm::vec3{1.5f, -1.5f, -5.0f});
+    currentScene->addEntity(entityContainerFace);
 
-    Entity sphere{tmig::utils::sphereMesh(), quadShader2, {containerTexture, faceTexture}};
-    sphere.translate(glm::vec3{0.0f, 0.0f, -3.0f});
+    auto entityContainer = std::make_shared<Entity>(quadMesh, quadShader, std::vector<gl::Texture>{containerTexture});
+    entityContainer->translate(glm::vec3{-1.5f, 1.5f, -5.0f});
+    currentScene->addEntity(entityContainer);
 
-    // Create skybox texture (its a cubemap, so normal Texture class wont work)
-    unsigned int skyboxTexture;
-    glGenTextures(1, &skyboxTexture);
-
-    // Skybox texture
-    {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-
-        std::string faces[] = {
-            "resources/textures/skybox/right.jpg",
-            "resources/textures/skybox/left.jpg",
-            "resources/textures/skybox/top.jpg",
-            "resources/textures/skybox/bottom.jpg",
-            "resources/textures/skybox/front.jpg",
-            "resources/textures/skybox/back.jpg"
-        };
-
-        int width, height, nrChannels;
-        unsigned char *data;
-        stbi_set_flip_vertically_on_load(false);
-        for (unsigned int i = 0; i < sizeof(faces) / sizeof(std::string); ++i)
-        {
-            data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-            if (data)
-            {
-                glTexImage2D(
-                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                    0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            }
-            else
-            {
-                std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
-            }
-
-            stbi_image_free(data);
-        }
-        stbi_set_flip_vertically_on_load(true);
-
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    }
-
-    // Default vertices for cube (this doesnt use EBO, so normal Entity class wont work)
-    // TODO: Create other entity class which doesnt use EBO, only VBO (or add some useEBO as parameter)
-    //       The difference would be to call glDrawArrays() instead of glDrawElements()
-    // const float containerVertices[] = {
-    //     // Back face
-    //     -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, // Bottom-left
-    //      0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // top-right
-    //      0.5f, -0.5f, -0.5f,    1.0f, 0.0f, // bottom-right
-    //      0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // top-right
-    //     -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, // bottom-left
-    //     -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // top-left
-    //     // Front face
-    //     -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // bottom-left
-    //      0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // bottom-right
-    //      0.5f,  0.5f,  0.5f,    1.0f, 1.0f, // top-right
-    //      0.5f,  0.5f,  0.5f,    1.0f, 1.0f, // top-right
-    //     -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, // top-left
-    //     -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // bottom-left
-    //     // Left face
-    //     -0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // top-right
-    //     -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // top-left
-    //     -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // bottom-left
-    //     -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // bottom-left
-    //     -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // bottom-right
-    //     -0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // top-right
-    //     // Right face
-    //      0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // top-left
-    //      0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // bottom-right
-    //      0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // top-right
-    //      0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // bottom-right
-    //      0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // top-left
-    //      0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // bottom-left
-    //     // Bottom face
-    //     -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // top-right
-    //      0.5f, -0.5f, -0.5f,    1.0f, 1.0f, // top-left
-    //      0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // bottom-left
-    //      0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // bottom-left
-    //     -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // bottom-right
-    //     -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // top-right
-    //     // Top face
-    //     -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // top-left
-    //      0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // bottom-right
-    //      0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // top-right
-    //      0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // bottom-right
-    //     -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // top-left
-    //     -0.5f,  0.5f,  0.5f,    0.0f, 0.0f  // bottom-left
-    // };
-
-    // Vertices for skybox (this uses vertices with only position, so using Vertex with pos and uv wont work)
-    // TODO: Change entity so it can receive any type of Vertex, and create a setup() on Vertex which sets vertex attribs properly
-    //       This would also need a whichFaceToRender parameter, as the skybox only renders the back face (glCullFace(GL_FRONT))
-    const float skyboxVertices[] = {
-        // positions
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-    };
-
-    // Indices for skybox
-    const unsigned int skyboxIndices[] = {
-        // back
-        4, 6, 7,
-        4, 5, 6,
-
-        // right
-        5, 2, 6,
-        5, 1, 2,
-
-        // left
-        0, 7, 3,
-        0, 4, 7,
-
-        // front
-        1, 3, 2,
-        1, 0, 3,
-
-        // top
-        7, 2, 3,
-        7, 6, 2,
-
-        // bottom
-        0, 5, 4,
-        0, 1, 5,
-    };
-
-    // Skybox
-    unsigned int skyboxVBO, skyboxVAO, skyboxEBO;
-    {
-        // Create vertex objects
-        glGenVertexArrays(1, &skyboxVAO);
-        glGenBuffers(1, &skyboxVBO);
-        glGenBuffers(1, &skyboxEBO);
-
-        // Bind the array (VAO) first
-        glBindVertexArray(skyboxVAO);
-
-        // Then bind and set the buffer (VBO)
-        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
-
-        // Then bind and set the elements buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), skyboxIndices, GL_STATIC_DRAW);
-
-        // How to interpret the vertex data (layout location on vertex shader)
-        // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-        // Unbind buffers
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        // Set texture unit
-        skyboxShader.use();
-        skyboxShader.setInt("texture1", 0);
-    }
+    auto entityFaceContainer = std::make_shared<Entity>(quadMesh, quadShader2, std::vector<gl::Texture>{faceTexture, containerTexture});
+    entityFaceContainer->translate(glm::vec3{1.5f, 1.5f, -5.0f});
+    currentScene->addEntity(entityFaceContainer);
 
     // Enable OpenGL functionalities
     {
@@ -355,84 +208,59 @@ void Window::start()
     float last = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        //------------------------------------------------------
+        //------------------------------------------------------
         // Clear screen
+
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //------------------------------------------------------
+        //------------------------------------------------------
+        // Get delta time
 
         float t = glfwGetTime();
         float dt = t - last;
         last = t;
-
         processInput(dt);
 
-        float red = std::sin(t);
-        sphere.setColor(glm::vec4{red, 0.5f, 0.5f, 1.0f});
+        //------------------------------------------------------
+        //------------------------------------------------------
+        // Temporary "scene update" function
 
+        float red = std::sin(t);
+        sphere->setColor(glm::vec4{red, 0.5f, 0.5f, 1.0f});
+
+        //------------------------------------------------------
+        //------------------------------------------------------
         // Get projection and view matrix
+
         int width, height;
         getSize(width, height);
-        auto projection = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.01f, 1000.0f);
-        auto view = camera.getViewMatrix();
+
+        auto &cam = currentScene->camera;
+        projection = glm::perspective(
+            glm::radians(cam.fov),
+            (float)width / (float)height,
+            cam.minDist, cam.maxDist
+        );
 
         //------------------------------------------------------
         //------------------------------------------------------
+        // Update scene
 
-        // Draw skybox
-        skyboxShader.use();
-        skyboxShader.setMat4("view", glm::mat4{glm::mat3{view}});
-        skyboxShader.setMat4("projection", projection);
-
-        glCullFace(GL_FRONT);
-        glDepthFunc(GL_LEQUAL);
-        glBindVertexArray(skyboxVAO);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-        glDrawElements(GL_TRIANGLES, sizeof(skyboxIndices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
-        glCullFace(GL_BACK);
-        glDepthFunc(GL_LESS);
-
-        //------------------------------------------------------
-        //------------------------------------------------------
-
-        // Set shaders matrices
         // TODO: Make a UBO for fixed projection/view matrix uniforms
-        quadShader.setMat4("projection", projection);
-        quadShader.setMat4("view", view);
-
-        quadShader2.setMat4("projection", projection);
-        quadShader2.setMat4("view", view);
-
-        noTextureShader.setMat4("projection", projection);
-        noTextureShader.setMat4("view", view);
-
-        // Draw containers with one/two textures
-        entityFace.draw();
-        entityContainer.draw();
-        entityFaceContainer.draw();
-        entityContainerFace.draw();
-        cube.draw();
-        sphere.draw();
+        currentScene->setProjection(projection);
+        currentScene->update(dt);
+        currentScene->render();
 
         //------------------------------------------------------
         //------------------------------------------------------
-
         // Swap buffers and poll events
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    entityFace.destroy();
-    entityContainerFace.destroy();
-    entityContainer.destroy();
-    entityFaceContainer.destroy();
-    cube.destroy();
-    sphere.draw();
-
-    quadShader.destroy();
-    quadShader2.destroy();
-    noTextureShader.destroy();
-
-    faceTexture.destroy();
-    containerTexture.destroy();
 }
 
 } // namespace tmig

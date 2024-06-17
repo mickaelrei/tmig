@@ -35,12 +35,12 @@ void Entity::destroy()
     vao.destroy();
 }
 
-void Entity::setViewMatrix(const glm::mat4 &view)
+void Entity::setViewMatrix(const glm::mat4 &view) const
 {
     shader.setMat4("view", view);
 }
 
-void Entity::setProjectionMatrix(const glm::mat4 &projection)
+void Entity::setProjectionMatrix(const glm::mat4 &projection) const
 {
     shader.setMat4("projection", projection);
 }
@@ -117,7 +117,7 @@ void Entity::update(float dt)
     (void)dt;
 }
 
-void Entity::draw(const glm::mat4 &mat)
+void Entity::draw(const glm::mat4 &mat) const
 {
     // Bind shader and VAO
     shader.use();

@@ -25,22 +25,22 @@ public:
     void destroy() const;
 
     // Set uniform bool in shader
-    void setBool(const std::string &name, bool value) const;
+    void setBool(const std::string &name, const bool value) const;
 
     // Set uniform int in shader
-    void setInt(const std::string &name, int value) const;
+    void setInt(const std::string &name, const int value) const;
 
     // Set uniform float in shader
-    void setFloat(const std::string &name, float value) const;
+    void setFloat(const std::string &name, const float value) const;
 
     // Set uniform vec2 in shader
-    void setVec2(const std::string &name, glm::vec2 &v) const;
+    void setVec2(const std::string &name, const glm::vec2 &v) const;
 
     // Set uniform vec3 in shader
-    void setVec3(const std::string &name, glm::vec3 v) const;
+    void setVec3(const std::string &name, const glm::vec3 v) const;
 
     // Set uniform vec4 in shader
-    void setVec4(const std::string &name, glm::vec4 &v) const;
+    void setVec4(const std::string &name, const glm::vec4 &v) const;
 
     // Set uniform mat4 in shader
     void setMat4(const std::string &name, const glm::mat4 &mat) const;

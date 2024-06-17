@@ -35,12 +35,13 @@ set(
 
     ${SOURCE_DIR}/utils/primitives.cpp
     ${SOURCE_DIR}/utils/shaders.cpp
+    ${SOURCE_DIR}/utils/skybox.cpp
 
     ${SOURCE_DIR}/camera.cpp
     ${SOURCE_DIR}/entity.cpp
     ${SOURCE_DIR}/mesh.cpp
+    ${SOURCE_DIR}/scene.cpp
     ${SOURCE_DIR}/window.cpp
-
 
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
     ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
