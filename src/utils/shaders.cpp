@@ -1,4 +1,6 @@
-#include "utils/shaders.hpp"
+#include <glm/gtc/type_ptr.hpp>
+
+#include "tmig/utils/shaders.hpp"
 
 namespace tmig {
 

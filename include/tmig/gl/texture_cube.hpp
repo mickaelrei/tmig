@@ -1,16 +1,15 @@
 #pragma once
 
-#include "entity.hpp"
+#include <string>
 
 namespace tmig {
 
-namespace utils {
+namespace gl {
 
-class Skybox : public Entity
-{
+class TextureCube {
 public:
-    Skybox() = default;
-    Skybox(
+    TextureCube() = default;
+    TextureCube(
         const std::string &rightPath,
         const std::string &leftPath,
         const std::string &topPath,
@@ -19,12 +18,13 @@ public:
         const std::string &backPath
     );
 
-    void draw(const glm::mat4 &mat = glm::mat4{1.0f}) const override;
+    void bind() const;
+    void unbind() const;
+    void destroy() const;
 
-private:
-    unsigned int id;
+    unsigned int id = 0;
 };
 
-} // namespace utils
+} // namespace gl
 
 } // namespace tmig

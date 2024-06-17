@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include "gl/vao.hpp"
-#include "gl/vbo.hpp"
-#include "gl/ebo.hpp"
-#include "gl/shader.hpp"
-#include "gl/texture.hpp"
-#include "mesh.hpp"
+#include "tmig/gl/vao.hpp"
+#include "tmig/gl/vbo.hpp"
+#include "tmig/gl/ebo.hpp"
+#include "tmig/gl/shader.hpp"
+#include "tmig/gl/texture.hpp"
+#include "tmig/mesh.hpp"
 
 namespace tmig {
 

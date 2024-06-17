@@ -1,14 +1,12 @@
 #pragma once
 
-#include <vector>
-
 namespace tmig {
 
 namespace gl {
 
 class Texture {
 public:
-    Texture();
+    Texture() = default;
     Texture(const std::string &path);
 
     void activate(const unsigned int unit) const;

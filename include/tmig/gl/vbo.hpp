@@ -3,7 +3,7 @@
 #include <vector>
 #include <concepts>
 
-#include "structs.hpp"
+#include "tmig/structs.hpp"
 
 namespace tmig {
 

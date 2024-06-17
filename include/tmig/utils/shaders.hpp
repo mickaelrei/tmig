@@ -1,4 +1,4 @@
-#include "gl/shader.hpp"
+#include "tmig/gl/shader.hpp"
 
 namespace tmig {
 

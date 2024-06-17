@@ -6,8 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "camera.hpp"
-#include "scene.hpp"
+#include "tmig/camera.hpp"
+#include "tmig/scene.hpp"
 
 namespace tmig {
 
@@ -23,14 +23,18 @@ public:
     void setSize(const int &width, const int &height) const;
     void getSize(int &width, int &height) const;
 
-private:
-    void processInput(float dt);
+    void setup();
+    void update(float dt);
+
+protected:
+    virtual void processInput(float dt);
 
     std::string title;
     std::shared_ptr<Scene> currentScene;
 
     glm::mat4 projection;
 
+private:
     GLFWwindow *window;
 };
 

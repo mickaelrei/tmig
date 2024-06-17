@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "structs.hpp"
+#include "tmig/structs.hpp"
 
 namespace tmig {
 

@@ -1,9 +1,10 @@
 #include <iostream>
-#include <glm/gtx/string_cast.hpp>
 
-#include <glad/glad.h>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include "entity.hpp"
+#include "glad/glad.h"
+
+#include "tmig/entity.hpp"
 
 namespace tmig {
 
@@ -121,7 +122,7 @@ void Entity::draw(const glm::mat4 &mat) const
 {
     // Bind shader and VAO
     shader.use();
-    shader.setMat4("model", mat * _modelMatrix);
+    shader.setMat4("model", mat *_modelMatrix);
     shader.setVec4("color", _color);
     vao.bind();
 

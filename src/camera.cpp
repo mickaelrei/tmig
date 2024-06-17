@@ -1,8 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/vector_angle.hpp>
 
-#include "camera.hpp"
-#include "entity.hpp"
+#include "tmig/camera.hpp"
 
 namespace tmig {
 

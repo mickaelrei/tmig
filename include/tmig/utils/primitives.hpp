@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entity.hpp"
+#include "tmig/entity.hpp"
 
 namespace tmig {
 

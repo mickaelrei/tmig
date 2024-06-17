@@ -1,6 +1,6 @@
-#include <glad/glad.h>
+#include "glad/glad.h"
 
-#include "gl/ebo.hpp"
+#include "tmig/gl/ebo.hpp"
 
 namespace tmig {
 

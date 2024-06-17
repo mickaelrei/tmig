@@ -29,6 +29,7 @@ set(
     ENGINE_SOURCE_FILES
     ${SOURCE_DIR}/gl/ebo.cpp
     ${SOURCE_DIR}/gl/shader.cpp
+    ${SOURCE_DIR}/gl/texture_cube.cpp
     ${SOURCE_DIR}/gl/texture.cpp
     ${SOURCE_DIR}/gl/vao.cpp
     ${SOURCE_DIR}/gl/vbo.cpp
@@ -39,6 +40,7 @@ set(
 
     ${SOURCE_DIR}/camera.cpp
     ${SOURCE_DIR}/entity.cpp
+    ${SOURCE_DIR}/init.cpp
     ${SOURCE_DIR}/mesh.cpp
     ${SOURCE_DIR}/scene.cpp
     ${SOURCE_DIR}/window.cpp

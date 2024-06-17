@@ -1,6 +1,6 @@
-#include <glad/glad.h>
+#include "glad/glad.h"
 
-#include "gl/vao.hpp"
+#include "tmig/gl/vao.hpp"
 
 namespace tmig {
 

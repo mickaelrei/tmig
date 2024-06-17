@@ -1,4 +1,4 @@
-#include "scene.hpp"
+#include "tmig/scene.hpp"
 
 namespace tmig {
 
@@ -41,7 +41,7 @@ void Scene::render() const
     // Draw all entities
     for (const auto &entity : entities)
     {
-        entity->draw();
+       entity->draw();
     }
 }
 

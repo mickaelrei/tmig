@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vbo.hpp"
+#include "tmig/gl/vbo.hpp"
 
 namespace tmig {
 

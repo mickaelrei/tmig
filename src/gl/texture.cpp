@@ -1,15 +1,13 @@
 #include <stdexcept>
 
-#include <glad/glad.h>
-#include <stb/stb_image.h>
+#include "glad/glad.h"
+#include "stb/stb_image.h"
 
-#include "gl/texture.hpp"
+#include "tmig/gl/texture.hpp"
 
 namespace tmig {
 
 namespace gl {
-
-Texture::Texture() {}
 
 Texture::Texture(const std::string &path)
 {

@@ -3,9 +3,9 @@
 #include <vector>
 #include <memory>
 
-#include "entity.hpp"
-#include "camera.hpp"
-#include "utils/skybox.hpp"
+#include "tmig/entity.hpp"
+#include "tmig/camera.hpp"
+#include "tmig/utils/skybox.hpp"
 
 namespace tmig {
 
