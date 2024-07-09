@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "tmig/init.hpp"
+#include "tmig/gl/gl.hpp"
 
 // Whether GLFW is initialized
 static bool _initializedGLFW = false;
@@ -65,6 +66,11 @@ void initGLFW()
 
 void initGLAD()
 {
+    // GLFW should be already initialized
+    if (!_initializedGLFW) {
+        std::cout << "WARNING [tmig::initGLAD()]: GLFW is not initialized. Make sure to call tmig::init() first\n";
+    }
+
     // Init should be called only once
     if (_initializedGLAD) return;
 
@@ -92,7 +98,8 @@ void initDefaults()
     // Defaults should be initialized only once
     if (_initializedDefaults) return;
 
-    // TODO: Initialize default entity shader, matrices UBO, lights UBO etc
+    // Initialize defaults
+    // gl::init();
 
     _initializedDefaults = true;
 }

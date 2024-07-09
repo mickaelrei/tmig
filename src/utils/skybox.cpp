@@ -11,13 +11,13 @@ namespace tmig {
 namespace utils {
 
 Skybox::Skybox(const gl::TextureCube &textureCube)
-    : Entity::Entity{boxMesh, newSkyboxShader()},
+    : Entity::Entity{boxMesh},
       textureCube{textureCube}
 {
 
 }
 
-void Skybox::draw(const glm::mat4 &mat) const
+void Skybox::draw(const gl::Shader& shader) const
 {
     // TODO: This all needs to change. GLAD shouldnt need to be
     //       included in these files, instead make a tmig::enable
@@ -27,10 +27,9 @@ void Skybox::draw(const glm::mat4 &mat) const
     glCullFace(GL_FRONT);
     glDepthFunc(GL_LEQUAL);
 
-
     // Bind shader and VAO
     shader.use();
-    shader.setMat4("model", mat * _modelMatrix);
+    shader.setMat4("model", _modelMatrix);
     vao.bind();
     textureCube.bind();
 

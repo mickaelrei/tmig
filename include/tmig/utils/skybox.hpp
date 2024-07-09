@@ -13,7 +13,7 @@ public:
     Skybox() = default;
     Skybox(const gl::TextureCube &textureCube);
 
-    void draw(const glm::mat4 &mat = glm::mat4{1.0f}) const override;
+    void draw(const gl::Shader& shader) const override;
 
 private:
     gl::TextureCube textureCube;

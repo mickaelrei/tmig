@@ -17,7 +17,6 @@ public:
     Entity();
     Entity(
         const Mesh &mesh,
-        const gl::Shader &shader,
         const std::vector<gl::Texture> &textures = {},
         const glm::vec3 &pos = glm::vec3{0.0f},
         const glm::mat4 &rotation = glm::mat4{1.0f},
@@ -26,9 +25,6 @@ public:
     );
 
     void destroy();
-
-    void setViewMatrix(const glm::mat4 &view) const;
-    void setProjectionMatrix(const glm::mat4 &projection) const;
 
     glm::vec3 getPosition() const;
     glm::mat4 getRotation() const;
@@ -44,7 +40,7 @@ public:
     void rotate(const glm::mat4 &rotation);
 
     virtual void update(float dt);
-    virtual void draw(const glm::mat4 &mat = glm::mat4{1.0f}) const;
+    virtual void draw(const gl::Shader &shader) const;
 
 protected:
     Mesh mesh;
@@ -58,7 +54,6 @@ protected:
     gl::VAO vao;
     gl::VBO vbo;
     gl::EBO ebo;
-    gl::Shader shader;
     std::vector<gl::Texture> textures;
 
     void updateModelMatrix();

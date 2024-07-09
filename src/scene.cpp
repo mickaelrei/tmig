@@ -1,3 +1,4 @@
+#include "tmig/gl/gl.hpp"
 #include "tmig/scene.hpp"
 
 namespace tmig {
@@ -7,41 +8,20 @@ void Scene::addEntity(const std::shared_ptr<Entity> &entity)
     entities.push_back(entity);
 }
 
-void Scene::setProjection(const glm::mat4 &projection) const
-{
-    // Set for skybox
-    skybox.setProjectionMatrix(projection);
-
-    // Set for all entities
-    for (const auto &entity : entities)
-    {
-        entity->setProjectionMatrix(projection);
-    }
-}
-
 void Scene::update(float dt) const
 {
     (void)dt;
-
-    // Set view matrix
-    auto view = camera.getViewMatrix();
-
-    skybox.setViewMatrix(view);
-    for (const auto &entity : entities)
-    {
-        entity->setViewMatrix(view);
-    }
 }
 
-void Scene::render() const
+void Scene::render(const gl::Shader &shader) const
 {
     // Render skybox first
-    skybox.draw();
+    skybox.draw(gl::skyboxShader());
 
     // Draw all entities
     for (const auto &entity : entities)
     {
-       entity->draw();
+       entity->draw(shader);
     }
 }
 

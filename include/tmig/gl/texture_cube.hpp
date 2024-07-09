@@ -22,6 +22,7 @@ public:
     void unbind() const;
     void destroy() const;
 
+private:
     unsigned int id = 0;
 };
 

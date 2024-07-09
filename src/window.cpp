@@ -6,6 +6,7 @@
 
 #include "tmig/init.hpp"
 #include "tmig/window.hpp"
+#include "tmig/gl/gl.hpp"
 #include "tmig/gl/shader.hpp"
 #include "tmig/entity.hpp"
 #include "tmig/utils/skybox.hpp"
@@ -63,53 +64,50 @@ void Window::getSize(int &width, int &height) const
 
 void Window::setup()
 {
-    // Testing quads
-    gl::Shader quadShader{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/fragment_shader.glsl"};
-    gl::Shader quadShader2{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/fragment_shader2.glsl"};
-    gl::Shader skyboxShader{"./resources/shaders/skybox_vert_shader.glsl", "./resources/shaders/skybox_frag_shader.glsl"};
+    currentScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
 
-    gl::Shader noTextureShader{"./resources/shaders/vertex_shader.glsl", "./resources/shaders/no_tex_frag_shader.glsl"};
+    auto wallLeft = std::make_shared<Entity>(utils::boxMesh);
+    wallLeft->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
+    wallLeft->setPosition(glm::vec3{-5.0f, 0.0f, 0.0f});
+    wallLeft->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
 
-    gl::Texture faceTexture{"resources/textures/awesomeface.png"};
-    gl::Texture containerTexture{"resources/textures/container.jpg"};
-    gl::Texture skyTexture{"resources/textures/skybox/back.jpg"};
+    auto wallRight = std::make_shared<Entity>(utils::boxMesh);
+    wallRight->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
+    wallRight->setPosition(glm::vec3{5.0f, 0.0f, 0.0f});
+    wallRight->setColor(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+    wallRight->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(45.f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
-    Mesh quadMesh{
-        {
-            Vertex{glm::vec3{-1.0f, -1.0f, 0.0f}, glm::vec2{0.0f, 0.0f}},
-            Vertex{glm::vec3{ 1.0f, -1.0f, 0.0f}, glm::vec2{1.0f, 0.0f}},
-            Vertex{glm::vec3{ 1.0f,  1.0f, 0.0f}, glm::vec2{1.0f, 1.0f}},
-            Vertex{glm::vec3{-1.0f,  1.0f, 0.0f}, glm::vec2{0.0f, 1.0f}},
-        },
-        {
-            0, 1, 2,
-            0, 2, 3,
-        },
-    };
+    auto wallBack = std::make_shared<Entity>(utils::boxMesh);
+    wallBack->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
+    wallBack->setPosition(glm::vec3{0.0f, 0.0f, 5.0f});
+    wallBack->setColor(glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 
-    auto cube = std::make_shared<Entity>(tmig::utils::boxMesh, quadShader, std::vector<gl::Texture>{containerTexture});
-    cube->translate(glm::vec3{1.5f, 1.5f, -7.0f});
-    cube->setScale(glm::vec3{3.0f, 0.5f, 2.0f});
+    auto wallFront = std::make_shared<Entity>(utils::boxMesh);
+    wallFront->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
+    wallFront->setPosition(glm::vec3{0.0f, 0.0f, -5.0f});
+    wallFront->setColor(glm::vec4{1.0f, 1.0f, 0.0f, 1.0f});
 
-    auto sphere = std::make_shared<Entity>(tmig::utils::sphereMesh(), quadShader2, std::vector<gl::Texture>{containerTexture, faceTexture});
-    sphere->translate(glm::vec3{0.0f, 0.0f, -3.0f});
-    currentScene->addEntity(sphere);
+    auto wallBottom = std::make_shared<Entity>(utils::boxMesh);
+    wallBottom->setScale(glm::vec3{10.0f, 1.0f, 10.0f});
+    wallBottom->setPosition(glm::vec3{0.0f, -5.0f, 0.0f});
+    wallBottom->setColor(glm::vec4{0.0f, 1.0f, 1.0f, 1.0f});
 
-    auto entityFace = std::make_shared<Entity>(quadMesh, quadShader, std::vector<gl::Texture>{faceTexture});
-    entityFace->translate(glm::vec3{-1.5f, -1.5f, -5.0f});
-    currentScene->addEntity(entityFace);
+    auto wallTop = std::make_shared<Entity>(utils::boxMesh);
+    wallTop->setScale(glm::vec3{10.0f, 1.0f, 10.0f});
+    wallTop->setPosition(glm::vec3{0.0f, 5.0f, 0.0f});
+    wallTop->setColor(glm::vec4{1.0f, 0.0f, 1.0f, 1.0f});
 
-    auto entityContainerFace = std::make_shared<Entity>(quadMesh, quadShader2, std::vector<gl::Texture>{containerTexture, faceTexture});
-    entityContainerFace->translate(glm::vec3{1.5f, -1.5f, -5.0f});
-    currentScene->addEntity(entityContainerFace);
+    currentScene->addEntity(wallLeft);
+    currentScene->addEntity(wallRight);
+    currentScene->addEntity(wallBack);
+    currentScene->addEntity(wallFront);
+    currentScene->addEntity(wallBottom);
+    currentScene->addEntity(wallTop);
 
-    auto entityContainer = std::make_shared<Entity>(quadMesh, quadShader, std::vector<gl::Texture>{containerTexture});
-    entityContainer->translate(glm::vec3{-1.5f, 1.5f, -5.0f});
-    currentScene->addEntity(entityContainer);
-
-    auto entityFaceContainer = std::make_shared<Entity>(quadMesh, quadShader2, std::vector<gl::Texture>{faceTexture, containerTexture});
-    entityFaceContainer->translate(glm::vec3{1.5f, 1.5f, -5.0f});
-    currentScene->addEntity(entityFaceContainer);
+    auto cube = std::make_shared<Entity>(utils::boxMesh);
+    cube->setScale(glm::vec3{1.0f, 1.0f, 1.0f});
+    cube->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
+    cube->setColor(glm::vec4{1.0f, 0.25f, 0.0f, 1.0f});
 
     currentScene->addEntity(cube);
 }
@@ -117,6 +115,14 @@ void Window::setup()
 void Window::update(float dt)
 {
     (void)dt;
+
+    float t = glfwGetTime();
+    float s = 4.5f;
+    float e = 0.5f;
+    gl::entityShader().setVec3(
+        "lightPos",
+        glm::vec3{std::cos(t * e) * s, 0.0f, std::sin(t * e) * s}
+    );
 }
 
 void Window::processInput(float dt)
@@ -207,6 +213,8 @@ void Window::start()
     // Call setup before starting
     setup();
 
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     float last = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
@@ -246,14 +254,22 @@ void Window::start()
             cam.minDist, cam.maxDist
         );
 
+        auto view = cam.getViewMatrix();
+        gl::skyboxShader().setMat4("view", glm::mat4{glm::mat3{view}});
+        gl::entityShader().setMat4("view", view);
+
+        gl::skyboxShader().setMat4("projection", projection);
+        gl::entityShader().setMat4("projection", projection);
+
+        gl::entityShader().setVec3("viewPos", currentScene->camera.pos);
+
         //------------------------------------------------------
         //------------------------------------------------------
         // Update scene
 
         // TODO: Make a UBO for fixed projection/view matrix uniforms
-        currentScene->setProjection(projection);
         currentScene->update(dt);
-        currentScene->render();
+        currentScene->render(gl::entityShader());
 
         //------------------------------------------------------
         //------------------------------------------------------

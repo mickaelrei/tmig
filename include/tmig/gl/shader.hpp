@@ -10,9 +10,6 @@ namespace gl {
 
 class Shader {
 public:
-    // the program id
-    unsigned int id = 0;
-
     Shader();
 
     // Constructor
@@ -44,6 +41,9 @@ public:
 
     // Set uniform mat4 in shader
     void setMat4(const std::string &name, const glm::mat4 &mat) const;
+
+private:
+    unsigned int id = 0;
 };
 
 } // namespace gl

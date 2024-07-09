@@ -17,16 +17,14 @@ public:
 
     void addEntity(const std::shared_ptr<Entity> &entity);
 
-    void setProjection(const glm::mat4 &projection) const;
-
     virtual void update(float dt) const;
-    virtual void render() const;
+    virtual void render(const gl::Shader &shader) const;
 
     Camera camera;
     utils::Skybox skybox;
 
-protected:
     std::vector<std::shared_ptr<Entity>> entities;
+protected:
 };
 
 } // namespace tmig

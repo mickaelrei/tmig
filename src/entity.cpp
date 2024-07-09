@@ -11,7 +11,6 @@ namespace tmig {
 Entity::Entity() {}
 
 Entity::Entity(const Mesh &mesh,
-    const gl::Shader &shader,
     const std::vector<gl::Texture> &textures,
     const glm::vec3 &pos,
     const glm::mat4 &rotation,
@@ -23,7 +22,6 @@ Entity::Entity(const Mesh &mesh,
     _rotation{rotation},
     _scale{scale},
     _color{color},
-    shader{shader},
     textures{textures}
 {
     setup();
@@ -34,16 +32,6 @@ void Entity::destroy()
     ebo.destroy();
     vbo.destroy();
     vao.destroy();
-}
-
-void Entity::setViewMatrix(const glm::mat4 &view) const
-{
-    shader.setMat4("view", view);
-}
-
-void Entity::setProjectionMatrix(const glm::mat4 &projection) const
-{
-    shader.setMat4("projection", projection);
 }
 
 glm::vec3 Entity::getPosition() const
@@ -108,9 +96,6 @@ void Entity::updateModelMatrix()
     _modelMatrix = glm::translate(_modelMatrix, _position);
     _modelMatrix *= _rotation;
     _modelMatrix = glm::scale(_modelMatrix, _scale);
-
-    shader.use();
-    shader.setMat4("model", _modelMatrix);
 }
 
 void Entity::update(float dt)
@@ -118,11 +103,11 @@ void Entity::update(float dt)
     (void)dt;
 }
 
-void Entity::draw(const glm::mat4 &mat) const
+void Entity::draw(const gl::Shader &shader) const
 {
     // Bind shader and VAO
     shader.use();
-    shader.setMat4("model", mat *_modelMatrix);
+    shader.setMat4("model", _modelMatrix);
     shader.setVec4("color", _color);
     vao.bind();
 
@@ -154,8 +139,9 @@ void Entity::setup()
     ebo.bind();
 
     // Set vertex attributes
-    vao.vertexAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (const void *)0);
-    vao.vertexAttrib(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), (const void *)(sizeof(glm::vec3)));
+    vao.vertexAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (const void *)(offsetof(Vertex, pos)));
+    vao.vertexAttrib(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), (const void *)(offsetof(Vertex, uv)));
+    vao.vertexAttrib(vbo, 2, 3, GL_FLOAT, sizeof(Vertex), (const void *)(offsetof(Vertex, normal)));
 
     vao.unbind();
     vbo.unbind();

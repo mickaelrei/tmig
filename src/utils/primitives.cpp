@@ -36,7 +36,7 @@ Mesh sphereMesh() {
             float y = std::cos(theta);
             float z = std::sin(theta) * std::cos(phi);
 
-            mesh.vertices.push_back(Vertex{glm::vec3{x, y, z}, glm::vec2{texU, texV}});
+            mesh.vertices.push_back(Vertex{glm::vec3{x, y, z}, glm::vec2{texU, texV}, glm::vec3{x, y, z}});
         }
     }
 
