@@ -108,15 +108,17 @@ void Entity::draw(const gl::Shader &shader) const
     // Bind shader and VAO
     shader.use();
     shader.setMat4("model", _modelMatrix);
-    shader.setVec4("color", _color);
+    shader.setVec4("meshColor", _color);
     vao.bind();
 
     // Set textures
-    for (unsigned int i = 0; i < textures.size(); ++i) {
+    int numTextures = (int)std::min(maxTextures, textures.size());
+    for (int i = 0; i < numTextures; ++i) {
         textures[i].activate(i);
         textures[i].bind();
-        shader.setInt("texture" + std::to_string(i), i);
+        shader.setInt("textures[" + std::to_string(i) + "]", i);
     }
+    shader.setInt("numTextures", numTextures);
 
     // Draw
     glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);

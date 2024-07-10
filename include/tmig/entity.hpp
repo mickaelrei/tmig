@@ -63,4 +63,7 @@ private:
     bool _setupCalled = false;
 };
 
+/// @brief Max number of textures an entity can have
+const size_t maxTextures = 4;
+
 } // namespace tmig

@@ -49,9 +49,17 @@ vec3 calculateLighting()
 // Returns the mixed color for all textures
 vec4 calculateTexture()
 {
+    if (numTextures == 0)
+        return vec4(0.0f);
+
+    // Step for mixing colors
     float mixStep = 1.0f / float(numTextures);
     vec4 color = vec4(1.0f);
 
+    // NOTE: Can't use a for-loop because an array of samplers can only be
+    //       indexed by a constant value, for example, a literal int like below
+
+    // Mix textures based on number of binded textures
     if (numTextures > 0)
         color = mix(color, texture(textures[0], texCoord), mixStep);
 
@@ -71,8 +79,12 @@ void main()
 {
     vec3 lighting = calculateLighting();
     vec4 texColor = calculateTexture();
+
+    // If texture alpha is not 100%, starting mixing with mesh color
     if (texColor.a < 1.0f) {
         texColor = vec4(mix(texColor.rgb, meshColor.rgb, 1.0f - texColor.a), 1.0f);
     }
-    FragColor = texColor * meshColor * vec4(lighting, 1.0f);
+
+    // Final result
+    FragColor = texColor * vec4(lighting, 1.0f);
 }

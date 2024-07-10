@@ -66,6 +66,9 @@ void Window::setup()
 {
     currentScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
 
+    gl::Texture faceTexture{"resources/textures/awesomeface.png"};
+    gl::Texture crateTexture{"resources/textures/container.jpg"};
+
     auto wallLeft = std::make_shared<Entity>(utils::boxMesh);
     wallLeft->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
     wallLeft->setPosition(glm::vec3{-5.0f, 0.0f, 0.0f});
@@ -75,7 +78,7 @@ void Window::setup()
     wallRight->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
     wallRight->setPosition(glm::vec3{5.0f, 0.0f, 0.0f});
     wallRight->setColor(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-    wallRight->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(45.f), glm::vec3{0.0f, 0.0f, 1.0f}));
+    wallRight->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(180.f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
     auto wallBack = std::make_shared<Entity>(utils::boxMesh);
     wallBack->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
@@ -97,6 +100,10 @@ void Window::setup()
     wallTop->setPosition(glm::vec3{0.0f, 5.0f, 0.0f});
     wallTop->setColor(glm::vec4{1.0f, 0.0f, 1.0f, 1.0f});
 
+    auto lightCube = std::make_shared<Entity>(utils::boxMesh);
+    lightCube->setScale(glm::vec3{.1f});
+
+    currentScene->addEntity(lightCube);
     currentScene->addEntity(wallLeft);
     currentScene->addEntity(wallRight);
     currentScene->addEntity(wallBack);
@@ -109,7 +116,27 @@ void Window::setup()
     cube->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
     cube->setColor(glm::vec4{1.0f, 0.25f, 0.0f, 1.0f});
 
+    auto sphere = std::make_shared<Entity>(utils::sphereMesh(), std::vector<gl::Texture>{crateTexture});
+    sphere->setPosition(glm::vec3{-2.0f, 0.0f, 0.0f});
+
+    auto cone = std::make_shared<Entity>(utils::coneMesh(), std::vector<gl::Texture>{faceTexture});
+    cone->setPosition(glm::vec3{2.0f, 0.0f, 0.0f});
+
+    auto cylinder = std::make_shared<Entity>(utils::cylinderMesh(), std::vector<gl::Texture>{faceTexture});
+    cylinder->setPosition(glm::vec3{0.0f, 2.0f, 0.0f});
+    cylinder->setColor(glm::vec4{1.0f, 0.0f, 0.5f, 1.0f});
+    cylinder->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
+    cylinder->rotate(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{0.0f, 0.0f, 1.0f}));
+
+    auto ramp = std::make_shared<Entity>(utils::rampMesh);
+    ramp->setColor(glm::vec4{0.0f, 1.0f, 0.75f, 1.0f});
+    ramp->setPosition(glm::vec3{0.0f, -2.0f, 0.0f});
+
     currentScene->addEntity(cube);
+    currentScene->addEntity(sphere);
+    currentScene->addEntity(cone);
+    currentScene->addEntity(cylinder);
+    currentScene->addEntity(ramp);
 }
 
 void Window::update(float dt)
@@ -117,12 +144,15 @@ void Window::update(float dt)
     (void)dt;
 
     float t = glfwGetTime();
-    float s = 4.5f;
+    float s = 2.f;
     float e = 0.5f;
+    glm::vec3 pos{std::cos(t * e) * s, -2.0f, std::sin(t * e) * s};
     gl::entityShader().setVec3(
         "lightPos",
-        glm::vec3{std::cos(t * e) * s, 0.0f, std::sin(t * e) * s}
+        pos
     );
+
+    currentScene->entities[0]->setPosition(pos);
 }
 
 void Window::processInput(float dt)
