@@ -7,16 +7,24 @@ namespace tmig {
 namespace utils {
 
 /// @brief Creates a sphere mesh
+/// @param resolution number of width/height segments
 /// @return The spherical mesh
-Mesh sphereMesh();
+Mesh sphereMesh(const size_t resolution = 20);
 
 /// @brief Creates a cylinder mesh
+/// @param resolution number of side segments
 /// @return The cylinder mesh
-Mesh cylinderMesh();
+Mesh cylinderMesh(const size_t resolution = 20);
 
 /// @brief Creates a cone mesh
+/// @param resolution number of side segments
 /// @return The cone mesh
-Mesh coneMesh();
+Mesh coneMesh(const size_t resolution = 20);
+
+/// @brief Creates a torus mesh
+/// @param resolution number of side (inner and outer) segments
+/// @return The torus mesh
+Mesh torusMesh(const size_t resolution = 30);
 
 /// @brief Mesh for a default box
 static const Mesh boxMesh = {
@@ -84,7 +92,7 @@ static const Mesh boxMesh = {
     }
 };
 
-static const Mesh rampMesh = {
+static const Mesh wedgeMesh = {
     {
         // Back
         Vertex{glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec2{0.0f, 0.0f}, glm::vec3{0.0f, 0.0f, -1.0f}},

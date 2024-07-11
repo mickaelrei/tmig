@@ -128,15 +128,20 @@ void Window::setup()
     cylinder->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
     cylinder->rotate(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
-    auto ramp = std::make_shared<Entity>(utils::rampMesh);
-    ramp->setColor(glm::vec4{0.0f, 1.0f, 0.75f, 1.0f});
-    ramp->setPosition(glm::vec3{0.0f, -2.0f, 0.0f});
+    auto wedge = std::make_shared<Entity>(utils::wedgeMesh);
+    wedge->setColor(glm::vec4{0.0f, 1.0f, 0.75f, 1.0f});
+    wedge->setPosition(glm::vec3{0.0f, -2.0f, 0.0f});
+
+    auto torus = std::make_shared<Entity>(utils::torusMesh(), std::vector<gl::Texture>{faceTexture});
+    torus->setPosition(glm::vec3{0.0f, 0.0f, -2.0f});
+    torus->setColor(glm::vec4{0.25f, 0.5f, 1.0f, 1.0f});
 
     currentScene->addEntity(cube);
     currentScene->addEntity(sphere);
     currentScene->addEntity(cone);
     currentScene->addEntity(cylinder);
-    currentScene->addEntity(ramp);
+    currentScene->addEntity(wedge);
+    currentScene->addEntity(torus);
 }
 
 void Window::update(float dt)
@@ -146,7 +151,7 @@ void Window::update(float dt)
     float t = glfwGetTime();
     float s = 2.f;
     float e = 0.5f;
-    glm::vec3 pos{std::cos(t * e) * s, -2.0f, std::sin(t * e) * s};
+    glm::vec3 pos{std::cos(t * e) * s, 2.0f, std::sin(t * e) * s};
     gl::entityShader().setVec3(
         "lightPos",
         pos
@@ -244,6 +249,7 @@ void Window::start()
     setup();
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPointSize(5.0f);
 
     float last = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window))
