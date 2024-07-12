@@ -6,8 +6,6 @@ namespace tmig {
 
 namespace gl {
 
-VBO::VBO() {}
-
 VBO::VBO(const std::vector<Vertex> &vertices)
 {
     glGenBuffers(1, &id);

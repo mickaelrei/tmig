@@ -10,8 +10,6 @@ namespace tmig {
 
 namespace gl {
 
-Shader::Shader() {}
-
 Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath)
 {
     // Retrieve the vertex/fragment source code from filePath

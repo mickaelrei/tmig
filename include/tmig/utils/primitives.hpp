@@ -92,6 +92,7 @@ static const Mesh boxMesh = {
     }
 };
 
+/// @brief Mesh for a default wedge/ramp
 static const Mesh wedgeMesh = {
     {
         // Back

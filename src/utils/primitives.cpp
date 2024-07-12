@@ -1,5 +1,4 @@
 #include "tmig/utils/primitives.hpp"
-#include "tmig/utils/shaders.hpp"
 
 namespace tmig {
 

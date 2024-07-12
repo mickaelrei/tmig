@@ -36,13 +36,11 @@ set(
     ${SOURCE_DIR}/gl/vbo.cpp
 
     ${SOURCE_DIR}/utils/primitives.cpp
-    ${SOURCE_DIR}/utils/shaders.cpp
     ${SOURCE_DIR}/utils/skybox.cpp
 
     ${SOURCE_DIR}/camera.cpp
     ${SOURCE_DIR}/entity.cpp
     ${SOURCE_DIR}/init.cpp
-    ${SOURCE_DIR}/mesh.cpp
     ${SOURCE_DIR}/scene.cpp
     ${SOURCE_DIR}/window.cpp
 

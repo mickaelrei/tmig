@@ -6,8 +6,6 @@ namespace tmig {
 
 namespace gl {
 
-EBO::EBO() {}
-
 EBO::EBO(const std::vector<unsigned int> &indices)
 {
     glGenBuffers(1, &id);

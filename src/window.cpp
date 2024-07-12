@@ -22,6 +22,9 @@ static void frameBufferSizeCallback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+Window::Window()
+    : Window::Window("Tmig Engine") {}
+
 Window::Window(const std::string &title)
     : title{title}
 {

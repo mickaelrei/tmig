@@ -7,59 +7,115 @@
 #include "tmig/gl/ebo.hpp"
 #include "tmig/gl/shader.hpp"
 #include "tmig/gl/texture.hpp"
-#include "tmig/mesh.hpp"
+#include "tmig/structs.hpp"
 
 namespace tmig {
 
-class Entity : public Mesh
+/// @brief Class that represents a graphic entity in 3D space
+class Entity
 {
 public:
-    Entity();
+    /// @brief Default constructor
+    Entity() = default;
+
+    /// @brief Constructor with parameters
+    /// @param mesh mesh to assign to entity
+    /// @param textures optional list of textures
     Entity(
         const Mesh &mesh,
-        const std::vector<gl::Texture> &textures = {},
-        const glm::vec3 &pos = glm::vec3{0.0f},
-        const glm::mat4 &rotation = glm::mat4{1.0f},
-        const glm::vec3 &scale = glm::vec3{1.0f},
-        const glm::vec4 &color = glm::vec4{1.0f}
+        const std::vector<gl::Texture> &textures = {}
     );
 
+    /// @brief Destroy resources related to this entity
     void destroy();
 
+    /// @brief Get current position
+    /// @return vec3 for entity position
     glm::vec3 getPosition() const;
+
+    /// @brief Get current rotation matrix
+    /// @return mat4 for entity rotation
     glm::mat4 getRotation() const;
+
+    /// @brief Get current scale
+    /// @return vec3 for entity scale
     glm::vec3 getScale() const;
+
+    /// @brief Get current color
+    /// @return vec4 for entity color
     glm::vec4 getColor() const;
 
+    /// @brief Set entity position
+    /// @param position new position
     void setPosition(const glm::vec3 &position);
+
+    /// @brief Set entity rotation
+    /// @param rotation new rotation
     void setRotation(const glm::mat4 &rotation);
+
+    /// @brief Set entity scale
+    /// @param scale new scale
     void setScale(const glm::vec3 &scale);
+
+    /// @brief Set entity color
+    /// @param color new color
     void setColor(const glm::vec4 &color);
 
+    /// @brief Apply position offset on entity
+    /// @param offset position to offset
     void translate(const glm::vec3 &offset);
+
+    /// @brief Apply rotation on entity
+    /// @param rotation rotation to be applied
     void rotate(const glm::mat4 &rotation);
 
+    /// @brief Update entity (this is useful for inherited classes with special behavior)
+    /// @param dt delta time
     virtual void update(float dt);
+
+    /// @brief Draw entity
+    /// @param shader scene shader
     virtual void draw(const gl::Shader &shader) const;
 
 protected:
+    /// @brief Entity mesh
     Mesh mesh;
 
-    glm::vec3 _position;
-    glm::mat4 _rotation;
-    glm::vec3 _scale;
-    glm::mat4 _modelMatrix;
-    glm::vec4 _color;
+    /// @brief Current position
+    glm::vec3 _position = glm::vec3{0.0f};
 
+    /// @brief Current rotation
+    glm::mat4 _rotation = glm::mat4{1.0f};
+
+    /// @brief Current scale
+    glm::vec3 _scale = glm::vec3{1.0f};
+
+    /// @brief Current color
+    glm::vec4 _color = glm::vec4{1.0f};
+
+    /// @brief Model matrix for caching
+    glm::mat4 _modelMatrix;
+
+    /// @brief Entity VAO
     gl::VAO vao;
+
+    /// @brief Entity VBO
     gl::VBO vbo;
+
+    /// @brief Entity EBO
     gl::EBO ebo;
+
+    /// @brief List of textures
     std::vector<gl::Texture> textures;
 
+    /// @brief Updates cached model matrix
     void updateModelMatrix();
+
+    /// @brief Called to setup resources such as VAO, VBO and EBO
     void setup();
 
 private:
+    /// @brief Whether setup() was called (should be only once)
     bool _setupCalled = false;
 };
 

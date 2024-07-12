@@ -8,20 +8,10 @@
 
 namespace tmig {
 
-Entity::Entity() {}
-
 Entity::Entity(const Mesh &mesh,
-    const std::vector<gl::Texture> &textures,
-    const glm::vec3 &pos,
-    const glm::mat4 &rotation,
-    const glm::vec3 &scale,
-    const glm::vec4 &color
+    const std::vector<gl::Texture> &textures
 )
     : mesh{mesh},
-    _position{pos},
-    _rotation{rotation},
-    _scale{scale},
-    _color{color},
     textures{textures}
 {
     setup();
