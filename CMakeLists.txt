@@ -35,12 +35,15 @@ set(
     ${SOURCE_DIR}/gl/vao.cpp
     ${SOURCE_DIR}/gl/vbo.cpp
 
-    ${SOURCE_DIR}/utils/primitives.cpp
+    ${SOURCE_DIR}/utils/primitives_mesh.cpp
+    ${SOURCE_DIR}/utils/primitives_gmesh.cpp
     ${SOURCE_DIR}/utils/skybox.cpp
 
     ${SOURCE_DIR}/camera.cpp
     ${SOURCE_DIR}/entity.cpp
+    ${SOURCE_DIR}/gmesh.cpp
     ${SOURCE_DIR}/init.cpp
+    ${SOURCE_DIR}/mesh.cpp
     ${SOURCE_DIR}/scene.cpp
     ${SOURCE_DIR}/window.cpp
 

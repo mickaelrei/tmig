@@ -11,7 +11,7 @@
 #include "tmig/entity.hpp"
 #include "tmig/utils/skybox.hpp"
 
-#include "tmig/utils/primitives.hpp"
+#include "tmig/utils/primitives_gmesh.hpp"
 
 namespace tmig {
 
@@ -72,38 +72,38 @@ void Window::setup()
     gl::Texture faceTexture{"resources/textures/awesomeface.png"};
     gl::Texture crateTexture{"resources/textures/container.jpg"};
 
-    auto wallLeft = std::make_shared<Entity>(utils::boxMesh);
+    auto wallLeft = std::make_shared<Entity>(utils::boxGMesh());
     wallLeft->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
     wallLeft->setPosition(glm::vec3{-5.0f, 0.0f, 0.0f});
     wallLeft->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
 
-    auto wallRight = std::make_shared<Entity>(utils::boxMesh);
+    auto wallRight = std::make_shared<Entity>(utils::boxGMesh());
     wallRight->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
     wallRight->setPosition(glm::vec3{5.0f, 0.0f, 0.0f});
     wallRight->setColor(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
     wallRight->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(180.f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
-    auto wallBack = std::make_shared<Entity>(utils::boxMesh);
+    auto wallBack = std::make_shared<Entity>(utils::boxGMesh());
     wallBack->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
     wallBack->setPosition(glm::vec3{0.0f, 0.0f, 5.0f});
     wallBack->setColor(glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 
-    auto wallFront = std::make_shared<Entity>(utils::boxMesh);
+    auto wallFront = std::make_shared<Entity>(utils::boxGMesh());
     wallFront->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
     wallFront->setPosition(glm::vec3{0.0f, 0.0f, -5.0f});
     wallFront->setColor(glm::vec4{1.0f, 1.0f, 0.0f, 1.0f});
 
-    auto wallBottom = std::make_shared<Entity>(utils::boxMesh);
+    auto wallBottom = std::make_shared<Entity>(utils::boxGMesh());
     wallBottom->setScale(glm::vec3{10.0f, 1.0f, 10.0f});
     wallBottom->setPosition(glm::vec3{0.0f, -5.0f, 0.0f});
     wallBottom->setColor(glm::vec4{0.0f, 1.0f, 1.0f, 1.0f});
 
-    auto wallTop = std::make_shared<Entity>(utils::boxMesh);
+    auto wallTop = std::make_shared<Entity>(utils::boxGMesh());
     wallTop->setScale(glm::vec3{10.0f, 1.0f, 10.0f});
     wallTop->setPosition(glm::vec3{0.0f, 5.0f, 0.0f});
     wallTop->setColor(glm::vec4{1.0f, 0.0f, 1.0f, 1.0f});
 
-    auto lightCube = std::make_shared<Entity>(utils::boxMesh);
+    auto lightCube = std::make_shared<Entity>(utils::boxGMesh());
     lightCube->setScale(glm::vec3{.1f});
 
     currentScene->addEntity(lightCube);
@@ -114,28 +114,28 @@ void Window::setup()
     currentScene->addEntity(wallBottom);
     currentScene->addEntity(wallTop);
 
-    auto cube = std::make_shared<Entity>(utils::boxMesh);
+    auto cube = std::make_shared<Entity>(utils::boxGMesh());
     cube->setScale(glm::vec3{1.0f, 1.0f, 1.0f});
     cube->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
     cube->setColor(glm::vec4{1.0f, 0.25f, 0.0f, 1.0f});
 
-    auto sphere = std::make_shared<Entity>(utils::sphereMesh(), std::vector<gl::Texture>{crateTexture});
+    auto sphere = std::make_shared<Entity>(utils::sphereGMesh(), std::vector<gl::Texture>{crateTexture});
     sphere->setPosition(glm::vec3{-2.0f, 0.0f, 0.0f});
 
-    auto cone = std::make_shared<Entity>(utils::coneMesh(), std::vector<gl::Texture>{faceTexture});
+    auto cone = std::make_shared<Entity>(utils::coneGMesh(), std::vector<gl::Texture>{faceTexture});
     cone->setPosition(glm::vec3{2.0f, 0.0f, 0.0f});
 
-    auto cylinder = std::make_shared<Entity>(utils::cylinderMesh(), std::vector<gl::Texture>{faceTexture});
+    auto cylinder = std::make_shared<Entity>(utils::cylinderGMesh(), std::vector<gl::Texture>{faceTexture});
     cylinder->setPosition(glm::vec3{0.0f, 2.0f, 0.0f});
     cylinder->setColor(glm::vec4{1.0f, 0.0f, 0.5f, 1.0f});
     cylinder->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
     cylinder->rotate(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
-    auto wedge = std::make_shared<Entity>(utils::wedgeMesh);
+    auto wedge = std::make_shared<Entity>(utils::wedgeGMesh());
     wedge->setColor(glm::vec4{0.0f, 1.0f, 0.75f, 1.0f});
     wedge->setPosition(glm::vec3{0.0f, -2.0f, 0.0f});
 
-    auto torus = std::make_shared<Entity>(utils::torusMesh(), std::vector<gl::Texture>{faceTexture});
+    auto torus = std::make_shared<Entity>(utils::torusGMesh(), std::vector<gl::Texture>{faceTexture});
     torus->setPosition(glm::vec3{0.0f, 0.0f, -2.0f});
     torus->setColor(glm::vec4{0.25f, 0.5f, 1.0f, 1.0f});
 

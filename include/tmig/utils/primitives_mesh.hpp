@@ -1,30 +1,26 @@
 #pragma once
 
-#include "tmig/entity.hpp"
+#include "tmig/mesh.hpp"
 
 namespace tmig {
 
 namespace utils {
 
 /// @brief Creates a sphere mesh
-/// @param resolution number of width/height segments
 /// @return The spherical mesh
-Mesh sphereMesh(const size_t resolution = 20);
+Mesh sphereMesh();
 
 /// @brief Creates a cylinder mesh
-/// @param resolution number of side segments
 /// @return The cylinder mesh
-Mesh cylinderMesh(const size_t resolution = 20);
+Mesh cylinderMesh();
 
 /// @brief Creates a cone mesh
-/// @param resolution number of side segments
 /// @return The cone mesh
-Mesh coneMesh(const size_t resolution = 20);
+Mesh coneMesh();
 
 /// @brief Creates a torus mesh
-/// @param resolution number of side (inner and outer) segments
 /// @return The torus mesh
-Mesh torusMesh(const size_t resolution = 30);
+Mesh torusMesh();
 
 /// @brief Mesh for a default box
 static const Mesh boxMesh = {

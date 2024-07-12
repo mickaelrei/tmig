@@ -2,12 +2,9 @@
 
 #include <vector>
 
-#include "tmig/gl/vao.hpp"
-#include "tmig/gl/vbo.hpp"
-#include "tmig/gl/ebo.hpp"
 #include "tmig/gl/shader.hpp"
 #include "tmig/gl/texture.hpp"
-#include "tmig/structs.hpp"
+#include "tmig/gmesh.hpp"
 
 namespace tmig {
 
@@ -19,10 +16,10 @@ public:
     Entity() = default;
 
     /// @brief Constructor with parameters
-    /// @param mesh mesh to assign to entity
+    /// @param gmesh gmesh to assign to entity
     /// @param textures optional list of textures
     Entity(
-        const Mesh &mesh,
+        const GMesh &gmesh,
         const std::vector<gl::Texture> &textures = {}
     );
 
@@ -78,8 +75,8 @@ public:
     virtual void draw(const gl::Shader &shader) const;
 
 protected:
-    /// @brief Entity mesh
-    Mesh mesh;
+    /// @brief Entity graphic mesh
+    GMesh gmesh;
 
     /// @brief Current position
     glm::vec3 _position = glm::vec3{0.0f};
@@ -96,27 +93,11 @@ protected:
     /// @brief Model matrix for caching
     glm::mat4 _modelMatrix;
 
-    /// @brief Entity VAO
-    gl::VAO vao;
-
-    /// @brief Entity VBO
-    gl::VBO vbo;
-
-    /// @brief Entity EBO
-    gl::EBO ebo;
-
     /// @brief List of textures
     std::vector<gl::Texture> textures;
 
     /// @brief Updates cached model matrix
     void updateModelMatrix();
-
-    /// @brief Called to setup resources such as VAO, VBO and EBO
-    void setup();
-
-private:
-    /// @brief Whether setup() was called (should be only once)
-    bool _setupCalled = false;
 };
 
 /// @brief Max number of textures an entity can have

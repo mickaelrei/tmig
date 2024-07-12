@@ -1,10 +1,13 @@
-#include "tmig/utils/primitives.hpp"
+#include "tmig/utils/primitives_mesh.hpp"
+
+/// @brief Resolution for generating pritimive shape meshes
+static const size_t resolution = 30;
 
 namespace tmig {
 
 namespace utils {
 
-Mesh sphereMesh(const size_t resolution) {
+Mesh sphereMesh() {
     Mesh mesh;
 
     const float step = 1.0f / (float)resolution;
@@ -61,7 +64,7 @@ Mesh sphereMesh(const size_t resolution) {
     return mesh;
 }
 
-Mesh cylinderMesh(const size_t resolution) {
+Mesh cylinderMesh() {
     Mesh mesh;
 
     // Add top and bottom vertex
@@ -151,7 +154,7 @@ Mesh cylinderMesh(const size_t resolution) {
     return mesh;
 }
 
-Mesh coneMesh(const size_t resolution) {
+Mesh coneMesh() {
     Mesh mesh;
 
     // Add top and bottom vertex
@@ -217,7 +220,7 @@ Mesh coneMesh(const size_t resolution) {
     return mesh;
 }
 
-Mesh torusMesh(const size_t resolution) {
+Mesh torusMesh() {
     Mesh mesh;
 
     // Add vertices

@@ -16,13 +16,4 @@ struct Vertex {
     glm::vec3 normal;
 };
 
-/// @brief Struct to represent a 3D mesh
-struct Mesh {
-    /// @brief List of vertices
-    std::vector<Vertex> vertices;
-
-    /// @brief List of indices
-    std::vector<unsigned int> indices;
-};
-
 } // namespace tmig
