@@ -89,7 +89,8 @@ public:
         const glm::vec3 &color,
         const glm::vec3 &pos = glm::vec3{0.0f},
         const glm::vec3 &dir = glm::vec3{0.0f, 0.0f, -1.0f},
-        float cutoffAngle = 0.0f
+        float cutoffAngle = 0.0f,
+        float outerCutoffAngle = 0.0f
     );
 
     /// @brief Light position in scene
@@ -100,6 +101,9 @@ public:
 
     /// @brief Cut-off angle
     float cutoffAngle;
+
+    /// @brief Outer cut-off angle
+    float outerCutoffAngle;
 
     void bind(const gl::Shader &shader, const std::string &prefix) const override;
 };

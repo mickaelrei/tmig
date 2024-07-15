@@ -128,19 +128,21 @@ void Window::setup()
     torus->setPosition(glm::vec3{0.0f, 0.0f, -2.0f});
     torus->setColor(glm::vec4{0.25f, 0.5f, 1.0f, 1.0f});
 
+    currentScene->renderSkybox = false;
+
     // currentScene->addEntity(cube);
     // currentScene->addEntity(sphere);
     // currentScene->addEntity(cone);
-    currentScene->addEntity(cylinder);
+    // currentScene->addEntity(cylinder);
     // currentScene->addEntity(wedge);
     // currentScene->addEntity(torus);
 
-    currentScene->addEntity(wallLeft);
-    currentScene->addEntity(wallRight);
-    currentScene->addEntity(wallBack);
-    currentScene->addEntity(wallFront);
-    currentScene->addEntity(wallBottom);
-    currentScene->addEntity(wallTop);
+    // currentScene->addEntity(wallLeft);
+    // currentScene->addEntity(wallRight);
+    // currentScene->addEntity(wallBack);
+    // currentScene->addEntity(wallFront);
+    // currentScene->addEntity(wallBottom);
+    // currentScene->addEntity(wallTop);
 
     auto light1 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 2.0f, 0.0f});
     auto light2 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 0.0f}, glm::vec3{0.0f, -2.0f, 0.0f});
@@ -148,23 +150,69 @@ void Window::setup()
     auto light4 = std::make_shared<PointLight>(glm::vec3{1.0f, 1.0f, 0.0f}, glm::vec3{-2.0f, 0.0f, 0.0f});
     auto light5 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 1.0f}, glm::vec3{0.0f, 0.0f, 2.0f});
     auto light6 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 1.0f}, glm::vec3{0.0f, 0.0f, -2.0f});
-    currentScene->addLight(light1);
-    currentScene->addLight(light2);
-    currentScene->addLight(light3);
-    currentScene->addLight(light4);
-    currentScene->addLight(light5);
-    currentScene->addLight(light6);
+
+    spotlightTest = std::make_shared<SpotLight>(
+        glm::vec3{1.0f, 1.0f, 1.0f},
+        glm::vec3{0.0f, 0.0f, 2.0f},
+        glm::vec3{0.0f, 0.0f, -1.0f},
+        glm::radians(12.5f),
+        glm::radians(17.5f)
+    );
+    auto spotlight1 = std::make_shared<SpotLight>(
+        glm::vec3{0.0f, 1.0f, 0.0f},
+        glm::vec3{2.0f, 0.0f, 2.0f},
+        glm::vec3{0.0f, 0.0f, -1.0f},
+        glm::radians(10.0f),
+        glm::radians(15.0f)
+    );
+    currentScene->addLight(spotlightTest);
+    currentScene->addLight(spotlight1);
+
+    // currentScene->addLight(light1);
+    // currentScene->addLight(light2);
+    // currentScene->addLight(light3);
+    // currentScene->addLight(light4);
+    // currentScene->addLight(light5);
+    // currentScene->addLight(light6);
+
+    glm::vec3 pos[] = {
+        {0.7f, 0.6f, -1.0f},
+        {-0.7f, -.5f, -3.0f},
+        {0.0f, 1.6f, -4.0f},
+        {1.2f, 1.0f, -5.0f},
+        {0.7f, -0.6f, -4.0f},
+        {-1.0f, 1.3f, -8.0f},
+    };
+
+    glm::mat4 rot[] = {
+        glm::rotate(glm::mat4{1.0f}, glm::radians(45.0f), glm::vec3{1.0f, 0.0f, 0.5f}),
+        glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{-0.3f, 1.0f, 0.2f}),
+        glm::rotate(glm::mat4{1.0f}, glm::radians(27.0f), glm::vec3{0.4f, -0.9f, 0.9f}),
+        glm::rotate(glm::mat4{1.0f}, glm::radians(58.0f), glm::vec3{1.6f, -0.3f, 0.0f}),
+        glm::rotate(glm::mat4{1.0f}, glm::radians(43.0f), glm::vec3{0.8f, 0.5f, -0.4f}),
+        glm::rotate(glm::mat4{1.0f}, glm::radians(184.0f), glm::vec3{0.1f, 0.9f, -0.8f}),
+    };
+
+    for (size_t i = 0; i < 6; ++i) {
+        auto box = std::make_shared<Entity>(utils::boxGMesh(), std::vector<gl::Texture>{crateTexture});
+        box->setPosition(pos[i]);
+        box->setRotation(rot[i]);
+        currentScene->addEntity(box);
+    }
 }
 
 void Window::update(float dt)
 {
     (void)dt;
 
-    float t = glfwGetTime();
+    // float t = glfwGetTime();
 
-    glm::mat4 rot{1.0f};
-    rot = glm::rotate(rot, t, glm::vec3{0.5f, 0.3f, 0.1f});
-    currentScene->entities[0]->setRotation(rot);
+    // glm::mat4 rot{1.0f};
+    // rot = glm::rotate(rot, t, glm::vec3{0.5f, 0.3f, 0.1f});
+    // currentScene->entities[0]->setRotation(rot);
+
+    spotlightTest->pos = currentScene->camera.pos;
+    spotlightTest->dir = currentScene->camera.getForward();
 }
 
 void Window::processInput(float dt)
@@ -266,7 +314,7 @@ void Window::start()
         //------------------------------------------------------
         // Clear screen
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //------------------------------------------------------

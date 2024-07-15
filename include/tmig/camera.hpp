@@ -54,6 +54,10 @@ public:
     /// @param dt delta time
     void rotate(float rx, float ry, float dt);
 
+    /// @brief Get camera's forward direction vector
+    /// @return vec3 for forward direction
+    glm::vec3 getForward() const;
+
     /// @brief Current position
     glm::vec3 pos;
 

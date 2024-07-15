@@ -23,6 +23,7 @@ struct SpotLight {
     vec3 pos;
     vec3 dir;
     float cutoffAngle;
+    float outerCutoffAngle;
 };
 
 // Vertex info
@@ -60,7 +61,7 @@ vec3 calculatePointLight(PointLight light) {
     vec3 lightDir = normalize(light.pos - fragPos);
     float lightDist = distance(fragPos, light.pos);
 
-    vec3 ambient = ambientStrength * light.color;
+    // vec3 ambient = ambientStrength * light.color;
 
     float diff = max(dot(norm, lightDir), 0.0f) / lightDist;
     vec3 diffuse = diff * light.color;
@@ -71,7 +72,8 @@ vec3 calculatePointLight(PointLight light) {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 8.0f);
     vec3 specular = spec * specularStrength * light.color;
 
-    return ambient + diffuse + specular;
+    // return ambient + diffuse + specular;
+    return diffuse + specular;
 }
 
 vec3 calculateDirectionalLight(DirectionalLight light) {
@@ -79,7 +81,33 @@ vec3 calculateDirectionalLight(DirectionalLight light) {
 }
 
 vec3 calculateSpotLight(SpotLight light) {
-    return vec3(0.0f);
+    vec3 fragToLight = normalize(fragPos - light.pos);
+    float d = dot(fragToLight, light.dir);
+
+    if (d < light.outerCutoffAngle) {
+        return vec3(0.0f);
+    }
+
+    float eps = light.cutoffAngle - light.outerCutoffAngle;
+    float intensity = clamp((d - light.outerCutoffAngle) / eps, 0.0f, 1.0f);
+
+    vec3 norm = normalize(normal);
+    vec3 lightDir = normalize(light.pos - fragPos);
+    float lightDist = distance(fragPos, light.pos);
+
+    // vec3 ambient = ambientStrength * light.color;
+
+    float diff = max(dot(norm, lightDir), 0.0f) / lightDist;
+    vec3 diffuse = diff * intensity * light.color;
+
+    vec3 viewDir = normalize(viewPos - fragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 8.0f);
+    vec3 specular = spec * intensity * specularStrength * light.color;
+
+    // return ambient + diffuse + specular;
+    return diffuse + specular;
 }
 
 // Returns a color on how lighting affects the fragment
@@ -91,6 +119,7 @@ vec3 calculateLighting()
     int _numDirectionalLights = clamp(0, MAX_LIGHTS, numDirectionalLights);
     int _numSpotLights = clamp(0, MAX_LIGHTS, numSpotLights);
 
+    // Add casters influence
     int i;
     for (i = 0; i < _numPointLights; ++i) {
         PointLight light = pointLights[i];
@@ -112,6 +141,9 @@ vec3 calculateLighting()
 
         color += calculateSpotLight(light);
     }
+
+    // Add ambient lighting influence
+    color += ambientStrength * vec3(1.0f);
 
     return color;
 }

@@ -48,6 +48,8 @@ public:
     /// @param dt delta time
     void update(float dt);
 
+    std::shared_ptr<SpotLight> spotlightTest;
+
 protected:
     /// @brief Process input, called once each iteration of render loop
     /// @param dt delta time

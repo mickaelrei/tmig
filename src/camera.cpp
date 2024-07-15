@@ -62,6 +62,10 @@ void Camera::rotate(float rx, float ry, float dt)
     updateVectors();
 }
 
+glm::vec3 Camera::getForward() const {
+    return forward;
+}
+
 void Camera::updateVectors()
 {
     // Update direction

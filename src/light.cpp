@@ -40,7 +40,7 @@ DirectionalLight::DirectionalLight(
     const glm::vec3 &color,
     const glm::vec3 &dir
 )
-    : Light::Light{color, Light::Type::point},
+    : Light::Light{color, Light::Type::directional},
       dir{dir} {}
 
 void DirectionalLight::bind(const gl::Shader &shader, const std::string &prefix) const {
@@ -48,19 +48,21 @@ void DirectionalLight::bind(const gl::Shader &shader, const std::string &prefix)
     Light::bind(shader, prefix);
 
     std::string dirName = prefix + ".dir";
-    shader.setVec3(dirName, dir);
+    shader.setVec3(dirName, glm::normalize(dir));
 }
 
 SpotLight::SpotLight(
     const glm::vec3 &color,
     const glm::vec3 &pos,
     const glm::vec3 &dir,
-    float cutoffAngle
+    float cutoffAngle,
+    float outerCutoffAngle
 )
-    : Light::Light{color, Light::Type::point},
+    : Light::Light{color, Light::Type::spot},
       pos{pos},
       dir{dir},
-      cutoffAngle{cutoffAngle} {}
+      cutoffAngle{cutoffAngle},
+      outerCutoffAngle{outerCutoffAngle} {}
 
 void SpotLight::bind(const gl::Shader &shader, const std::string &prefix) const {
     // Default bindings
@@ -70,10 +72,13 @@ void SpotLight::bind(const gl::Shader &shader, const std::string &prefix) const 
     shader.setVec3(posName, pos);
 
     std::string dirName = prefix + ".dir";
-    shader.setVec3(dirName, dir);
+    shader.setVec3(dirName, glm::normalize(dir));
 
     std::string cutoffAngleName = prefix + ".cutoffAngle";
-    shader.setFloat(cutoffAngleName, cutoffAngle);
+    shader.setFloat(cutoffAngleName, glm::cos(cutoffAngle));
+
+    std::string outerCutoffAngleName = prefix + ".outerCutoffAngle";
+    shader.setFloat(outerCutoffAngleName, glm::cos(outerCutoffAngle));
 }
 
 } // namespace tmig
