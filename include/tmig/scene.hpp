@@ -5,6 +5,7 @@
 
 #include "tmig/entity.hpp"
 #include "tmig/camera.hpp"
+#include "tmig/light.hpp"
 #include "tmig/utils/skybox.hpp"
 
 namespace tmig {
@@ -16,13 +17,20 @@ public:
     /// @param entity entity to be added
     void addEntity(const std::shared_ptr<Entity> &entity);
 
+    /// @brief Add new light to scene
+    /// @param light light to be added
+    void addLight(const std::shared_ptr<Light> &light);
+
+    /// @brief Set shader for scene rendering
+    /// @param shader shader to be used
+    void setShader(const gl::Shader &shader);
+
     /// @brief Update scene (could be useful for an inherited scene class with special behavior)
     /// @param dt delta time
     virtual void update(float dt) const;
 
     /// @brief Render scene
-    /// @param shader scene shader
-    virtual void render(const gl::Shader &shader) const;
+    virtual void render() const;
 
     /// @brief Current camera
     Camera camera;
@@ -30,8 +38,18 @@ public:
     /// @brief Visual skybox
     utils::Skybox skybox;
 
+    /// @brief Whether should render scene skybox
+    bool renderSkybox = true;
+
     /// @brief List of entities currently in scene
     std::vector<std::shared_ptr<Entity>> entities;
+
+    /// @brief List of lights currently in scene
+    std::vector<std::shared_ptr<Light>> lights;
+
+protected:
+    /// @brief Current shader for rendering the scene
+    gl::Shader shader;
 };
 
 } // namespace tmig

@@ -43,6 +43,7 @@ set(
     ${SOURCE_DIR}/entity.cpp
     ${SOURCE_DIR}/gmesh.cpp
     ${SOURCE_DIR}/init.cpp
+    ${SOURCE_DIR}/light.cpp
     ${SOURCE_DIR}/mesh.cpp
     ${SOURCE_DIR}/scene.cpp
     ${SOURCE_DIR}/window.cpp

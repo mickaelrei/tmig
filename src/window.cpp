@@ -75,44 +75,33 @@ void Window::setup()
     auto wallLeft = std::make_shared<Entity>(utils::boxGMesh());
     wallLeft->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
     wallLeft->setPosition(glm::vec3{-5.0f, 0.0f, 0.0f});
-    wallLeft->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    // wallLeft->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
 
     auto wallRight = std::make_shared<Entity>(utils::boxGMesh());
     wallRight->setScale(glm::vec3{1.0f, 10.0f, 10.0f});
     wallRight->setPosition(glm::vec3{5.0f, 0.0f, 0.0f});
-    wallRight->setColor(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+    // wallRight->setColor(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
     wallRight->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(180.f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
     auto wallBack = std::make_shared<Entity>(utils::boxGMesh());
     wallBack->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
     wallBack->setPosition(glm::vec3{0.0f, 0.0f, 5.0f});
-    wallBack->setColor(glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+    // wallBack->setColor(glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 
     auto wallFront = std::make_shared<Entity>(utils::boxGMesh());
     wallFront->setScale(glm::vec3{10.0f, 10.0f, 1.0f});
     wallFront->setPosition(glm::vec3{0.0f, 0.0f, -5.0f});
-    wallFront->setColor(glm::vec4{1.0f, 1.0f, 0.0f, 1.0f});
+    // wallFront->setColor(glm::vec4{1.0f, 1.0f, 0.0f, 1.0f});
 
     auto wallBottom = std::make_shared<Entity>(utils::boxGMesh());
     wallBottom->setScale(glm::vec3{10.0f, 1.0f, 10.0f});
     wallBottom->setPosition(glm::vec3{0.0f, -5.0f, 0.0f});
-    wallBottom->setColor(glm::vec4{0.0f, 1.0f, 1.0f, 1.0f});
+    // wallBottom->setColor(glm::vec4{0.0f, 1.0f, 1.0f, 1.0f});
 
     auto wallTop = std::make_shared<Entity>(utils::boxGMesh());
     wallTop->setScale(glm::vec3{10.0f, 1.0f, 10.0f});
     wallTop->setPosition(glm::vec3{0.0f, 5.0f, 0.0f});
-    wallTop->setColor(glm::vec4{1.0f, 0.0f, 1.0f, 1.0f});
-
-    auto lightCube = std::make_shared<Entity>(utils::boxGMesh());
-    lightCube->setScale(glm::vec3{.1f});
-
-    currentScene->addEntity(lightCube);
-    currentScene->addEntity(wallLeft);
-    currentScene->addEntity(wallRight);
-    currentScene->addEntity(wallBack);
-    currentScene->addEntity(wallFront);
-    currentScene->addEntity(wallBottom);
-    currentScene->addEntity(wallTop);
+    // wallTop->setColor(glm::vec4{1.0f, 0.0f, 1.0f, 1.0f});
 
     auto cube = std::make_shared<Entity>(utils::boxGMesh());
     cube->setScale(glm::vec3{1.0f, 1.0f, 1.0f});
@@ -125,9 +114,9 @@ void Window::setup()
     auto cone = std::make_shared<Entity>(utils::coneGMesh(), std::vector<gl::Texture>{faceTexture});
     cone->setPosition(glm::vec3{2.0f, 0.0f, 0.0f});
 
-    auto cylinder = std::make_shared<Entity>(utils::cylinderGMesh(), std::vector<gl::Texture>{faceTexture});
-    cylinder->setPosition(glm::vec3{0.0f, 2.0f, 0.0f});
-    cylinder->setColor(glm::vec4{1.0f, 0.0f, 0.5f, 1.0f});
+    auto cylinder = std::make_shared<Entity>(utils::cylinderGMesh());//, std::vector<gl::Texture>{faceTexture});
+    // cylinder->setPosition(glm::vec3{0.0f, 2.0f, 0.0f});
+    // cylinder->setColor(glm::vec4{1.0f, 0.0f, 0.5f, 1.0f});
     cylinder->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
     cylinder->rotate(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{0.0f, 0.0f, 1.0f}));
 
@@ -139,12 +128,32 @@ void Window::setup()
     torus->setPosition(glm::vec3{0.0f, 0.0f, -2.0f});
     torus->setColor(glm::vec4{0.25f, 0.5f, 1.0f, 1.0f});
 
-    currentScene->addEntity(cube);
-    currentScene->addEntity(sphere);
-    currentScene->addEntity(cone);
+    // currentScene->addEntity(cube);
+    // currentScene->addEntity(sphere);
+    // currentScene->addEntity(cone);
     currentScene->addEntity(cylinder);
-    currentScene->addEntity(wedge);
-    currentScene->addEntity(torus);
+    // currentScene->addEntity(wedge);
+    // currentScene->addEntity(torus);
+
+    currentScene->addEntity(wallLeft);
+    currentScene->addEntity(wallRight);
+    currentScene->addEntity(wallBack);
+    currentScene->addEntity(wallFront);
+    currentScene->addEntity(wallBottom);
+    currentScene->addEntity(wallTop);
+
+    auto light1 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 2.0f, 0.0f});
+    auto light2 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 0.0f}, glm::vec3{0.0f, -2.0f, 0.0f});
+    auto light3 = std::make_shared<PointLight>(glm::vec3{0.0f, 0.0f, 1.0f}, glm::vec3{2.0f, 0.0f, 0.0f});
+    auto light4 = std::make_shared<PointLight>(glm::vec3{1.0f, 1.0f, 0.0f}, glm::vec3{-2.0f, 0.0f, 0.0f});
+    auto light5 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 1.0f}, glm::vec3{0.0f, 0.0f, 2.0f});
+    auto light6 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 1.0f}, glm::vec3{0.0f, 0.0f, -2.0f});
+    currentScene->addLight(light1);
+    currentScene->addLight(light2);
+    currentScene->addLight(light3);
+    currentScene->addLight(light4);
+    currentScene->addLight(light5);
+    currentScene->addLight(light6);
 }
 
 void Window::update(float dt)
@@ -152,15 +161,10 @@ void Window::update(float dt)
     (void)dt;
 
     float t = glfwGetTime();
-    float s = 2.f;
-    float e = 0.5f;
-    glm::vec3 pos{std::cos(t * e) * s, 2.0f, std::sin(t * e) * s};
-    gl::entityShader().setVec3(
-        "lightPos",
-        pos
-    );
 
-    currentScene->entities[0]->setPosition(pos);
+    glm::mat4 rot{1.0f};
+    rot = glm::rotate(rot, t, glm::vec3{0.5f, 0.3f, 0.1f});
+    currentScene->entities[0]->setRotation(rot);
 }
 
 void Window::processInput(float dt)
@@ -226,6 +230,7 @@ void Window::start()
 {
     // Create new scene
     currentScene = std::make_shared<Scene>();
+    currentScene->setShader(gl::entityShader());
     currentScene->skybox = utils::Skybox{gl::TextureCube{
         "resources/textures/skybox/right.jpg",
         "resources/textures/skybox/left.jpg",
@@ -308,7 +313,7 @@ void Window::start()
 
         // TODO: Make a UBO for fixed projection/view matrix uniforms
         currentScene->update(dt);
-        currentScene->render(gl::entityShader());
+        currentScene->render();
 
         //------------------------------------------------------
         //------------------------------------------------------

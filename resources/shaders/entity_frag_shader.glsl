@@ -1,6 +1,30 @@
 #version 330 core
 out vec4 FragColor;
 
+// Light caster types
+struct PointLight {
+    int enabled;
+    vec3 color;
+
+    vec3 pos;
+};
+
+struct DirectionalLight {
+    int enabled;
+    vec3 color;
+
+    vec3 dir;
+};
+
+struct SpotLight {
+    int enabled;
+    vec3 color;
+
+    vec3 pos;
+    vec3 dir;
+    float cutoffAngle;
+};
+
 // Vertex info
 in vec2 texCoord;
 in vec3 normal;
@@ -10,7 +34,7 @@ in vec3 fragPos;
 uniform vec4 meshColor;
 
 // Entity textures
-const int MAX_TEXTURES = 4;
+#define MAX_TEXTURES 4
 uniform int numTextures;
 uniform sampler2D textures[MAX_TEXTURES];
 
@@ -18,32 +42,78 @@ uniform sampler2D textures[MAX_TEXTURES];
 uniform vec3 viewPos;
 
 // Lighting info
-uniform vec3 lightPos;
-uniform vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
+uniform float ambientStrength;
+uniform float specularStrength;
 
-uniform float ambientStrength = 0.1f;
-uniform float lightStrength = 1.f;
-uniform float specularStrength = 0.5f;
+// Scene lights
+#define MAX_LIGHTS 50
+uniform int numPointLights;
+uniform int numDirectionalLights;
+uniform int numSpotLights;
+uniform PointLight pointLights[MAX_LIGHTS];
+uniform DirectionalLight directionalLights[MAX_LIGHTS];
+uniform SpotLight spotLights[MAX_LIGHTS];
 
-// Returns a color on how lighting affects the fragment
-vec3 calculateLighting()
-{
+// Calculate how a point light affects the fragment
+vec3 calculatePointLight(PointLight light) {
     vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(lightPos - fragPos);
-    float lightDist = distance(fragPos, lightPos);
+    vec3 lightDir = normalize(light.pos - fragPos);
+    float lightDist = distance(fragPos, light.pos);
 
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = ambientStrength * light.color;
 
     float diff = max(dot(norm, lightDir), 0.0f) / lightDist;
-    vec3 diffuse = diff * lightStrength * lightColor;
+    vec3 diffuse = diff * light.color;
 
     vec3 viewDir = normalize(viewPos - fragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 32.0f);
-    vec3 specular = specularStrength * spec * lightColor;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 8.0f);
+    vec3 specular = spec * specularStrength * light.color;
 
     return ambient + diffuse + specular;
+}
+
+vec3 calculateDirectionalLight(DirectionalLight light) {
+    return vec3(0.0f);
+}
+
+vec3 calculateSpotLight(SpotLight light) {
+    return vec3(0.0f);
+}
+
+// Returns a color on how lighting affects the fragment
+vec3 calculateLighting()
+{
+    vec3 color = vec3(0.0f);
+
+    int _numPointLights = clamp(0, MAX_LIGHTS, numPointLights);
+    int _numDirectionalLights = clamp(0, MAX_LIGHTS, numDirectionalLights);
+    int _numSpotLights = clamp(0, MAX_LIGHTS, numSpotLights);
+
+    int i;
+    for (i = 0; i < _numPointLights; ++i) {
+        PointLight light = pointLights[i];
+        if (light.enabled == 0) continue;
+
+        color += calculatePointLight(light);
+    }
+
+    for (i = 0; i < _numDirectionalLights; ++i) {
+        DirectionalLight light = directionalLights[i];
+        if (light.enabled == 0) continue;
+
+        color += calculateDirectionalLight(light);
+    }
+
+    for (i = 0; i < _numSpotLights; ++i) {
+        SpotLight light = spotLights[i];
+        if (light.enabled == 0) continue;
+
+        color += calculateSpotLight(light);
+    }
+
+    return color;
 }
 
 // Returns the mixed color for all textures
