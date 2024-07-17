@@ -172,7 +172,11 @@ void Window::start()
         //------------------------------------------------------
         // Clear screen
 
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glm::vec4 clearColor{0.05f, 0.05f, 0.05f, 1.0f};
+        if (currentScene != nullptr) {
+            clearColor = currentScene->clearColor;
+        }
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //------------------------------------------------------

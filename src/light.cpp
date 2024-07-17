@@ -4,9 +4,10 @@
 
 namespace tmig {
 
-Light::Light(const glm::vec3 &color, Type type)
+Light::Light(const glm::vec3 &color, float strength, Type type)
     : color{color},
       enabled{true},
+      strength{strength},
       _type{type} {}
 
 Light::Type Light::type() {
@@ -19,13 +20,16 @@ void Light::bind(const gl::Shader &shader, const std::string &prefix) const {
 
     std::string enabledName = prefix + ".enabled";
     shader.setInt(enabledName, enabled);
+
+    std::string strengthName = prefix + ".strength";
+    shader.setFloat(strengthName, strength);
 }
 
 PointLight::PointLight(
-    const glm::vec3 &color,
+    const glm::vec3 &color, float strength,
     const glm::vec3 &pos
 )
-    : Light::Light{color, Light::Type::point},
+    : Light::Light{color, strength, Light::Type::point},
       pos{pos} {}
 
 void PointLight::bind(const gl::Shader &shader, const std::string &prefix) const {
@@ -37,10 +41,10 @@ void PointLight::bind(const gl::Shader &shader, const std::string &prefix) const
 }
 
 DirectionalLight::DirectionalLight(
-    const glm::vec3 &color,
+    const glm::vec3 &color, float strength,
     const glm::vec3 &dir
 )
-    : Light::Light{color, Light::Type::directional},
+    : Light::Light{color, strength, Light::Type::directional},
       dir{dir} {}
 
 void DirectionalLight::bind(const gl::Shader &shader, const std::string &prefix) const {
@@ -52,13 +56,13 @@ void DirectionalLight::bind(const gl::Shader &shader, const std::string &prefix)
 }
 
 SpotLight::SpotLight(
-    const glm::vec3 &color,
+    const glm::vec3 &color, float strength,
     const glm::vec3 &pos,
     const glm::vec3 &dir,
     float cutoffAngle,
     float outerCutoffAngle
 )
-    : Light::Light{color, Light::Type::spot},
+    : Light::Light{color, strength, Light::Type::spot},
       pos{pos},
       dir{dir},
       cutoffAngle{cutoffAngle},

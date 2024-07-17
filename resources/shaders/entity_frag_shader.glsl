@@ -5,6 +5,7 @@ out vec4 FragColor;
 struct PointLight {
     int enabled;
     vec3 color;
+    float strength;
 
     vec3 pos;
 };
@@ -12,6 +13,7 @@ struct PointLight {
 struct DirectionalLight {
     int enabled;
     vec3 color;
+    float strength;
 
     vec3 dir;
 };
@@ -19,6 +21,7 @@ struct DirectionalLight {
 struct SpotLight {
     int enabled;
     vec3 color;
+    float strength;
 
     vec3 pos;
     vec3 dir;
@@ -59,11 +62,11 @@ uniform SpotLight spotLights[MAX_LIGHTS];
 vec3 calculatePointLight(PointLight light) {
     vec3 norm = normalize(normal);
     vec3 lightDir = normalize(light.pos - fragPos);
-    float lightDist = distance(fragPos, light.pos);
 
-    // vec3 ambient = ambientStrength * light.color;
+    float dist = length(fragPos - light.pos);
+    float attenuation = 1.0f / (1.0f + 0.1f * dist + 0.03f * (dist * dist));
 
-    float diff = max(dot(norm, lightDir), 0.0f) / lightDist;
+    float diff = max(dot(norm, lightDir), 0.0f);
     vec3 diffuse = diff * light.color;
 
     vec3 viewDir = normalize(viewPos - fragPos);
@@ -72,8 +75,7 @@ vec3 calculatePointLight(PointLight light) {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 8.0f);
     vec3 specular = spec * specularStrength * light.color;
 
-    // return ambient + diffuse + specular;
-    return diffuse + specular;
+    return (light.strength * attenuation) * (diffuse + specular);
 }
 
 vec3 calculateDirectionalLight(DirectionalLight light) {
@@ -93,11 +95,11 @@ vec3 calculateSpotLight(SpotLight light) {
 
     vec3 norm = normalize(normal);
     vec3 lightDir = normalize(light.pos - fragPos);
-    float lightDist = distance(fragPos, light.pos);
 
-    // vec3 ambient = ambientStrength * light.color;
+    float dist = length(fragPos - light.pos);
+    float attenuation = 1.0f / (1.0f + 0.1f * dist + 0.03f * (dist * dist));
 
-    float diff = max(dot(norm, lightDir), 0.0f) / lightDist;
+    float diff = max(dot(norm, lightDir), 0.0f);
     vec3 diffuse = diff * intensity * light.color;
 
     vec3 viewDir = normalize(viewPos - fragPos);
@@ -106,8 +108,7 @@ vec3 calculateSpotLight(SpotLight light) {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 8.0f);
     vec3 specular = spec * intensity * specularStrength * light.color;
 
-    // return ambient + diffuse + specular;
-    return diffuse + specular;
+    return (light.strength * attenuation) * (diffuse + specular);
 }
 
 // Returns a color on how lighting affects the fragment

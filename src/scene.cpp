@@ -50,7 +50,7 @@ void Scene::update(float dt) {
     shader.setInt("numSpotLights", numSpotLights);
 
     // TODO: This could be better encapsulated as a config
-    shader.setFloat("ambientStrength", 0.1f);
+    shader.setFloat("ambientStrength", 0.2f);
     shader.setFloat("specularStrength", 0.5f);
 }
 

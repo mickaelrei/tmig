@@ -25,6 +25,9 @@ public:
     /// @brief Whether light is enabled
     bool enabled;
 
+    /// @brief Light brightness strength
+    float strength;
+
     /// @brief Binds this light's data at a shader
     /// @param shader shader to bind info
     /// @param prefix uniform name prefix such as "lights[0]"
@@ -38,7 +41,7 @@ protected:
     /// @brief Constructor
     /// @param pos light color
     /// @param enabled whether light is enabled 
-    Light(const glm::vec3 &color, Type type);
+    Light(const glm::vec3 &color, float strength, Type type);
 
     /// @brief Caster type
     Type _type;
@@ -51,7 +54,7 @@ public:
     /// @param color light color
     /// @param enabled whether light is enabled
     PointLight(
-        const glm::vec3 &color,
+        const glm::vec3 &color, float strength = 1.0f,
         const glm::vec3 &pos = glm::vec3{0.0f}
     );
 
@@ -69,7 +72,7 @@ public:
     /// @param enabled whether light is enabled
     /// @param dir light direction
     DirectionalLight(
-        const glm::vec3 &color,
+        const glm::vec3 &color, float strength = 1.0f,
         const glm::vec3 &dir = glm::vec3{0.0f, 0.0f, -1.0f}
     );
 
@@ -86,7 +89,7 @@ public:
     /// @param color light color
     /// @param enabled whether light is enabled
     SpotLight(
-        const glm::vec3 &color,
+        const glm::vec3 &color, float strength = 1.0f,
         const glm::vec3 &pos = glm::vec3{0.0f},
         const glm::vec3 &dir = glm::vec3{0.0f, 0.0f, -1.0f},
         float cutoffAngle = 0.0f,

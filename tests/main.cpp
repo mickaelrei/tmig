@@ -93,12 +93,12 @@ void App::setup() {
         lightsScene->addEntity(movingEntity);
         lightsScene->addEntity(rotatingEntity);
 
-        auto light1 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 0.0f}, glm::vec3{0.0f, 2.0f, 0.0f});
-        auto light2 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 0.0f}, glm::vec3{0.0f, -2.0f, 0.0f});
-        auto light3 = std::make_shared<PointLight>(glm::vec3{0.0f, 0.0f, 1.0f}, glm::vec3{2.0f, 0.0f, 0.0f});
-        auto light4 = std::make_shared<PointLight>(glm::vec3{1.0f, 1.0f, 0.0f}, glm::vec3{-2.0f, 0.0f, 0.0f});
-        auto light5 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 1.0f}, glm::vec3{0.0f, 0.0f, 2.0f});
-        auto light6 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 1.0f}, glm::vec3{0.0f, 0.0f, -2.0f});
+        auto light1 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 0.0f}, 0.5f, glm::vec3{0.0f, 2.0f, 0.0f});
+        auto light2 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 0.0f}, 0.5f, glm::vec3{0.0f, -2.0f, 0.0f});
+        auto light3 = std::make_shared<PointLight>(glm::vec3{0.0f, 0.0f, 1.0f}, 0.5f, glm::vec3{2.0f, 0.0f, 0.0f});
+        auto light4 = std::make_shared<PointLight>(glm::vec3{1.0f, 1.0f, 0.0f}, 0.5f, glm::vec3{-2.0f, 0.0f, 0.0f});
+        auto light5 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 1.0f}, 0.5f, glm::vec3{0.0f, 0.0f, 2.0f});
+        auto light6 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 1.0f}, 0.5f, glm::vec3{0.0f, 0.0f, -2.0f});
 
         lightsScene->addLight(light1);
         lightsScene->addLight(light2);
@@ -118,6 +118,7 @@ void App::setup() {
 
     flashlight = std::make_shared<SpotLight>(
         glm::vec3{1.0f, 1.0f, 1.0f},
+        2.5f,
         glm::vec3{0.0f, 0.0f, 2.0f},
         glm::vec3{0.0f, 0.0f, -1.0f},
         glm::radians(12.5f),

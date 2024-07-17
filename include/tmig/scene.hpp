@@ -41,6 +41,9 @@ public:
     /// @brief Whether should render scene skybox
     bool renderSkybox = true;
 
+    /// @brief Color used to clear color buffer
+    glm::vec4 clearColor;
+
     /// @brief List of entities currently in scene
     std::vector<std::shared_ptr<Entity>> entities;
 
