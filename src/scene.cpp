@@ -17,8 +17,7 @@ void Scene::setShader(const gl::Shader &shader) {
     Scene::shader = shader;
 }
 
-void Scene::update(float dt) const
-{
+void Scene::update(float dt) {
     (void)dt;
 
     int numPointLights = 0;

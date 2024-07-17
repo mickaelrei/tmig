@@ -27,7 +27,7 @@ public:
 
     /// @brief Update scene (could be useful for an inherited scene class with special behavior)
     /// @param dt delta time
-    virtual void update(float dt) const;
+    virtual void update(float dt);
 
     /// @brief Render scene
     virtual void render() const;

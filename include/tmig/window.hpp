@@ -41,14 +41,16 @@ public:
     /// @param height output height
     void getSize(int &width, int &height) const;
 
+    /// @brief Get elapsed time since engine initialization
+    /// @return Elapsed time in seconds
+    float elapsedTime() const;
+
     /// @brief Setup objects, called before render loop
-    void setup();
+    virtual void setup();
 
     /// @brief Update objects, called once each iteration of render loop
     /// @param dt delta time
-    void update(float dt);
-
-    std::shared_ptr<SpotLight> spotlightTest;
+    virtual void update(float dt);
 
 protected:
     /// @brief Process input, called once each iteration of render loop
@@ -59,12 +61,11 @@ protected:
     std::string title;
 
     /// @brief Current render scene
-    std::shared_ptr<Scene> currentScene;
+    std::shared_ptr<Scene> currentScene = nullptr;
 
     /// @brief Projection matrix
     glm::mat4 projection;
 
-private:
     /// @brief GLFW window object
     GLFWwindow *window;
 };
