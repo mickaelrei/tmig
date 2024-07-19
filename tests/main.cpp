@@ -206,9 +206,6 @@ void App::setup() {
 void App::update(float dt) {
     (void)dt;
 
-    auto pos = currentScene->camera.pos;
-    printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.z);
-
     if (currentScene == lightsScene) {
         auto t = elapsedTime();
         glm::mat4 rot{1.0f};
@@ -232,18 +229,15 @@ void App::processInput(float dt) {
     Window::processInput(dt);
 
     // Toggle scenes when pressing F
-    // TODO: Change this to a wrapper "getKeyState(tmig::Window::Key)"
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+    if (isKeyPressed(KeyCode::f)) {
         if (currentScene == flashlightScene) {
             currentScene = lightsScene;
         } else {
             currentScene = flashlightScene;
         }
     }
-    if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-        flashlightFollowing = false;
-    } else {
-        flashlightFollowing = true;
+    if (currentScene == flashlightScene && isKeyPressed(KeyCode::g)) {
+        flashlightFollowing = !flashlightFollowing;
     }
 }
 

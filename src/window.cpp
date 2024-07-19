@@ -82,9 +82,9 @@ void Window::update(float dt)
 void Window::processInput(float dt)
 {
     // Check for window close
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (isKeyPressed(KeyCode::escape))
     {
-        glfwSetWindowShouldClose(window, true);
+        setShouldClose(true);
     }
 
     if (currentScene == nullptr) return;
@@ -92,27 +92,27 @@ void Window::processInput(float dt)
     auto &cam = currentScene->camera;
 
     // Camera movement
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::w))
     {
         cam.moveForward(dt);
     }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::s))
     {
         cam.moveBack(dt);
     }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::d))
     {
         cam.moveRight(dt);
     }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::a))
     {
         cam.moveLeft(dt);
     }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::e))
     {
         cam.moveUp(dt);
     }
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::q))
     {
         cam.moveDown(dt);
     }
@@ -120,24 +120,70 @@ void Window::processInput(float dt)
     // Camera rotation
     float rx = 0.0f;
     float ry = 0.0f;
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::left))
     {
         ry -= 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::right))
     {
         ry += 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::up))
     {
         rx += 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (isKeyHeld(KeyCode::down))
     {
         rx -= 1.0f;
     }
 
     cam.rotate(rx, ry, dt);
+}
+
+void Window::setShouldClose(bool shouldClose) const {
+    glfwSetWindowShouldClose(window, shouldClose);
+}
+
+Window::KeyState Window::getKeyState(KeyCode key) const {
+    // Try to find state in map
+    auto iterator = keyboardState.find(key);
+    if (iterator != keyboardState.end()) {
+        return iterator->second;
+    }
+
+    // If not found, by default key is released
+    return KeyState::released;
+}
+
+void Window::setKeyState(KeyCode key, KeyState state) {
+    keyboardState[key] = state;
+}
+
+
+bool Window::isKeyPressed(KeyCode key) {
+    auto currentState = getKeyState(key);
+    auto newState = static_cast<KeyState>(glfwGetKey(window, static_cast<int>(key)));
+    setKeyState(key, newState);
+
+    // Key is pressed if it was released and got pressed now
+    return newState == KeyState::pressed && currentState == KeyState::released;
+}
+
+bool Window::isKeyHeld(KeyCode key) {
+    auto newState = static_cast<KeyState>(glfwGetKey(window, static_cast<int>(key)));
+    setKeyState(key, newState);
+
+    // Key is held if it is pressed
+    return newState == KeyState::pressed;
+}
+
+bool Window::isKeyReleased(KeyCode key) {
+    auto currentState = getKeyState(key);
+    auto newState = static_cast<KeyState>(glfwGetKey(window, static_cast<int>(key)));
+    setKeyState(key, newState);
+
+    // Key is released if it was pressed and got released now
+    return newState == KeyState::released && currentState == KeyState::pressed;
 }
 
 void Window::start()

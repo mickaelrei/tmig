@@ -1,7 +1,7 @@
 #include "tmig/utils/primitives_mesh.hpp"
 
 /// @brief Resolution for generating pritimive shape meshes
-static const size_t resolution = 30;
+static const size_t resolution = 50;
 
 namespace tmig {
 
