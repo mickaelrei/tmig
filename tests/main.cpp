@@ -2,7 +2,7 @@
 
 #include "tmig/init.hpp"
 #include "tmig/light.hpp"
-#include "tmig/gl/gl.hpp"
+#include "tmig/utils/shaders.hpp"
 #include "tmig/utils/primitives_gmesh.hpp"
 #include "tmig/window.hpp"
 #include "tmig/glm.hpp"
@@ -35,7 +35,7 @@ void App::setup() {
     // Create scene testing multiple lights
     lightsScene = std::make_shared<tmig::Scene>();
     lightsScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
-    lightsScene->setShader(gl::entityShader());
+    lightsScene->setShader(utils::entityShader());
     lightsScene->skybox = utils::Skybox{gl::TextureCube{
         "resources/textures/skybox/right.jpg",
         "resources/textures/skybox/left.jpg",
@@ -155,7 +155,7 @@ void App::setup() {
     // Create scene testing spotlight as a flashlight
     flashlightScene = std::make_shared<tmig::Scene>();
     flashlightScene->camera.pos = glm::vec3{0.0f, 0.0f, 2.0f};
-    flashlightScene->setShader(gl::entityShader());
+    flashlightScene->setShader(utils::entityShader());
     flashlightScene->renderSkybox = false;
 
     flashlight = std::make_shared<SpotLight>(
@@ -172,7 +172,7 @@ void App::setup() {
     floor->setColor(glm::vec4{1.0f, 0.5f, 0.25f, 1.0f});
     floor->setScale(glm::vec3{10.f, 1.0f, 30.0f});
     floor->setPosition(glm::vec3{0.0f, -2.0f, 0.0f});
-    flashlightScene->addEntity(floor);
+    // flashlightScene->addEntity(floor);
 
     glm::vec3 pos[] = {
         {0.7f, 0.6f, -1.0f},
@@ -197,6 +197,16 @@ void App::setup() {
         box->setPosition(pos[i]);
         box->setRotation(rot[i]);
         flashlightScene->addEntity(box);
+    }
+
+    int dim = 25;
+    for (int i = -dim; i < dim; ++i) {
+        for (int j = -dim; j < dim; ++j) {
+            glm::vec3 pos{(float)i, (float)(rand() % 2 - 1) - 2.0f, (float)j};
+            auto box = std::make_shared<Entity>(utils::boxGMesh());
+            box->setPosition(pos);
+            flashlightScene->addEntity(box);
+        }
     }
 
     // Start with lights scene

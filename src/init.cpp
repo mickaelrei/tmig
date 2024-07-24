@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "tmig/init.hpp"
-#include "tmig/gl/gl.hpp"
+#include "tmig/utils/shaders.hpp"
 
 // Whether GLFW is initialized
 static bool _initializedGLFW = false;

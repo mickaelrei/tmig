@@ -27,7 +27,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
-    ${SOURCE_DIR}/gl/gl.cpp
     ${SOURCE_DIR}/gl/ebo.cpp
     ${SOURCE_DIR}/gl/shader.cpp
     ${SOURCE_DIR}/gl/texture_cube.cpp
@@ -37,6 +36,7 @@ set(
 
     ${SOURCE_DIR}/utils/primitives_mesh.cpp
     ${SOURCE_DIR}/utils/primitives_gmesh.cpp
+    ${SOURCE_DIR}/utils/shaders.cpp
     ${SOURCE_DIR}/utils/skybox.cpp
 
     ${SOURCE_DIR}/camera.cpp

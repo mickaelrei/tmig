@@ -11,11 +11,20 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform vec3 viewPos;
+
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos, 1.0f);
-
     texCoord = aTexCoord;
     normal = transpose(inverse(mat3(model))) * aNormal;
     fragPos = vec3(model * vec4(aPos, 1.0f));
+
+    vec4 viewPos = view * model * vec4(aPos, 1.0f);
+
+    // Simulate world curvature
+    // float dist = length(viewPos.xyz);
+    // float curved = viewPos.y - 0.025f * dist * dist;
+    // viewPos.y = curved;
+
+    gl_Position = projection * viewPos;
 }

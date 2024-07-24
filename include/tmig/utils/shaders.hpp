@@ -6,16 +6,16 @@
 
 namespace tmig {
 
-namespace gl {
+namespace utils {
 
 /// @brief Returns the default skybox shader
 /// @return Default skybox shader
-Shader skyboxShader();
+gl::Shader skyboxShader();
 
 /// @brief Returns the default entity shader
 /// @return Default entity shader
-Shader entityShader();
+gl::Shader entityShader();
 
-} // namespace gl
+} // namespace utils
 
 } // namespace tmig

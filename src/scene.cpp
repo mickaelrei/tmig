@@ -1,4 +1,4 @@
-#include "tmig/gl/gl.hpp"
+#include "tmig/utils/shaders.hpp"
 #include "tmig/scene.hpp"
 
 namespace tmig {
@@ -58,7 +58,7 @@ void Scene::render() const
 {
     // Render skybox first
     if (renderSkybox) {
-        skybox.draw(gl::skyboxShader());
+        skybox.draw(utils::skyboxShader());
     }
 
     // Draw all entities

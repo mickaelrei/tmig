@@ -1,25 +1,25 @@
-#include "tmig/gl/gl.hpp"
+#include "tmig/utils/shaders.hpp"
 
 namespace tmig {
 
-namespace gl {
+namespace utils {
 
-Shader skyboxShader() {
-    static Shader shader{
+gl::Shader skyboxShader() {
+    static gl::Shader shader{
         "resources/shaders/skybox_vert_shader.glsl",
         "resources/shaders/skybox_frag_shader.glsl"
     };
     return shader;
 }
 
-Shader entityShader() {
-    static Shader shader{
+gl::Shader entityShader() {
+    static gl::Shader shader{
         "resources/shaders/entity_vert_shader.glsl",
         "resources/shaders/entity_frag_shader.glsl"
     };
     return shader;
 }
 
-} // namespace gl
+} // namespace utils
 
 } // namespace tmig

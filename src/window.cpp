@@ -6,7 +6,7 @@
 
 #include "tmig/init.hpp"
 #include "tmig/window.hpp"
-#include "tmig/gl/gl.hpp"
+#include "tmig/utils/shaders.hpp"
 #include "tmig/gl/shader.hpp"
 #include "tmig/entity.hpp"
 #include "tmig/utils/skybox.hpp"
@@ -252,13 +252,13 @@ void Window::start()
             );
 
             auto view = cam.getViewMatrix();
-            gl::skyboxShader().setMat4("view", glm::mat4{glm::mat3{view}});
-            gl::entityShader().setMat4("view", view);
+            utils::skyboxShader().setMat4("view", glm::mat4{glm::mat3{view}});
+            utils::entityShader().setMat4("view", view);
 
-            gl::skyboxShader().setMat4("projection", projection);
-            gl::entityShader().setMat4("projection", projection);
+            utils::skyboxShader().setMat4("projection", projection);
+            utils::entityShader().setMat4("projection", projection);
 
-            gl::entityShader().setVec3("viewPos", currentScene->camera.pos);
+            utils::entityShader().setVec3("viewPos", currentScene->camera.pos);
 
             //------------------------------------------------------
             //------------------------------------------------------
