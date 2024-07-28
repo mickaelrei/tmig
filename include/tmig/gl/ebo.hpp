@@ -2,20 +2,24 @@
 
 #include <cstddef>
 #include <vector>
+#include <memory>
+
+#include "tmig/gl/gl_object.hpp"
 
 namespace tmig {
 
 namespace gl {
 
 /// @brief OpenGL Element Buffer Object (EBO) wrapper class
-class EBO {
+class EBO : public GLObject {
 public:
     /// @brief Default constructor (does nothing)
     EBO() = default;
 
-    /// @brief Constructor
+    /// @brief Creates an instance of EBO
     /// @param indices list of indices/elements
-    EBO(const std::vector<unsigned int> &indices);
+    /// @return Shared pointer to new EBO
+    static std::shared_ptr<EBO> create(const std::vector<unsigned int> &indices);
 
     /// @brief Set buffer data
     /// @param size buffer size
@@ -29,11 +33,12 @@ public:
     void unbind() const;
 
     /// @brief Destroy object
-    void destroy() const;
+    void destroy() override;
 
 private:
-    /// @brief OpenGL object identifier
-    unsigned int id = 0;
+    /// @brief Constructor
+    /// @param indices list of indices/elements
+    EBO(const std::vector<unsigned int> &indices);
 };
 
 } // namespace gl

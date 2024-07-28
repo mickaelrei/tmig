@@ -10,6 +10,24 @@ namespace tmig {
 
 namespace gl {
 
+std::shared_ptr<TextureCube> TextureCube::create(
+    const std::string &rightPath,
+    const std::string &leftPath,
+    const std::string &topPath,
+    const std::string &bottomPath,
+    const std::string &frontPath,
+    const std::string &backPath
+) {
+    return std::shared_ptr<TextureCube>{new TextureCube{
+        rightPath,
+        leftPath,
+        topPath,
+        bottomPath,
+        frontPath,
+        backPath
+    }, Deleter{}};
+}
+
 TextureCube::TextureCube(
     const std::string &rightPath,
     const std::string &leftPath,
@@ -27,8 +45,9 @@ TextureCube::TextureCube(
     };
 
     // Generate texture
-    glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+    glGenTextures(1, &_id);
+    printf("Created texture cube id %d\n", _id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 
     // Load images
     int width, height, nrChannels;
@@ -65,7 +84,7 @@ TextureCube::TextureCube(
 
 void TextureCube::bind() const
 {
-    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 }
 
 void TextureCube::unbind() const
@@ -73,9 +92,10 @@ void TextureCube::unbind() const
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void TextureCube::destroy() const
+void TextureCube::destroy()
 {
-    glDeleteTextures(1, &id);
+    printf("destroy texture cube id %d\n", _id);
+    glDeleteTextures(1, &_id);
 }
 
 } // namespace gl

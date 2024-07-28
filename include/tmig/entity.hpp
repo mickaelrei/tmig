@@ -20,11 +20,8 @@ public:
     /// @param textures optional list of textures
     Entity(
         const GMesh &gmesh,
-        const std::vector<gl::Texture> &textures = {}
+        const std::vector<std::shared_ptr<gl::Texture>> &textures = {}
     );
-
-    /// @brief Destroy resources related to this entity
-    void destroy();
 
     /// @brief Get current position
     /// @return vec3 for entity position
@@ -94,7 +91,7 @@ protected:
     glm::mat4 _modelMatrix;
 
     /// @brief List of textures
-    std::vector<gl::Texture> textures;
+    std::vector<std::shared_ptr<gl::Texture>> textures;
 
     /// @brief Updates cached model matrix
     void updateModelMatrix();

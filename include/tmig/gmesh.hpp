@@ -19,13 +19,13 @@ struct GMesh : public Mesh {
     GMesh(const Mesh &mesh);
 
     /// @brief GMesh VAO
-    gl::VAO vao;
+    std::shared_ptr<gl::VAO> vao = nullptr;
 
     /// @brief GMesh VBO
-    gl::VBO vbo;
+    std::shared_ptr<gl::VBO> vbo = nullptr;
 
     /// @brief GMesh EBO
-    gl::EBO ebo;
+    std::shared_ptr<gl::EBO> ebo = nullptr;
 
     /// @brief Method to setup OpenGL objects
     void setup();

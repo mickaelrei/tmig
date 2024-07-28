@@ -9,6 +9,10 @@ namespace tmig {
 
 namespace gl {
 
+std::shared_ptr<Texture> Texture::create(const std::string &path) {
+    return std::shared_ptr<Texture>{new Texture{path}, Deleter{}};
+}
+
 Texture::Texture(const std::string &path)
 {
     // Try loading image
@@ -39,7 +43,8 @@ Texture::Texture(const std::string &path)
     }
 
     // Everything ok, generate texture
-    glGenTextures(1, &id);
+    glGenTextures(1, &_id);
+    printf("Created texture id %d\n", _id);
 
     // Bind texture and set
     bind();
@@ -66,7 +71,7 @@ void Texture::activate(const unsigned int unit) const
 
 void Texture::bind() const
 {
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTexture(GL_TEXTURE_2D, _id);
 }
 
 void Texture::unbind() const
@@ -74,9 +79,10 @@ void Texture::unbind() const
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::destroy() const
+void Texture::destroy()
 {
-    glDeleteTextures(1, &id);
+    printf("destroy texture id %d\n", _id);
+    glDeleteTextures(1, &_id);
 }
 
 } // namespace gl

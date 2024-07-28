@@ -58,7 +58,7 @@ void Scene::render() const
 {
     // Render skybox first
     if (renderSkybox) {
-        skybox.draw(utils::skyboxShader());
+        skybox.draw(*utils::skyboxShader());
     }
 
     // Draw all entities

@@ -1,16 +1,24 @@
 #pragma once
 
+#include <memory>
+
 #include "tmig/gl/vbo.hpp"
+
+#include "tmig/gl/gl_object.hpp"
 
 namespace tmig {
 
 namespace gl {
 
 /// @brief OpenGL Vertex Attribute Object (VAO) wrapper class
-class VAO {
+class VAO : public GLObject {
 public:
     /// @brief Default constructor
     VAO();
+
+    /// @brief Creates a new VAO
+    /// @return Shared pointer to new VAO
+    static std::shared_ptr<VAO> create();
 
     /// @brief Set vertex attribute
     /// @param vbo VBO to bind
@@ -35,11 +43,7 @@ public:
     void unbind() const;
 
     /// @brief Destroy object
-    void destroy() const;
-
-private:
-    /// @brief OpenGL object identifier
-    unsigned int id = 0;
+    void destroy() override;
 };
 
 } // namespace gl

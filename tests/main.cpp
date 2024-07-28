@@ -35,17 +35,17 @@ void App::setup() {
     // Create scene testing multiple lights
     lightsScene = std::make_shared<tmig::Scene>();
     lightsScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
-    lightsScene->setShader(utils::entityShader());
-    lightsScene->skybox = utils::Skybox{gl::TextureCube{
+    lightsScene->setShader(*utils::entityShader());
+    lightsScene->skybox = utils::Skybox{gl::TextureCube::create(
         "resources/textures/skybox/right.jpg",
         "resources/textures/skybox/left.jpg",
         "resources/textures/skybox/top.jpg",
         "resources/textures/skybox/bottom.jpg",
         "resources/textures/skybox/front.jpg",
         "resources/textures/skybox/back.jpg"
-    }};
+    )};
 
-    gl::Texture crateTexture{"resources/textures/container.jpg"};
+    auto crateTexture = gl::Texture::create("resources/textures/container.jpg");
 
     // Create entities to scene
     {
@@ -155,7 +155,7 @@ void App::setup() {
     // Create scene testing spotlight as a flashlight
     flashlightScene = std::make_shared<tmig::Scene>();
     flashlightScene->camera.pos = glm::vec3{0.0f, 0.0f, 2.0f};
-    flashlightScene->setShader(utils::entityShader());
+    flashlightScene->setShader(*utils::entityShader());
     flashlightScene->renderSkybox = false;
 
     flashlight = std::make_shared<SpotLight>(
@@ -193,7 +193,7 @@ void App::setup() {
     };
 
     for (size_t i = 0; i < 6; ++i) {
-        auto box = std::make_shared<Entity>(utils::boxGMesh(), std::vector<gl::Texture>{crateTexture});
+        auto box = std::make_shared<Entity>(utils::boxGMesh(), std::vector<std::shared_ptr<gl::Texture>>{crateTexture});
         box->setPosition(pos[i]);
         box->setRotation(rot[i]);
         flashlightScene->addEntity(box);

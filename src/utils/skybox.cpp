@@ -9,7 +9,7 @@ namespace tmig {
 
 namespace utils {
 
-Skybox::Skybox(const gl::TextureCube &textureCube)
+Skybox::Skybox(const std::shared_ptr<gl::TextureCube> &textureCube)
     : Entity::Entity{boxGMesh()},
       textureCube{textureCube}
 {
@@ -33,12 +33,12 @@ void Skybox::draw(const gl::Shader& shader) const
     // Bind shader and VAO
     shader.use();
     shader.setMat4("model", _modelMatrix);
-    gmesh.vao.bind();
-    textureCube.bind();
+    gmesh.vao->bind();
+    textureCube->bind();
 
     // Draw
     glDrawElements(GL_TRIANGLES, gmesh.indices.size(), GL_UNSIGNED_INT, 0);
-    gmesh.vao.unbind();
+    gmesh.vao->unbind();
 
     // Back to defaults
     glCullFace(GL_BACK);

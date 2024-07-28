@@ -1,18 +1,23 @@
 #pragma once
 
+#include <memory>
+
+#include "tmig/gl/gl_object.hpp"
+
 namespace tmig {
 
 namespace gl {
 
 /// @brief OpenGL texture wrapper class
-class Texture {
+class Texture : public GLObject {
 public:
     /// @brief Default constructor (does nothing)
     Texture() = default;
 
-    /// @brief Constructor with path to file
+    /// @brief Creates a new Texture
     /// @param path path to image file
-    Texture(const std::string &path);
+    /// @return Shared pointer to new texture
+    static std::shared_ptr<Texture> create(const std::string &path);
 
     /// @brief Activate texture
     /// @param unit texture unit to be set to
@@ -25,11 +30,12 @@ public:
     void unbind() const;
 
     /// @brief Destroy texture
-    void destroy() const;
+    void destroy() override;
 
 private:
-    /// @brief OpenGL object identifier
-    unsigned int id = 0;
+    /// @brief Constructor with path to file
+    /// @param path path to image file
+    Texture(const std::string &path);
 };
 
 } // namespace gl

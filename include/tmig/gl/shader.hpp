@@ -1,29 +1,36 @@
 #pragma once
 
+#include <string>
+#include <memory>
+
 #include <glm/glm.hpp>
 
-#include <string>
+#include "tmig/gl/gl_object.hpp"
 
 namespace tmig {
 
 namespace gl {
 
 /// @brief OpenGL shader wrapper class
-class Shader {
+class Shader : public GLObject {
 public:
     /// @brief Default constructor (does nothing)
     Shader() = default;
 
-    /// @brief Constructor with file paths
+    /// @brief Creates a new shader
     /// @param vertexPath path to vertex shader file
     /// @param fragmentPath path to frament shader file
-    Shader(const std::string &vertexPath, const std::string &fragmentPath);
+    /// @return Shared pointer to new shader
+    static std::shared_ptr<Shader> create(
+        const std::string &vertexPath,
+        const std::string &fragmentPath
+    );
 
     /// @brief Use/activate shader
     void use() const;
 
     /// @brief Destroy shader
-    void destroy() const;
+    void destroy() override;
 
     /// @brief Set uniform bool in shader
     /// @param name uniform name
@@ -61,8 +68,10 @@ public:
     void setMat4(const std::string &name, const glm::mat4 &mat) const;
 
 private:
-    /// @brief OpenGL object identifier
-    unsigned int id = 0;
+    /// @brief Constructor with file paths
+    /// @param vertexPath path to vertex shader file
+    /// @param fragmentPath path to frament shader file
+    Shader(const std::string &vertexPath, const std::string &fragmentPath);
 };
 
 } // namespace gl

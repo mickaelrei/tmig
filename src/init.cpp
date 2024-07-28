@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 #include "tmig/init.hpp"
-#include "tmig/utils/shaders.hpp"
 
 // Whether GLFW is initialized
 static bool _initializedGLFW = false;
@@ -99,7 +98,6 @@ void initDefaults()
     if (_initializedDefaults) return;
 
     // Initialize defaults
-    // gl::init();
 
     _initializedDefaults = true;
 }

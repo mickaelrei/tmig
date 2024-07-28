@@ -6,12 +6,9 @@
 
 namespace tmig {
 
-Entity::Entity(const GMesh &gmesh, const std::vector<gl::Texture> &textures)
+Entity::Entity(const GMesh &gmesh, const std::vector<std::shared_ptr<gl::Texture>> &textures)
     : gmesh{gmesh},
       textures{textures} {}
-
-void Entity::destroy() {
-}
 
 glm::vec3 Entity::getPosition() const {
     return _position;
@@ -74,20 +71,20 @@ void Entity::draw(const gl::Shader &shader) const {
     shader.use();
     shader.setMat4("model", _modelMatrix);
     shader.setVec4("meshColor", _color);
-    gmesh.vao.bind();
+    gmesh.vao->bind();
 
     // Set textures
     int numTextures = (int)std::min(maxTextures, textures.size());
     for (int i = 0; i < numTextures; ++i) {
-        textures[i].activate(i);
-        textures[i].bind();
+        textures[i]->activate(i);
+        textures[i]->bind();
         shader.setInt("textures[" + std::to_string(i) + "]", i);
     }
     shader.setInt("numTextures", numTextures);
 
     // Draw
     glDrawElements(GL_TRIANGLES, gmesh.indices.size(), GL_UNSIGNED_INT, 0);
-    gmesh.vao.unbind();
+    gmesh.vao->unbind();
 }
 
 } // namespace tmig

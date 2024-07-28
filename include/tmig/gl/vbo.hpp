@@ -1,23 +1,25 @@
 #pragma once
 
 #include <vector>
-#include <concepts>
+#include <memory>
 
 #include "tmig/structs.hpp"
+#include "tmig/gl/gl_object.hpp"
 
 namespace tmig {
 
 namespace gl {
 
 /// @brief OpenGL Vertex Buffer Object (VBO) wrapper class
-class VBO {
+class VBO : public GLObject {
 public:
     /// @brief Default constructor (does nothing)
     VBO() = default;
 
-    /// @brief Constructor
+    /// @brief Creates a new VBO
     /// @param vertices list of vertices
-    VBO(const std::vector<Vertex> &vertices);
+    /// @return Shared pointer to new VBO
+    static std::shared_ptr<VBO> create(const std::vector<Vertex> &vertices);
 
     /// @brief Set buffer data
     /// @param size buffer size
@@ -31,11 +33,12 @@ public:
     void unbind() const;
 
     /// @brief Destroy object
-    void destroy() const;
+    void destroy() override;
 
 private:
-    /// @brief OpenGL object identifier
-    unsigned int id = 0;
+    /// @brief Constructor
+    /// @param vertices list of vertices
+    VBO(const std::vector<Vertex> &vertices);
 };
 
 } // namespace gl

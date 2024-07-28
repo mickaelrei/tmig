@@ -10,11 +10,11 @@ namespace utils {
 
 /// @brief Returns the default skybox shader
 /// @return Default skybox shader
-gl::Shader skyboxShader();
+std::shared_ptr<gl::Shader> skyboxShader();
 
 /// @brief Returns the default entity shader
 /// @return Default entity shader
-gl::Shader entityShader();
+std::shared_ptr<gl::Shader> entityShader();
 
 } // namespace utils
 

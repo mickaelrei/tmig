@@ -10,6 +10,13 @@ namespace tmig {
 
 namespace gl {
 
+ std::shared_ptr<Shader> Shader::create(
+    const std::string &vertexPath,
+    const std::string &fragmentPath
+) {
+    return std::shared_ptr<Shader>{new Shader{vertexPath, fragmentPath}, Deleter{}};
+}
+
 Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath)
 {
     // Retrieve the vertex/fragment source code from filePath
@@ -79,15 +86,17 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     };
 
     // Shader Program
-    id = glCreateProgram();
-    glAttachShader(id, vertex);
-    glAttachShader(id, fragment);
-    glLinkProgram(id);
+    _id = glCreateProgram();
+    printf("Created shader id %d\n", _id);
+
+    glAttachShader(_id, vertex);
+    glAttachShader(_id, fragment);
+    glLinkProgram(_id);
     // Print linking errors if any
-    glGetProgramiv(id, GL_LINK_STATUS, &success);
+    glGetProgramiv(_id, GL_LINK_STATUS, &success);
     if (!success)
     {
-        glGetProgramInfoLog(id, 512, NULL, infoLog);
+        glGetProgramInfoLog(_id, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
             << infoLog << "\n";
     }
@@ -99,54 +108,55 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
 
 void Shader::use() const
 {
-    glUseProgram(id);
+    glUseProgram(_id);
 }
 
-void Shader::destroy() const
+void Shader::destroy()
 {
-    glDeleteProgram(id);
+    printf("destroy shader id %d\n", _id);
+    glDeleteProgram(_id);
 }
 
 void Shader::setBool(const std::string &name, const bool value) const
 {
     use();
-    glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value);
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value);
 }
 
 void Shader::setInt(const std::string &name, const int value) const
 {
     use();
-    glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), value);
 }
 
 void Shader::setFloat(const std::string &name, const float value) const
 {
     use();
-    glUniform1f(glGetUniformLocation(id, name.c_str()), value);
+    glUniform1f(glGetUniformLocation(_id, name.c_str()), value);
 }
 
 void Shader::setVec2(const std::string &name, const glm::vec2 &v) const
 {
     use();
-    glUniform2f(glGetUniformLocation(id, name.c_str()), v.x, v.y);
+    glUniform2f(glGetUniformLocation(_id, name.c_str()), v.x, v.y);
 }
 
 void Shader::setVec3(const std::string &name, const glm::vec3 v) const
 {
     use();
-    glUniform3f(glGetUniformLocation(id, name.c_str()), v.x, v.y, v.z);
+    glUniform3f(glGetUniformLocation(_id, name.c_str()), v.x, v.y, v.z);
 }
 
 void Shader::setVec4(const std::string &name, const glm::vec4 &v) const
 {
     use();
-    glUniform4f(glGetUniformLocation(id, name.c_str()), v.x, v.y, v.z, v.w);
+    glUniform4f(glGetUniformLocation(_id, name.c_str()), v.x, v.y, v.z, v.w);
 }
 
 void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
 {
     use();
-    glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 } // namespace gl

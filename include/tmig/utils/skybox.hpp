@@ -15,7 +15,7 @@ public:
 
     /// @brief Constructor
     /// @param textureCube texture cube to be used as skybox
-    Skybox(const gl::TextureCube &textureCube);
+    Skybox(const std::shared_ptr<gl::TextureCube> &textureCube);
 
     /// @brief Draw the skybox
     /// @param shader scene shader
@@ -23,7 +23,7 @@ public:
 
 private:
     /// @brief Skybox texture cube
-    gl::TextureCube textureCube;
+    std::shared_ptr<gl::TextureCube> textureCube;
 };
 
 } // namespace utils
