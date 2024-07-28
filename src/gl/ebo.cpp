@@ -2,6 +2,7 @@
 
 #include "glad/glad.h"
 
+#include "tmig/utils.hpp"
 #include "tmig/gl/ebo.hpp"
 
 namespace tmig {
@@ -15,7 +16,7 @@ std::shared_ptr<EBO> EBO::create(const std::vector<unsigned int> &indices) {
 EBO::EBO(const std::vector<unsigned int> &indices)
 {
     glGenBuffers(1, &_id);
-    printf("Created EBO id %d\n", _id);
+    debug_print("Created EBO: %d\n", _id);
     bufferData(indices.size() * sizeof(unsigned int), indices.data());
 }
 
@@ -38,8 +39,8 @@ void EBO::unbind() const
 
 void EBO::destroy()
 {
-    printf("destroy EBO id %d\n", _id);
     glDeleteBuffers(1, &_id);
+    debug_print("Destroyed EBO: %d\n", _id);
 }
 
 } // namespace gl

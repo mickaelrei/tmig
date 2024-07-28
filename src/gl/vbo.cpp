@@ -2,6 +2,7 @@
 
 #include "glad/glad.h"
 
+#include "tmig/utils.hpp"
 #include "tmig/gl/vbo.hpp"
 
 namespace tmig {
@@ -15,7 +16,7 @@ std::shared_ptr<VBO> VBO::create(const std::vector<Vertex> &vertices) {
 VBO::VBO(const std::vector<Vertex> &vertices)
 {
     glGenBuffers(1, &_id);
-    printf("Created VBO id %d\n", _id);
+    debug_print("Created VBO: %d\n", _id);
     bufferData(vertices.size() * sizeof(Vertex), vertices.data());
 }
 
@@ -38,7 +39,7 @@ void VBO::unbind() const
 
 void VBO::destroy()
 {
-    printf("destroy VBO id %d\n", _id);
+    debug_print("Destroyed VBO: %d\n", _id);
     glDeleteVertexArrays(1, &_id);
 }
 

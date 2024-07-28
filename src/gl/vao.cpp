@@ -2,6 +2,7 @@
 
 #include "glad/glad.h"
 
+#include "tmig/utils.hpp"
 #include "tmig/gl/vao.hpp"
 
 namespace tmig {
@@ -15,7 +16,7 @@ std::shared_ptr<VAO> VAO::create() {
 VAO::VAO()
 {
     glGenVertexArrays(1, &_id);
-    printf("Created VAO id %d\n", _id);
+    debug_print("Created VAO: %d\n", _id);
 }
 
 void VAO::vertexAttrib(
@@ -47,7 +48,7 @@ void VAO::unbind() const
 
 void VAO::destroy()
 {
-    printf("destroy VAO id %d\n", _id);
+    debug_print("Destroyed VAO: %d\n", _id);
     glDeleteVertexArrays(1, &_id);
 }
 

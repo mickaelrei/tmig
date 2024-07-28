@@ -10,9 +10,19 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 # Build type
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${FLAGS} -g3 -fsanitize=address,undefined")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FLAGS} -O3")
+
+# Debug option
+option(DEBUG "Enable debug mode" OFF)
+if (DEBUG)
+    message("DEBUG MODE ON")
+    add_definitions(-DDEBUG)
+else()
+    message("DEBUG MODE OFF")
+endif()
 
 # Find packages
 set(OpenGL_GL_PREFERENCE GLVND)

@@ -3,6 +3,7 @@
 #include "glad/glad.h"
 #include "stb/stb_image.h"
 
+#include "tmig/utils.hpp"
 #include "tmig/gl/texture.hpp"
 
 namespace tmig {
@@ -44,7 +45,7 @@ Texture::Texture(const std::string &path)
 
     // Everything ok, generate texture
     glGenTextures(1, &_id);
-    printf("Created texture id %d\n", _id);
+    debug_print("Created texture: %d\n", _id);
 
     // Bind texture and set
     bind();
@@ -81,7 +82,7 @@ void Texture::unbind() const
 
 void Texture::destroy()
 {
-    printf("destroy texture id %d\n", _id);
+    debug_print("Destroyed texture: %d\n", _id);
     glDeleteTextures(1, &_id);
 }
 

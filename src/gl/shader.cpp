@@ -4,6 +4,7 @@
 
 #include "glad/glad.h"
 
+#include "tmig/utils.hpp"
 #include "tmig/gl/shader.hpp"
 
 namespace tmig {
@@ -87,7 +88,7 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
 
     // Shader Program
     _id = glCreateProgram();
-    printf("Created shader id %d\n", _id);
+    debug_print("Created shader: %d\n", _id);
 
     glAttachShader(_id, vertex);
     glAttachShader(_id, fragment);
@@ -113,7 +114,7 @@ void Shader::use() const
 
 void Shader::destroy()
 {
-    printf("destroy shader id %d\n", _id);
+    debug_print("Destroyed shader: %d\n", _id);
     glDeleteProgram(_id);
 }
 

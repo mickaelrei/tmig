@@ -4,6 +4,7 @@
 #include "glad/glad.h"
 #include "stb/stb_image.h"
 
+#include "tmig/utils.hpp"
 #include "tmig/gl/texture_cube.hpp"
 
 namespace tmig {
@@ -46,7 +47,7 @@ TextureCube::TextureCube(
 
     // Generate texture
     glGenTextures(1, &_id);
-    printf("Created texture cube id %d\n", _id);
+    debug_print("Created texture cube: %d\n", _id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, _id);
 
     // Load images
@@ -94,7 +95,7 @@ void TextureCube::unbind() const
 
 void TextureCube::destroy()
 {
-    printf("destroy texture cube id %d\n", _id);
+    debug_print("Destroyed texture cube: %d\n", _id);
     glDeleteTextures(1, &_id);
 }
 
