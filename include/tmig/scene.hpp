@@ -23,7 +23,7 @@ public:
 
     /// @brief Set shader for scene rendering
     /// @param shader shader to be used
-    void setShader(const gl::Shader &shader);
+    void setShader(const std::shared_ptr<gl::Shader> &shader);
 
     /// @brief Update scene (could be useful for an inherited scene class with special behavior)
     /// @param dt delta time
@@ -52,7 +52,7 @@ public:
 
 protected:
     /// @brief Current shader for rendering the scene
-    gl::Shader shader;
+    std::shared_ptr<gl::Shader> shader;
 };
 
 } // namespace tmig

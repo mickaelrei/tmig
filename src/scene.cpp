@@ -13,12 +13,15 @@ void Scene::addLight(const std::shared_ptr<Light> &light)
     lights.push_back(light);
 }
 
-void Scene::setShader(const gl::Shader &shader) {
+void Scene::setShader(const std::shared_ptr<gl::Shader> &shader) {
     Scene::shader = shader;
 }
 
 void Scene::update(float dt) {
     (void)dt;
+
+    // Only update lights if shader is set
+    if (shader == nullptr) return;
 
     int numPointLights = 0;
     int numDirectionalLights = 0;
@@ -42,16 +45,16 @@ void Scene::update(float dt) {
                 continue;
         }
 
-        light->bind(shader, prefix);
+        light->bind(*shader, prefix);
     }
 
-    shader.setInt("numPointLights", numPointLights);
-    shader.setInt("numDirectionalLights", numDirectionalLights);
-    shader.setInt("numSpotLights", numSpotLights);
+    shader->setInt("numPointLights", numPointLights);
+    shader->setInt("numDirectionalLights", numDirectionalLights);
+    shader->setInt("numSpotLights", numSpotLights);
 
     // TODO: This could be better encapsulated as a config
-    shader.setFloat("ambientStrength", 0.2f);
-    shader.setFloat("specularStrength", 0.5f);
+    shader->setFloat("ambientStrength", 0.2f);
+    shader->setFloat("specularStrength", 0.5f);
 }
 
 void Scene::render() const
@@ -62,9 +65,11 @@ void Scene::render() const
     }
 
     // Draw all entities
-    for (const auto &entity : entities)
-    {
-       entity->draw(shader);
+    if (shader != nullptr) {
+        for (const auto &entity : entities)
+        {
+        entity->draw(*shader);
+        }
     }
 }
 

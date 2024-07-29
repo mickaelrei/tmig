@@ -60,19 +60,23 @@ void Window::setSize(const int &width, const int &height) const
     glfwSetWindowSize(window, width, height);
 }
 
-void Window::getSize(int &width, int &height) const
-{
-    glfwGetWindowSize(window, &width, &height);
+glm::ivec2 Window::getSize() const {
+    glm::ivec2 size;
+    glfwGetWindowSize(window, &size.x, &size.y);
+    return size;
+}
+
+glm::vec2 Window::getCursorPos() const {
+    glm::dvec2 pos;
+    glfwGetCursorPos(window, &pos.x, &pos.y);
+    return glm::vec2{pos};
 }
 
 float Window::elapsedTime() const {
     return (float)glfwGetTime();
 }
 
-void Window::setup()
-{
-    
-}
+void Window::setup() {}
 
 void Window::update(float dt)
 {
@@ -145,32 +149,31 @@ void Window::setShouldClose(bool shouldClose) const {
 }
 
 Window::KeyState Window::getKeyState(KeyCode key) const {
-    // Try to find state in map
-    auto iterator = keyboardState.find(key);
-    if (iterator != keyboardState.end()) {
-        return iterator->second;
-    }
-
-    // If not found, by default key is released
-    return KeyState::released;
+    auto keyInt = static_cast<int>(key);
+    return static_cast<KeyState>(glfwGetKey(window, keyInt));
 }
 
 void Window::setKeyState(KeyCode key, KeyState state) {
     keyboardState[key] = state;
 }
 
+void Window::updatePreviousKeyboardState() {
+    for (auto pair : keyboardState) {
+        keyboardPreviousState[pair.first] = pair.second;
+    }
+}
 
 bool Window::isKeyPressed(KeyCode key) {
-    auto currentState = getKeyState(key);
-    auto newState = static_cast<KeyState>(glfwGetKey(window, static_cast<int>(key)));
+    auto newState = getKeyState(key);
+    auto previousState = keyboardPreviousState[key];
     setKeyState(key, newState);
 
     // Key is pressed if it was released and got pressed now
-    return newState == KeyState::pressed && currentState == KeyState::released;
+    return newState == KeyState::pressed && previousState == KeyState::released;
 }
 
 bool Window::isKeyHeld(KeyCode key) {
-    auto newState = static_cast<KeyState>(glfwGetKey(window, static_cast<int>(key)));
+    auto newState = getKeyState(key);
     setKeyState(key, newState);
 
     // Key is held if it is pressed
@@ -178,46 +181,22 @@ bool Window::isKeyHeld(KeyCode key) {
 }
 
 bool Window::isKeyReleased(KeyCode key) {
-    auto currentState = getKeyState(key);
-    auto newState = static_cast<KeyState>(glfwGetKey(window, static_cast<int>(key)));
+    auto newState = getKeyState(key);
+    auto previousState = keyboardPreviousState[key];
     setKeyState(key, newState);
 
     // Key is released if it was pressed and got released now
-    return newState == KeyState::released && currentState == KeyState::pressed;
+    return newState == KeyState::released && previousState == KeyState::pressed;
 }
 
-void Window::start()
-{
-    // Enable OpenGL functionalities
-    {
-        // Enable blending
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_BLEND);
-
-        // Enable depth test
-        glEnable(GL_DEPTH_TEST);
-
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK); // not needed, GL_BACK is the default culled/ignored face
-    }
-
+void Window::start() {
     // Call setup before starting
     setup();
-
-    if (currentScene == nullptr) {
-        std::cout << "[WARNING]: No scene set!\n";
-    }
-
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glPointSize(5.0f);
 
     float last = (float)glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
-        //------------------------------------------------------
-        //------------------------------------------------------
         // Clear screen
-
         glm::vec4 clearColor{0.05f, 0.05f, 0.05f, 1.0f};
         if (currentScene != nullptr) {
             clearColor = currentScene->clearColor;
@@ -225,53 +204,41 @@ void Window::start()
         glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //------------------------------------------------------
-        //------------------------------------------------------
         // Calculate delta time
-
         float t = glfwGetTime();
         float dt = t - last;
         last = t;
 
+        // Call process input
         processInput(dt);
-        update(dt);
 
+        // Set projection and view matrices on default shaders
         if (currentScene != nullptr) {
-            //------------------------------------------------------
-            //------------------------------------------------------
-            // Get projection and view matrix
-
-            int width, height;
-            getSize(width, height);
-
+            auto size = getSize();
             auto &cam = currentScene->camera;
+
             projection = glm::perspective(
                 glm::radians(cam.fov),
-                (float)width / (float)height,
+                (float)size.x / (float)size.y,
                 cam.minDist, cam.maxDist
             );
 
             auto view = cam.getViewMatrix();
             utils::skyboxShader()->setMat4("view", glm::mat4{glm::mat3{view}});
-            utils::entityShader()->setMat4("view", view);
-
             utils::skyboxShader()->setMat4("projection", projection);
+
+            utils::entityShader()->setMat4("view", view);
             utils::entityShader()->setMat4("projection", projection);
-
             utils::entityShader()->setVec3("viewPos", currentScene->camera.pos);
-
-            //------------------------------------------------------
-            //------------------------------------------------------
-            // Update scene
-
-            currentScene->update(dt);
-            currentScene->render();
         }
 
-        //------------------------------------------------------
-        //------------------------------------------------------
-        // Swap buffers and poll events
+        // Call update
+        update(dt);
 
+        // Update keyboard state
+        updatePreviousKeyboardState();
+
+        // Update GLFW resources
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

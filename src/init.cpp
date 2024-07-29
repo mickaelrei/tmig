@@ -38,8 +38,6 @@ void terminate()
     }
 
     _initializedGLFW = false;
-
-    // TODO: Terminate defaults?
 }
 
 void initGLFW()

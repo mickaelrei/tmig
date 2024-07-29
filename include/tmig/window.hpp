@@ -175,9 +175,12 @@ public:
     void setSize(const int &width, const int &height) const;
 
     /// @brief Get window size
-    /// @param width output width
-    /// @param height output height
-    void getSize(int &width, int &height) const;
+    /// @return Window size vector
+    glm::ivec2 getSize() const;
+
+    /// @brief Get cursor position
+    /// @return Cursor position vector
+    glm::vec2 getCursorPos() const;
 
     /// @brief Get elapsed time since engine initialization
     /// @return Elapsed time in seconds
@@ -207,15 +210,15 @@ public:
     /// @return Whether key was released in the called frame
     bool isKeyReleased(KeyCode key);
 
-    /// @brief Setup objects, called before render loop
+    /// @brief Setup objects, called once before render loop
     virtual void setup();
 
-    /// @brief Update objects, called once each iteration of render loop
+    /// @brief Update application, called on each render update
     /// @param dt delta time
     virtual void update(float dt);
 
 protected:
-    /// @brief Process input, called once each iteration of render loop
+    /// @brief Process input, called before each render update
     /// @param dt delta time
     virtual void processInput(float dt);
 
@@ -223,6 +226,9 @@ protected:
     /// @param key key to set
     /// @param state new key state
     void setKeyState(KeyCode key, KeyState state);
+
+    /// @brief Updates previous keyboard state
+    void updatePreviousKeyboardState();
 
     /// @brief Current window title
     std::string title;
@@ -235,6 +241,9 @@ protected:
 
     /// @brief Map containing the state of each key
     std::unordered_map<KeyCode, KeyState> keyboardState;
+
+    /// @brief Map containing previous state of each key
+    std::unordered_map<KeyCode, KeyState> keyboardPreviousState;
 
     /// @brief GLFW window object
     GLFWwindow *window;

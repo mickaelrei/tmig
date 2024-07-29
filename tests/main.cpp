@@ -24,11 +24,24 @@ private:
     std::shared_ptr<tmig::Entity> rotatingEntity;
 
     bool flashlightFollowing = true;
+    unsigned int polygonMode = GL_FILL;
 };
 
 void App::setup() {
-    printf("my setup called\n");
     using namespace tmig;
+
+    // TODO: These should be wrapped in methods/enums to avoid direct access
+    {
+        // Enable blending
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+
+        // Enable depth test
+        glEnable(GL_DEPTH_TEST);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK); // not needed, GL_BACK is the default culled/ignored face
+    }
 
     // ----------------------------------------------------------
     // ----------------------------------------------------------
@@ -232,6 +245,10 @@ void App::update(float dt) {
         flashlight->pos = currentScene->camera.pos;
         flashlight->dir = currentScene->camera.getForward();
     }
+
+    // Update current scene
+    currentScene->update(dt);
+    currentScene->render();
 }
 
 void App::processInput(float dt) {
@@ -248,6 +265,20 @@ void App::processInput(float dt) {
     }
     if (currentScene == flashlightScene && isKeyPressed(KeyCode::g)) {
         flashlightFollowing = !flashlightFollowing;
+    }
+
+    // Switch polygon mode when pressing G
+    if (isKeyPressed(KeyCode::g)) {
+        if (polygonMode == GL_LINE) {
+            polygonMode = GL_FILL;
+        } else if (polygonMode == GL_FILL) {
+            polygonMode = GL_POINT;
+        } else {
+            polygonMode = GL_LINE;
+        }
+
+        // TODO: This should be wrapped in another method/enum
+        glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
     }
 }
 
