@@ -85,7 +85,6 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/external/include
 )
 
-
 # Tests
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 

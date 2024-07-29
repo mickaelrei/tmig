@@ -48,7 +48,7 @@ void App::setup() {
     // Create scene testing multiple lights
     lightsScene = std::make_shared<tmig::Scene>();
     lightsScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
-    lightsScene->setShader(*utils::entityShader());
+    lightsScene->setShader(utils::entityShader());
     lightsScene->skybox = utils::Skybox{gl::TextureCube::create(
         "resources/textures/skybox/right.jpg",
         "resources/textures/skybox/left.jpg",
@@ -168,7 +168,7 @@ void App::setup() {
     // Create scene testing spotlight as a flashlight
     flashlightScene = std::make_shared<tmig::Scene>();
     flashlightScene->camera.pos = glm::vec3{0.0f, 0.0f, 2.0f};
-    flashlightScene->setShader(*utils::entityShader());
+    flashlightScene->setShader(utils::entityShader());
     flashlightScene->renderSkybox = false;
 
     flashlight = std::make_shared<SpotLight>(
