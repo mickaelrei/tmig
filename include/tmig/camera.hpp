@@ -58,6 +58,18 @@ public:
     /// @return vec3 for forward direction
     glm::vec3 getForward() const;
 
+    /// @brief Set new forward vector
+    /// @param forward vector to be used as forward
+    void setForward(const glm::vec3 &forward);
+
+    /// @brief Get camera current pitch
+    /// @return camera pitch
+    float getPitch() const;
+
+    /// @brief Get camera current yaw
+    /// @return camera yaw
+    float getYaw() const;
+
     /// @brief Current position
     glm::vec3 pos;
 
@@ -99,7 +111,8 @@ private:
     float yaw = -90.0f;
 
     /// @brief Update vectors after rotation changes
-    void updateVectors();
+    /// @param calculateForward whether to calculate forward vector
+    void updateVectors(bool calculateForward = true);
 };
 
 } // namespace tmig

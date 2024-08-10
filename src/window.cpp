@@ -212,23 +212,7 @@ void Window::start() {
         // Call process input
         processInput(dt);
 
-        // Set projection and view matrices on default shaders
         if (currentScene != nullptr) {
-            auto size = getSize();
-            auto &cam = currentScene->camera;
-
-            projection = glm::perspective(
-                glm::radians(cam.fov),
-                (float)size.x / (float)size.y,
-                cam.minDist, cam.maxDist
-            );
-
-            auto view = cam.getViewMatrix();
-            utils::skyboxShader()->setMat4("view", glm::mat4{glm::mat3{view}});
-            utils::skyboxShader()->setMat4("projection", projection);
-
-            utils::entityShader()->setMat4("view", view);
-            utils::entityShader()->setMat4("projection", projection);
             utils::entityShader()->setVec3("viewPos", currentScene->camera.pos);
         }
 

@@ -185,7 +185,7 @@ void main()
 
     // If texture alpha is not 100%, starting mixing with mesh color
     if (texColor.a < 1.0f) {
-        texColor = vec4(mix(texColor.rgb, meshColor.rgb, 1.0f - texColor.a), 1.0f);
+        texColor = vec4(mix(texColor.rgb, meshColor.rgb, 1.0f - texColor.a), meshColor.a);
     }
 
     // Final result

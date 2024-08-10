@@ -22,6 +22,23 @@ Mesh coneMesh();
 /// @return The torus mesh
 Mesh torusMesh();
 
+/// @brief Mesh for a quad covering the whole screen
+static const Mesh screenQuadMesh = {
+    {
+        Vertex{glm::vec3{-1.0f, -1.0f, 1.0f}, glm::vec2{0.0f, 0.0f}, glm::vec3{0.0f, 0.0f, 1.0f}},
+        Vertex{glm::vec3{ 1.0f, -1.0f, 1.0f}, glm::vec2{1.0f, 0.0f}, glm::vec3{0.0f, 0.0f, 1.0f}},
+        Vertex{glm::vec3{ 1.0f,  1.0f, 1.0f}, glm::vec2{1.0f, 1.0f}, glm::vec3{0.0f, 0.0f, 1.0f}},
+        Vertex{glm::vec3{-1.0f,  1.0f, 1.0f}, glm::vec2{0.0f, 1.0f}, glm::vec3{0.0f, 0.0f, 1.0f}},
+    },
+    {
+        // Lower-right triangle
+        0, 1, 2,
+
+        // Upper-left triangle
+        0, 2, 3,
+    }
+};
+
 /// @brief Mesh for a default box
 static const Mesh boxMesh = {
     {

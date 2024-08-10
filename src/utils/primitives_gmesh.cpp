@@ -35,6 +35,11 @@ GMesh wedgeGMesh() {
     return gmesh;
 }
 
+GMesh screenQuadGMesh() {
+    static GMesh gmesh{screenQuadMesh};
+    return gmesh;
+}
+
 } // namespace utils
 
 } // namespace tmig

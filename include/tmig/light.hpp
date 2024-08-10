@@ -40,7 +40,7 @@ public:
 protected:
     /// @brief Constructor
     /// @param pos light color
-    /// @param enabled whether light is enabled 
+    /// @param enabled whether light is enabled
     Light(const glm::vec3 &color, float strength, Type type);
 
     /// @brief Caster type

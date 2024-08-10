@@ -30,6 +30,10 @@ GMesh boxGMesh();
 /// @return The wedge gmesh
 GMesh wedgeGMesh();
 
+/// @brief Get the default screen quad mesh
+/// @return The screen quad mesh
+GMesh screenQuadGMesh();
+
 } // namespace utils
 
 } // namespace tmig

@@ -96,10 +96,18 @@ void App::setup() {
 
         movingEntity = std::make_shared<Entity>(utils::sphereGMesh());
         movingEntity->setScale(glm::vec3{0.5f});
+        movingEntity->setPosition(glm::vec3{1.0f, 0.0f, 0.0f});
+        movingEntity->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 0.5f});
+
+        auto transparentObj = std::make_shared<Entity>(utils::sphereGMesh());
+        transparentObj->setScale(glm::vec3{0.5f});
+        transparentObj->setPosition(glm::vec3{0.7f, 0.0f, 0.7f});
+        transparentObj->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 0.5f});
 
         rotatingEntity = std::make_shared<Entity>(utils::torusGMesh());
         // rotatingEntity->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
         rotatingEntity->setScale(glm::vec3{0.5f});
+        rotatingEntity->setColor(glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});
 
         lightsScene->addEntity(wallLeft);
         lightsScene->addEntity(wallRight);
@@ -107,8 +115,9 @@ void App::setup() {
         lightsScene->addEntity(wallFront);
         lightsScene->addEntity(wallBottom);
         lightsScene->addEntity(wallTop);
-        lightsScene->addEntity(movingEntity);
-        lightsScene->addEntity(rotatingEntity);
+        lightsScene->addTransparentEntity(transparentObj);
+        lightsScene->addTransparentEntity(rotatingEntity);
+        lightsScene->addTransparentEntity(movingEntity);
 
         float s = 0.75f;
         auto light1 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 0.0f}, s, glm::vec3{0.0f, 2.0f, 0.0f});
@@ -169,7 +178,15 @@ void App::setup() {
     flashlightScene = std::make_shared<tmig::Scene>();
     flashlightScene->camera.pos = glm::vec3{0.0f, 0.0f, 2.0f};
     flashlightScene->setShader(utils::entityShader());
-    flashlightScene->renderSkybox = false;
+    flashlightScene->skybox = utils::Skybox{gl::TextureCube::create(
+        "resources/textures/skybox/right.jpg",
+        "resources/textures/skybox/left.jpg",
+        "resources/textures/skybox/top.jpg",
+        "resources/textures/skybox/bottom.jpg",
+        "resources/textures/skybox/front.jpg",
+        "resources/textures/skybox/back.jpg"
+    )};
+    flashlightScene->renderSkybox = true;
 
     flashlight = std::make_shared<SpotLight>(
         glm::vec3{1.0f, 1.0f, 1.0f},
@@ -235,20 +252,47 @@ void App::update(float dt) {
         rot = glm::rotate(rot, t, glm::vec3{1.0f, 0.2f, -0.7f});
         rotatingEntity->setRotation(rot);
 
-        float s = 2.0f;
-        movingEntity->setPosition(glm::vec3{
-            std::cos(t) * s,
-            std::cos(t * 4.0f),
-            std::sin(t) * s,
-        });
+        // float s = 2.0f;
+        // movingEntity->setPosition(glm::vec3{
+        //     std::cos(t) * s,
+        //     std::cos(t * 4.0f),
+        //     std::sin(t) * s,
+        // });
     } else if (flashlightFollowing) {
         flashlight->pos = currentScene->camera.pos;
         flashlight->dir = currentScene->camera.getForward();
     }
 
-    // Update current scene
+    // Render scene normally
+    auto size = getSize();
+    currentScene->setProjection(size);
     currentScene->update(dt);
     currentScene->render();
+
+    // Render "rear-view" scene
+    // Set negative forward
+    auto &cam = currentScene->camera;
+    auto forward = cam.getForward();
+    cam.setForward(-forward);
+
+    // Set new viewport rect and clear depth buffer
+    glm::ivec2 rearviewSize{300, 150};
+    glViewport(
+        (size.x - rearviewSize.x) / 2, size.y - rearviewSize.y,
+        rearviewSize.x, rearviewSize.y
+    );
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    // Update projection
+    currentScene->setProjection(rearviewSize);
+
+    // Re-render and set forward back to normal
+    currentScene->render();
+    cam.setForward(forward);
+
+    // Set viewport and projection back to original
+    glViewport(0, 0, size.x, size.y);
+    currentScene->setProjection(size);
 }
 
 void App::processInput(float dt) {

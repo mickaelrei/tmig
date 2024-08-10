@@ -1,3 +1,5 @@
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "tmig/utils/shaders.hpp"
 #include "tmig/scene.hpp"
 
@@ -8,6 +10,11 @@ void Scene::addEntity(const std::shared_ptr<Entity> &entity)
     entities.push_back(entity);
 }
 
+void Scene::addTransparentEntity(const std::shared_ptr<Entity> &entity) {
+    transparentEntities.push_back(entity);
+}
+
+
 void Scene::addLight(const std::shared_ptr<Light> &light)
 {
     lights.push_back(light);
@@ -16,6 +23,20 @@ void Scene::addLight(const std::shared_ptr<Light> &light)
 void Scene::setShader(const std::shared_ptr<gl::Shader> &shader) {
     Scene::shader = shader;
 }
+
+void Scene::setProjection(const glm::ivec2 &viewportSize) {
+    auto projection = glm::perspective(
+        glm::radians(camera.fov),
+        (float)viewportSize.x / (float)viewportSize.y,
+        camera.minDist, camera.maxDist
+    );
+
+    utils::skyboxShader()->setMat4("projection", projection);
+    if (shader != nullptr) {
+        shader->setMat4("projection", projection);
+    }
+}
+
 
 void Scene::update(float dt) {
     (void)dt;
@@ -57,19 +78,31 @@ void Scene::update(float dt) {
     shader->setFloat("specularStrength", 0.5f);
 }
 
-void Scene::render() const
-{
+void Scene::render() const {
+    auto view = camera.getViewMatrix();
+
     // Render skybox first
     if (renderSkybox) {
-        skybox.draw(*utils::skyboxShader());
+        auto skyboxShader = utils::skyboxShader();
+        skyboxShader->setMat4("view", glm::mat4{glm::mat3{view}});
+        skybox.draw(*skyboxShader);
     }
 
     // Draw all entities
     if (shader != nullptr) {
-        for (const auto &entity : entities)
-        {
-        entity->draw(*shader);
+        shader->setMat4("view", view);
+
+        // Draw opaque entities first
+        for (const auto &entity : entities) {
+            entity->draw(*shader);
         }
+
+        // Then draw transparent entities with no depth writing
+        glDepthMask(GL_FALSE);
+        for (const auto &entity : transparentEntities) {
+            entity->draw(*shader);
+        }
+        glDepthMask(GL_TRUE);
     }
 }
 

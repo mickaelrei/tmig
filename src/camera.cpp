@@ -66,18 +66,35 @@ glm::vec3 Camera::getForward() const {
     return forward;
 }
 
-void Camera::updateVectors()
+void Camera::setForward(const glm::vec3 &forward) {
+    if (glm::length2(forward) == 0.0f) return;
+
+    Camera::forward = glm::normalize(forward);
+    updateVectors(false);
+}
+
+float Camera::getPitch() const {
+    return pitch;
+}
+
+float Camera::getYaw() const {
+    return yaw;
+}
+
+void Camera::updateVectors(bool calculateForward)
 {
-    // Update direction
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    forward = glm::normalize(front);
+    if (calculateForward) {
+        // Update direction
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        forward = glm::normalize(front);
+    }
 
     // Update other vectors
     right = glm::normalize(glm::cross(forward, worldUp));
-    up = glm::normalize(glm::cross(right, front));
+    up = glm::normalize(glm::cross(right, forward));
 
     // Update view matrix
     viewMatrix = glm::lookAt(pos, pos + forward, up);
