@@ -96,7 +96,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 # Source files
 set(
     SCENE_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/main.cpp
+    ${CMAKE_SOURCE_DIR}/tests/scene-test.cpp
 )
 
 # Adding executables for testing
