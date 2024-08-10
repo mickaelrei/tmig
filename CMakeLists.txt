@@ -44,6 +44,7 @@ set(
     ${SOURCE_DIR}/gl/vao.cpp
     ${SOURCE_DIR}/gl/vbo.cpp
 
+    ${SOURCE_DIR}/utils/grid.cpp
     ${SOURCE_DIR}/utils/primitives_mesh.cpp
     ${SOURCE_DIR}/utils/primitives_gmesh.cpp
     ${SOURCE_DIR}/utils/shaders.cpp
@@ -88,23 +89,27 @@ target_include_directories(
 # Tests
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 
+#######################################################
+#######################################################
+# Main scene test
+
 # Source files
 set(
-    TEST_SOURCE_FILES
+    SCENE_TEST_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/tests/main.cpp
 )
 
 # Adding executables for testing
-add_executable(tests ${TEST_SOURCE_FILES})
+add_executable(scene-test ${SCENE_TEST_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    tests
+    scene-test
     PRIVATE
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 target_link_libraries(
-    tests
+    scene-test
     PRIVATE
     ${PROJECT_NAME}
     ${OPENGL_LIBRARIES} glfw
@@ -112,7 +117,8 @@ target_link_libraries(
 
 # Header files
 target_include_directories(
-    tests
+    scene-test
     PRIVATE
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
 )
