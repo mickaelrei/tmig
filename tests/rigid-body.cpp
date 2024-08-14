@@ -35,8 +35,6 @@ public:
     }
 
     void update(float dt) {
-        (void)dt;
-
         // Update auxiliary variables
         R = glm::mat3{q};
         iInv = R * iBodyInv * glm::transpose(R);
@@ -49,9 +47,6 @@ public:
         // Update rotation
         glm::quat qdt = 0.5f * (omega * q);
         q = glm::normalize(q * qdt);
-        // glm::mat4 Rdot = star(omega) * R;
-        // // Reset W component to avoid adding it to rotation
-        // Rdot[3][3] = 0.0f;
         setRotation(glm::mat4{q});
 
         // Update linear and angular momentum
