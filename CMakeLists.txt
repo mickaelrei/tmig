@@ -122,3 +122,37 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
 )
+
+#######################################################
+#######################################################
+# Rigid Body Simulation
+
+# Source files
+set(
+    RIGIDBODY_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/rigid-body.cpp
+)
+
+# Adding executables for testing
+add_executable(rigid-body ${RIGIDBODY_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    rigid-body
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    rigid-body
+    PRIVATE
+    ${PROJECT_NAME}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    rigid-body
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+)

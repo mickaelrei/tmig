@@ -51,10 +51,10 @@ void Camera::moveDown(float dt)
     pos -= up * moveSpeed * dt;
 }
 
-void Camera::rotate(float rx, float ry, float dt)
+void Camera::rotate(float rx, float ry)
 {
-    yaw += ry * rotationSpeed * dt;
-    pitch += rx * rotationSpeed * dt;
+    yaw += ry * rotationSpeed;
+    pitch += rx * rotationSpeed;
 
     // Clamp to avoid gimball lock
     pitch = glm::clamp(pitch, -89.0f, 89.0f);

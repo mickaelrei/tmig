@@ -41,27 +41,27 @@ public:
 
     /// @brief Set entity position
     /// @param position new position
-    void setPosition(const glm::vec3 &position);
+    virtual void setPosition(const glm::vec3 &position);
 
     /// @brief Set entity rotation
     /// @param rotation new rotation
-    void setRotation(const glm::mat4 &rotation);
+    virtual void setRotation(const glm::mat4 &rotation);
 
     /// @brief Set entity scale
     /// @param scale new scale
-    void setScale(const glm::vec3 &scale);
+    virtual void setScale(const glm::vec3 &scale);
 
     /// @brief Set entity color
     /// @param color new color
-    void setColor(const glm::vec4 &color);
+    virtual void setColor(const glm::vec4 &color);
 
     /// @brief Apply position offset on entity
     /// @param offset position to offset
-    void translate(const glm::vec3 &offset);
+    virtual void translate(const glm::vec3 &offset);
 
     /// @brief Apply rotation on entity
     /// @param rotation rotation to be applied
-    void rotate(const glm::mat4 &rotation);
+    virtual void rotate(const glm::mat4 &rotation);
 
     /// @brief Update entity (this is useful for inherited classes with special behavior)
     /// @param dt delta time
@@ -88,7 +88,7 @@ protected:
     glm::vec4 _color = glm::vec4{1.0f};
 
     /// @brief Model matrix for caching
-    glm::mat4 _modelMatrix;
+    glm::mat4 _modelMatrix = glm::mat4{1.0f};
 
     /// @brief List of textures
     std::vector<std::shared_ptr<gl::Texture>> textures;

@@ -49,10 +49,9 @@ public:
     void moveDown(float dt);
 
     /// @brief Rotate camera
-    /// @param rx rotation offset on X axis
-    /// @param ry rotation offset on Y axis
-    /// @param dt delta time
-    void rotate(float rx, float ry, float dt);
+    /// @param rx rotation offset on X axis in degrees
+    /// @param ry rotation offset on Y axis in degrees
+    void rotate(float rx, float ry);
 
     /// @brief Get camera's forward direction vector
     /// @return vec3 for forward direction

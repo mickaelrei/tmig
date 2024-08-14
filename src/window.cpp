@@ -141,7 +141,7 @@ void Window::processInput(float dt)
         rx -= 1.0f;
     }
 
-    cam.rotate(rx, ry, dt);
+    cam.rotate(rx * dt, ry * dt);
 }
 
 void Window::setShouldClose(bool shouldClose) const {
