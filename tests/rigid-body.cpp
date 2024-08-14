@@ -32,6 +32,20 @@ public:
     RigidBody(const glm::vec3 &scale)
         : Entity::Entity{tmig::utils::boxGMesh()} {
         setScale(scale);
+
+        // Create rotation axes entities
+        auto s = 0.1f;
+        axisX = std::make_shared<Entity>(tmig::utils::boxGMesh());
+        axisX->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+        axisX->setScale(glm::vec3{1.0f, s, s});
+
+        axisY = std::make_shared<Entity>(tmig::utils::boxGMesh());
+        axisY->setColor(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+        axisY->setScale(glm::vec3{s, 1.0f, s});
+
+        axisZ = std::make_shared<Entity>(tmig::utils::boxGMesh());
+        axisZ->setColor(glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
+        axisZ->setScale(glm::vec3{s, s, 1.0f});
     }
 
     void update(float dt) {
@@ -50,16 +64,16 @@ public:
         setRotation(glm::mat4{q});
 
         // Update linear and angular momentum
-        P += force * dt;
-        L += torque * dt;
+        P += totalForce * dt;
+        L += totalTorque * dt;
 
         // Apply drag to reduce momentum
         P *= .99f;
         L *= .99f;
 
         // Reset force and torque
-        force = glm::vec3{0.0f};
-        torque = glm::vec3{0.0f};
+        totalForce = glm::vec3{0.0f};
+        totalTorque = glm::vec3{0.0f};
     }
 
     void setScale(const glm::vec3 &scale) override {
@@ -78,22 +92,47 @@ public:
         iBodyInv = glm::inverse(iBody);
     }
 
+    void draw(const tmig::gl::Shader &shader) const override {
+        Entity::draw(shader);
+
+        // Correct position and rotation for each axis entity
+        auto rotation = getRotation();
+        axisX->setRotation(rotation);
+        axisY->setRotation(rotation);
+        axisZ->setRotation(rotation);
+
+        auto pos = getPosition();
+        axisX->setPosition(pos - glm::mat3{rotation} * glm::vec3{-0.5f,  0.0f,  0.0f});
+        axisY->setPosition(pos - glm::mat3{rotation} * glm::vec3{ 0.0f, -0.5f,  0.0f});
+        axisZ->setPosition(pos - glm::mat3{rotation} * glm::vec3{ 0.0f,  0.0f, -0.5f});
+
+        glDisable(GL_DEPTH_TEST);
+        // Draw rotation axes
+        axisX->draw(shader);
+        axisY->draw(shader);
+        axisZ->draw(shader);
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
     void applyForce(const glm::vec3 &force) {
-        RigidBody::force += force;
+        totalForce += force;
     }
 
     void applyTorque(const glm::vec3 &torque) {
-        RigidBody::torque += torque;
+        totalTorque += torque;
     }
 
     void applyRelativeForce(const glm::vec3 &force) {
-        // TODO: Convert [force] vector to relative coordinates (use rotation quat)
-        (void)force;
+        // Convert [force] vector to relative coordinates before applying
+        glm::vec3 relativeForce = glm::mat3{getRotation()} * force;
+        applyForce(relativeForce);
     }
 
     void applyRelativeTorque(const glm::vec3 &torque) {
-        // TODO: Convert [torque] vector to relative coordinates (use rotation quat)
-        (void)torque;
+        // Convert [torque] vector to relative coordinates before applying
+        glm::vec3 relativeTorque = glm::mat3{getRotation()} * torque;
+        applyTorque(relativeTorque);
     }
 
     void applyForceAtPosition(const glm::vec3 &force, const glm::vec3 &pos) {
@@ -104,6 +143,11 @@ public:
     }
 
 private:
+    // Rotation axes for better visualization
+    std::shared_ptr<Entity> axisX;
+    std::shared_ptr<Entity> axisY;
+    std::shared_ptr<Entity> axisZ;
+
     // Constants
     float mass;
     glm::mat3 iBody;
@@ -121,8 +165,8 @@ private:
     glm::vec3 omega = glm::vec3{0.0f};                  // axis of rotation
 
     // Computed values (external like wind, gravity, interaction with other rigid-bodies etc.)
-    glm::vec3 force = glm::vec3{0.0f};                  // sum of all forces
-    glm::vec3 torque = glm::vec3{0.0f};                 // sum of all torque
+    glm::vec3 totalForce = glm::vec3{0.0f};                  // sum of all forces
+    glm::vec3 totalTorque = glm::vec3{0.0f};                 // sum of all torque
 };
 
 class App : public tmig::Window {
@@ -180,7 +224,6 @@ void App::setup() {
     currentScene = rbScene;
     rbScene->addEntity(floor);
     rbScene->addLight(light);
-    rbScene->setProjection(getSize());
 
     // rbScene->addEntity(rb);
     // rigidBodies.push_back(rb);
@@ -192,17 +235,17 @@ void App::setup() {
 void App::update(float dt) {
     // Apply force and torque BEFORE updating
     if (isKeyPressed(KeyCode::r)) {
-        rigidBodies[0]->applyForce(glm::vec3{0.0f, 1.0f, 0.0f});
+        rigidBodies[0]->applyRelativeForce(glm::vec3{1.0f, 0.0f, 0.0f});
     }
 
     if (isKeyPressed(KeyCode::x)) {
-        rigidBodies[0]->applyTorque(glm::vec3{1.0f, 0.0f, 0.0f});
+        rigidBodies[0]->applyRelativeTorque(glm::vec3{1.0f, 0.0f, 0.0f});
     }
     if (isKeyPressed(KeyCode::y)) {
-        rigidBodies[0]->applyTorque(glm::vec3{0.0f, 1.0f, 0.0f});
+        rigidBodies[0]->applyRelativeTorque(glm::vec3{0.0f, 1.0f, 0.0f});
     }
     if (isKeyPressed(KeyCode::z)) {
-        rigidBodies[0]->applyTorque(glm::vec3{0.0f, 0.0f, 1.0f});
+        rigidBodies[0]->applyRelativeTorque(glm::vec3{0.0f, 0.0f, 1.0f});
     }
 
     if (isKeyPressed(KeyCode::v)) {
@@ -215,6 +258,7 @@ void App::update(float dt) {
         }
     // }
 
+    currentScene->setProjection(getSize());
     rbScene->update(dt);
     rbScene->render();
 }

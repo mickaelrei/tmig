@@ -170,9 +170,8 @@ public:
     void setTitle(const std::string &title);
 
     /// @brief Set window size
-    /// @param width window width
-    /// @param height window height
-    void setSize(const int &width, const int &height) const;
+    /// @param size size vector
+    void setSize(const glm::ivec2 &size) const;
 
     /// @brief Get window size
     /// @return Window size vector

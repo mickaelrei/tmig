@@ -55,9 +55,9 @@ void Window::setTitle(const std::string &title)
     glfwSetWindowTitle(window, title.c_str());
 }
 
-void Window::setSize(const int &width, const int &height) const
+void Window::setSize(const glm::ivec2 &size) const
 {
-    glfwSetWindowSize(window, width, height);
+    glfwSetWindowSize(window, size.x, size.y);
 }
 
 glm::ivec2 Window::getSize() const {
