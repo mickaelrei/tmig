@@ -27,8 +27,11 @@ glm::mat3 star(const glm::vec3 &v) {
 
 class RigidBody : public tmig::Entity {
 public:
+    /// @brief Default constructor (does nothing)
     RigidBody() = default;
 
+    /// @brief Constructor with scale
+    /// @param scale initial body scale
     RigidBody(const glm::vec3 &scale)
         : Entity::Entity{tmig::utils::boxGMesh()} {
         setScale(scale);
@@ -48,34 +51,45 @@ public:
         axisZ->setScale(glm::vec3{s, s, 1.0f});
     }
 
+    /// @brief Updates body data
+    /// @param dt time between frames in secons
     void update(float dt) {
         // Update auxiliary variables
-        R = glm::mat3{q};
+        R = glm::mat3{rot};
         iInv = R * iBodyInv * glm::transpose(R);
-        vel = P / mass;
-        omega = iInv * L;
+        vel = linearMomentum / mass;
+        omega = iInv * angularMomentum;
 
         // Update position
         setPosition(_position + vel);
 
         // Update rotation
-        glm::quat qdt = 0.5f * (omega * q);
-        q = glm::normalize(q * qdt);
-        setRotation(glm::mat4{q});
+        glm::quat qdt = 0.5f * (omega * rot);
+        rot = glm::normalize(rot * qdt);
+        Entity::setRotation(glm::mat4{rot});
 
         // Update linear and angular momentum
-        P += totalForce * dt;
-        L += totalTorque * dt;
+        linearMomentum += totalForce * dt;
+        angularMomentum += totalTorque * dt;
 
         // Apply drag to reduce momentum
-        P *= .99f;
-        L *= .99f;
+        linearMomentum *= .99f;
+        angularMomentum *= .99f;
 
         // Reset force and torque
         totalForce = glm::vec3{0.0f};
         totalTorque = glm::vec3{0.0f};
     }
 
+    /// @brief Sets new rotation for rigid body
+    /// @param rotation new rotation matrix
+    void setRotation(const glm::mat4 &rotation) override {
+        rot = glm::quat{rotation};
+        Entity::setRotation(rotation);
+    }
+
+    /// @brief Sets new scale for rigid body (recalculates data)
+    /// @param scale new scale vector
     void setScale(const glm::vec3 &scale) override {
         // Set scale variable
         _scale = scale;
@@ -92,6 +106,8 @@ public:
         iBodyInv = glm::inverse(iBody);
     }
 
+    /// @brief Draws rigid body and axis for visualization
+    /// @param shader shader to use for rendering
     void draw(const tmig::gl::Shader &shader) const override {
         Entity::draw(shader);
 
@@ -115,58 +131,142 @@ public:
         glEnable(GL_DEPTH_TEST);
     }
 
+    /// @brief Applies a force at the center of the body
+    /// @param force force vector in world space
     void applyForce(const glm::vec3 &force) {
         totalForce += force;
     }
 
+    /// @brief Applies a rotation torque at the center of the body
+    /// @param torque torque vector in world space
     void applyTorque(const glm::vec3 &torque) {
         totalTorque += torque;
     }
 
+    /// @brief Applies a force relative to the body's coordinate space
+    /// @param force force vector in local space
     void applyRelativeForce(const glm::vec3 &force) {
         // Convert [force] vector to relative coordinates before applying
         glm::vec3 relativeForce = glm::mat3{getRotation()} * force;
         applyForce(relativeForce);
     }
 
+    /// @brief Applies a rotation torque relative to the body's coordinate space
+    /// @param torque torque vector in local space
     void applyRelativeTorque(const glm::vec3 &torque) {
         // Convert [torque] vector to relative coordinates before applying
         glm::vec3 relativeTorque = glm::mat3{getRotation()} * torque;
         applyTorque(relativeTorque);
     }
 
+    /// @brief Applies a force at a position. This will apply both a force and a torque on the body
+    /// @param force force vector in world space
+    /// @param pos position in world space
     void applyForceAtPosition(const glm::vec3 &force, const glm::vec3 &pos) {
-        // TODO: Applying a force on a specific position will apply both
-        //       force and torque. Find a way of calculting these two
-        (void)force;
-        (void)pos;
+        // Apply force at center of body normally
+        applyForce(force);
+
+        // Calculate torque based on position and center of mass
+        glm::vec3 torque = glm::cross(pos - getPosition(), force);
+        applyTorque(torque);
+    }
+
+    /// @brief Converts a point in world space to local space
+    /// @param worldPoint point in world space
+    /// @return point in local space
+    glm::vec3 pointToLocalSpace(const glm::vec3 &worldPoint) const {
+        glm::vec3 point = worldPoint - getPosition();
+        return glm::inverse(glm::mat3{getRotation()}) * point;
+    }
+
+    /// @brief Converts a point in local space to world space
+    /// @param worldPoint point in local space
+    /// @return point in world space
+    glm::vec3 pointToWorldSpace(const glm::vec3 &localPoint) const {
+        glm::vec3 point = glm::mat3{getRotation()} * localPoint;
+        return point + getPosition();
+    }
+
+    /// @brief Converts a vector in world space to local space
+    /// @param worldVector vector in world space
+    /// @return vector in local space
+    glm::vec3 vectorToLocalSpace(const glm::vec3 &worldVector) const {
+        return glm::inverse(glm::mat3{getRotation()}) * worldVector;
+    }
+
+    /// @brief Converts a vector in local space to world space
+    /// @param localVector vector in local space
+    /// @return vector in world space
+    glm::vec3 vectorToWorldSpace(const glm::vec3 &localVector) const {
+        return glm::mat3{getRotation()} * localVector;
     }
 
 private:
-    // Rotation axes for better visualization
+    /// -------------------------------------------------------------- ///
+    ///                        MISCELLANEOUS                           ///
+    /// -------------------------------------------------------------- ///
+
+    /// @brief Entity for visualization of x-axis
     std::shared_ptr<Entity> axisX;
+
+    /// @brief Entity for visualization of y-axis
     std::shared_ptr<Entity> axisY;
+
+    /// @brief Entity for visualization of z-axis
     std::shared_ptr<Entity> axisZ;
 
-    // Constants
+    /// -------------------------------------------------------------- ///
+    ///                         CONSTANTS                              ///
+    /// -------------------------------------------------------------- ///
+
+    /// @brief Body mass
     float mass;
+
+    /// @brief Body inertia tensor
+    /// @link https://www.cs.cmu.edu/~baraff/sigcourse/notesd1.pdf
     glm::mat3 iBody;
+
+    /// @brief Inverse of body inertia tensor
     glm::mat3 iBodyInv;
 
-    // State variables
-    glm::quat q = glm::quat{1.0f, glm::vec3{0.0f}};     // Rotation quaternion
-    glm::vec3 P = glm::vec3{0.0f};                      // Linear momentum (position change)
-    glm::vec3 L = glm::vec3{0.0f};                      // Angular momentum (rotation change)
+    /// -------------------------------------------------------------- ///
+    ///                        CURRENT STATE                           ///
+    /// -------------------------------------------------------------- ///
 
-    // Derived values (auxiliary)
-    glm::mat3 iInv = glm::mat3{1.0f};                   // Inverse of inertia tensor
-    glm::mat3 R = glm::mat3{1.0f};                      // Rotation matrix
-    glm::vec3 vel = glm::vec3{0.0f};                    // velocity
-    glm::vec3 omega = glm::vec3{0.0f};                  // axis of rotation
+    /// @brief Rotation quaternion
+    glm::quat rot = glm::quat{1.0f, glm::vec3{0.0f}};
 
-    // Computed values (external like wind, gravity, interaction with other rigid-bodies etc.)
-    glm::vec3 totalForce = glm::vec3{0.0f};                  // sum of all forces
-    glm::vec3 totalTorque = glm::vec3{0.0f};                 // sum of all torque
+    /// @brief Linear momentum (change in position)
+    glm::vec3 linearMomentum = glm::vec3{0.0f};
+
+    /// @brief Angular momentum (change in rotation)
+    glm::vec3 angularMomentum = glm::vec3{0.0f};
+
+    /// -------------------------------------------------------------- ///
+    ///                          AUXILIARY                             ///
+    /// -------------------------------------------------------------- ///
+
+    /// @brief Inverse of inertia tensor at current simulation step
+    glm::mat3 iInv = glm::mat3{1.0f};
+
+    /// @brief Cached rotation matrix at current simulation step
+    glm::mat3 R = glm::mat3{1.0f};
+
+    /// @brief Linear velocity at current simulation step
+    glm::vec3 vel = glm::vec3{0.0f};
+
+    /// @brief Angular velocity at current simulation step
+    glm::vec3 omega = glm::vec3{0.0f};
+
+    /// -------------------------------------------------------------- ///
+    ///                   EXTERNAL INTERACTION                         ///
+    /// -------------------------------------------------------------- ///
+
+    /// @brief Total force accumulated (such as gravity and wind) at current simulation step
+    glm::vec3 totalForce = glm::vec3{0.0f};
+
+    /// @brief Total torque accumulated (such as collision) at current simulation step
+    glm::vec3 totalTorque = glm::vec3{0.0f};
 };
 
 class App : public tmig::Window {
@@ -179,6 +279,8 @@ public:
 
     std::shared_ptr<tmig::Scene> rbScene;
     std::vector<std::shared_ptr<RigidBody>> rigidBodies;
+
+    std::shared_ptr<tmig::Entity> sphere;
 };
 
 App::App()
@@ -197,7 +299,11 @@ void App::setup() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK); // not needed, GL_BACK is the default culled/ignored face
 
-    auto light = std::make_shared<PointLight>(glm::vec3{1.0f}, 1.0f, glm::vec3{0.0f});
+    auto light = std::make_shared<PointLight>(glm::vec3{1.0f}, 1.0f, glm::vec3{5.0f, 5.0f, 5.0f});
+
+    sphere = std::make_shared<Entity>(utils::sphereGMesh());
+    sphere->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    sphere->setScale(glm::vec3{0.2f});
 
     auto floor = std::make_shared<RigidBody>(glm::vec3{10.0f, 1.0f, 10.0f});
     floor->setPosition(glm::vec3{0.0f, -3.0f, 0.0f});
@@ -205,8 +311,9 @@ void App::setup() {
     auto rb = std::make_shared<RigidBody>(glm::vec3{1.0f});
     rb->setPosition(glm::vec3{3.0f, 0.0f, 0.0f});
 
-    auto rb1 = std::make_shared<RigidBody>(glm::vec3{1.0f, 1.0f, 2.0f});
-    rb1->setPosition(glm::vec3{-2.0f, 0.0f, 0.0f});
+    auto rb1 = std::make_shared<RigidBody>(glm::vec3{12.0f, 1.0f, 4.0f});
+    rb1->setPosition(glm::vec3{-15.0f, 0.0f, 0.0f});
+    rb1->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f}));
 
     rbScene = std::make_shared<Scene>();
     rbScene->camera.pos = glm::vec3{0.0f, 5.0f, 5.0f};
@@ -230,33 +337,57 @@ void App::setup() {
 
     rigidBodies.push_back(rb1);
     rbScene->addEntity(rb1);
+
+    rbScene->addEntity(sphere);
 }
 
 void App::update(float dt) {
-    // Apply force and torque BEFORE updating
-    if (isKeyPressed(KeyCode::r)) {
+    // Move in local right direction
+    if (isKeyHeld(KeyCode::r)) {
         rigidBodies[0]->applyRelativeForce(glm::vec3{1.0f, 0.0f, 0.0f});
     }
 
-    if (isKeyPressed(KeyCode::x)) {
+    // Rotation on each local axis
+    if (isKeyHeld(KeyCode::x)) {
         rigidBodies[0]->applyRelativeTorque(glm::vec3{1.0f, 0.0f, 0.0f});
     }
-    if (isKeyPressed(KeyCode::y)) {
+    if (isKeyHeld(KeyCode::y)) {
         rigidBodies[0]->applyRelativeTorque(glm::vec3{0.0f, 1.0f, 0.0f});
     }
-    if (isKeyPressed(KeyCode::z)) {
+    if (isKeyHeld(KeyCode::z)) {
         rigidBodies[0]->applyRelativeTorque(glm::vec3{0.0f, 0.0f, 1.0f});
+    }
+
+    // Apply force at position
+    if (isKeyPressed(KeyCode::g)) {
+        auto& body = rigidBodies[0];
+        float f = 70.0f;
+
+        body->applyForceAtPosition(
+            body->vectorToWorldSpace(glm::vec3{0.0f, 0.0f, -f}),
+            body->pointToWorldSpace(glm::vec3{-3.0f, 0.0f,  2.0f})
+        );
+
+        body->applyForceAtPosition(
+            body->vectorToWorldSpace(glm::vec3{0.0f, 0.0f, f}),
+            body->pointToWorldSpace(glm::vec3{3.0f, 0.0f,  -2.0f})
+        );
     }
 
     if (isKeyPressed(KeyCode::v)) {
         rigidBodies[0]->setScale(rigidBodies[0]->getScale() * 2.0f);
     }
 
-    // if (isKeyPressed(KeyCode::f)) {
-        for (auto &rb : rigidBodies) {
-            rb->update(dt);
-        }
-    // }
+    for (auto &rb : rigidBodies) {
+        rb->update(dt);
+    }
+
+    // Testing toLocal and toWorld methods
+    auto pos = glm::vec3{-6.0f, -0.5f, 2.0f};
+    pos = rigidBodies[0]->pointToWorldSpace(pos);
+    pos = rigidBodies[0]->pointToLocalSpace(pos);
+    pos = rigidBodies[0]->pointToWorldSpace(pos);
+    sphere->setPosition(pos);
 
     currentScene->setProjection(getSize());
     rbScene->update(dt);

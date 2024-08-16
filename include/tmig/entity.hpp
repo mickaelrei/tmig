@@ -25,19 +25,19 @@ public:
 
     /// @brief Get current position
     /// @return vec3 for entity position
-    glm::vec3 getPosition() const;
+    virtual glm::vec3 getPosition() const;
 
     /// @brief Get current rotation matrix
     /// @return mat4 for entity rotation
-    glm::mat4 getRotation() const;
+    virtual glm::mat4 getRotation() const;
 
     /// @brief Get current scale
     /// @return vec3 for entity scale
-    glm::vec3 getScale() const;
+    virtual glm::vec3 getScale() const;
 
     /// @brief Get current color
     /// @return vec4 for entity color
-    glm::vec4 getColor() const;
+    virtual glm::vec4 getColor() const;
 
     /// @brief Set entity position
     /// @param position new position
