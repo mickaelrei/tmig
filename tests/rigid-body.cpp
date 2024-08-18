@@ -13,6 +13,13 @@ void printMat3(const glm::mat3 &m) {
     printf("[%.3f, %.3f, %.3f]\n", m[2][0], m[2][1], m[2][2]);
 }
 
+void printMat4(const glm::mat4 &m) {
+    printf("[%.3f, %.3f, %.3f, %.3f]\n", m[0][0], m[0][1], m[0][2], m[0][3]);
+    printf("[%.3f, %.3f, %.3f, %.3f]\n", m[1][0], m[1][1], m[1][2], m[1][3]);
+    printf("[%.3f, %.3f, %.3f, %.3f]\n", m[2][0], m[2][1], m[2][2], m[2][3]);
+    printf("[%.3f, %.3f, %.3f, %.3f]\n", m[3][0], m[3][1], m[3][2], m[3][3]);
+}
+
 void printVec3(const glm::vec3 &v) {
     printf("[%.3f, %.3f, %.3f]\n", v.x, v.y, v.z);
 }
@@ -206,13 +213,13 @@ private:
     ///                        MISCELLANEOUS                           ///
     /// -------------------------------------------------------------- ///
 
-    /// @brief Entity for visualization of x-axis
+    /// @brief Entity for visualization of local x-axis
     std::shared_ptr<Entity> axisX;
 
-    /// @brief Entity for visualization of y-axis
+    /// @brief Entity for visualization of local y-axis
     std::shared_ptr<Entity> axisY;
 
-    /// @brief Entity for visualization of z-axis
+    /// @brief Entity for visualization of local z-axis
     std::shared_ptr<Entity> axisZ;
 
     /// -------------------------------------------------------------- ///
@@ -314,6 +321,8 @@ void App::setup() {
     auto rb1 = std::make_shared<RigidBody>(glm::vec3{12.0f, 1.0f, 4.0f});
     rb1->setPosition(glm::vec3{-15.0f, 0.0f, 0.0f});
     rb1->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f}));
+    rb1->applyForce(glm::vec3{1.0f, 0.0f, -1.0f} * 48.0f);
+    rb1->applyTorque(glm::vec3{2.5f, 3.3f, 4.6f} * 48.0f * 3.0f);
 
     rbScene = std::make_shared<Scene>();
     rbScene->camera.pos = glm::vec3{0.0f, 5.0f, 5.0f};
@@ -378,12 +387,18 @@ void App::update(float dt) {
         rigidBodies[0]->setScale(rigidBodies[0]->getScale() * 2.0f);
     }
 
-    for (auto &rb : rigidBodies) {
-        rb->update(dt);
-    }
+    // Fixed simulation step time
+    const float dtSimulation = 0.001f;
+    float simulatedTime = 0.0f;
+    do {
+        for (auto &rb : rigidBodies) {
+            rb->update(dtSimulation);
+        }
+        simulatedTime += dtSimulation;
+    } while (simulatedTime < dt);
 
     // Testing toLocal and toWorld methods
-    auto pos = glm::vec3{-6.0f, -0.5f, 2.0f};
+    auto pos = glm::vec3{-6.0f, 0.5f, 2.0f};
     pos = rigidBodies[0]->pointToWorldSpace(pos);
     pos = rigidBodies[0]->pointToLocalSpace(pos);
     pos = rigidBodies[0]->pointToWorldSpace(pos);
