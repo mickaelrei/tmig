@@ -98,7 +98,7 @@ public:
 
         // Set constants based on scale
         mass = scale.x * scale.y * scale.z;
-        iBody = glm::mat3{
+        iBody = mass / 12.0f * glm::mat3{
             scale2.y + scale2.z, 0.0f, 0.0f,
             0.0f, scale2.x + scale2.z, 0.0f,
             0.0f, 0.0f, scale2.x + scale2.y
