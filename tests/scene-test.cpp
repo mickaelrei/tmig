@@ -1,13 +1,13 @@
 #include <iostream>
 
 #include "tmig/init.hpp"
-#include "tmig/light.hpp"
-#include "tmig/utils/shaders.hpp"
-#include "tmig/utils/primitives_gmesh.hpp"
-#include "tmig/window.hpp"
-#include "tmig/glm.hpp"
+#include "tmig/render/light.hpp"
+#include "tmig/render/utils/shaders.hpp"
+#include "tmig/render/utils/primitives_gmesh.hpp"
+#include "tmig/render/window.hpp"
+#include "tmig/render/glm.hpp"
 
-class App : public tmig::Window {
+class App : public tmig::render::Window {
 public:
     void setup() override;
 
@@ -16,19 +16,19 @@ public:
     void processInput(float dt) override;
 
 private:
-    std::shared_ptr<tmig::Scene> flashlightScene;
-    std::shared_ptr<tmig::SpotLight> flashlight;
+    std::shared_ptr<tmig::render::Scene> flashlightScene;
+    std::shared_ptr<tmig::render::SpotLight> flashlight;
 
-    std::shared_ptr<tmig::Scene> lightsScene;
-    std::shared_ptr<tmig::Entity> movingEntity;
-    std::shared_ptr<tmig::Entity> rotatingEntity;
+    std::shared_ptr<tmig::render::Scene> lightsScene;
+    std::shared_ptr<tmig::render::Entity> movingEntity;
+    std::shared_ptr<tmig::render::Entity> rotatingEntity;
 
     bool flashlightFollowing = true;
     unsigned int polygonMode = GL_FILL;
 };
 
 void App::setup() {
-    using namespace tmig;
+    using namespace tmig::render;
 
     // TODO: These should be wrapped in methods/enums to avoid direct access
     {
@@ -46,7 +46,7 @@ void App::setup() {
     // ----------------------------------------------------------
     // ----------------------------------------------------------
     // Create scene testing multiple lights
-    lightsScene = std::make_shared<tmig::Scene>();
+    lightsScene = std::make_shared<Scene>();
     lightsScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
     lightsScene->setShader(utils::entityShader());
     lightsScene->skybox = utils::Skybox{gl::TextureCube::create(
@@ -175,7 +175,7 @@ void App::setup() {
     // ----------------------------------------------------------
     // ----------------------------------------------------------
     // Create scene testing spotlight as a flashlight
-    flashlightScene = std::make_shared<tmig::Scene>();
+    flashlightScene = std::make_shared<Scene>();
     flashlightScene->camera.pos = glm::vec3{0.0f, 0.0f, 2.0f};
     flashlightScene->setShader(utils::entityShader());
     flashlightScene->skybox = utils::Skybox{gl::TextureCube::create(

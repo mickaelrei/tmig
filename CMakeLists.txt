@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.5...3.27.5)
 
-set(PROJECT_NAME tmig)
-project(${PROJECT_NAME})
+set(TMIG tmig)
+project(${TMIG})
 
 # Warning flags
 set(FLAGS "-Wall -Wextra")
@@ -37,50 +37,59 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
-    ${SOURCE_DIR}/gl/ebo.cpp
-    ${SOURCE_DIR}/gl/shader.cpp
-    ${SOURCE_DIR}/gl/texture_cube.cpp
-    ${SOURCE_DIR}/gl/texture.cpp
-    ${SOURCE_DIR}/gl/vao.cpp
-    ${SOURCE_DIR}/gl/vbo.cpp
 
-    ${SOURCE_DIR}/utils/grid.cpp
-    ${SOURCE_DIR}/utils/primitives_mesh.cpp
-    ${SOURCE_DIR}/utils/primitives_gmesh.cpp
-    ${SOURCE_DIR}/utils/shaders.cpp
-    ${SOURCE_DIR}/utils/skybox.cpp
+    # Physics objects
+    ${SOURCE_DIR}/physics/rigid-body.cpp
 
-    ${SOURCE_DIR}/camera.cpp
-    ${SOURCE_DIR}/entity.cpp
-    ${SOURCE_DIR}/gmesh.cpp
+    # Render GL resources
+    ${SOURCE_DIR}/render/gl/ebo.cpp
+    ${SOURCE_DIR}/render/gl/shader.cpp
+    ${SOURCE_DIR}/render/gl/texture_cube.cpp
+    ${SOURCE_DIR}/render/gl/texture.cpp
+    ${SOURCE_DIR}/render/gl/vao.cpp
+    ${SOURCE_DIR}/render/gl/vbo.cpp
+
+    # Render utils
+    ${SOURCE_DIR}/render/utils/primitives_mesh.cpp
+    ${SOURCE_DIR}/render/utils/primitives_gmesh.cpp
+    ${SOURCE_DIR}/render/utils/shaders.cpp
+    ${SOURCE_DIR}/render/utils/skybox.cpp
+
+    # Render objects
+    ${SOURCE_DIR}/render/camera.cpp
+    ${SOURCE_DIR}/render/entity.cpp
+    ${SOURCE_DIR}/render/gmesh.cpp
+    ${SOURCE_DIR}/render/light.cpp
+    ${SOURCE_DIR}/render/scene.cpp
+    ${SOURCE_DIR}/render/window.cpp
+
+    # Engine commons
     ${SOURCE_DIR}/init.cpp
-    ${SOURCE_DIR}/light.cpp
     ${SOURCE_DIR}/mesh.cpp
-    ${SOURCE_DIR}/scene.cpp
-    ${SOURCE_DIR}/window.cpp
 
+    # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
     ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
 )
 
 # Adding engine shared library
-add_library(${PROJECT_NAME} SHARED ${ENGINE_SOURCE_FILES})
+add_library(${TMIG} SHARED ${ENGINE_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    ${PROJECT_NAME}
+    ${TMIG}
     PRIVATE
     ${OPENGL_INCLUDE_DIRS}
 )
 target_link_libraries(
-    ${PROJECT_NAME}
+    ${TMIG}
     PRIVATE
     ${OPENGL_LIBRARIES} glfw
 )
 
 # Header files
 target_include_directories(
-    ${PROJECT_NAME}
+    ${TMIG}
     PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/external/include
@@ -111,7 +120,7 @@ target_link_directories(
 target_link_libraries(
     scene-test
     PRIVATE
-    ${PROJECT_NAME}
+    ${TMIG}
     ${OPENGL_LIBRARIES} glfw
 )
 
@@ -145,7 +154,7 @@ target_link_directories(
 target_link_libraries(
     rigid-body
     PRIVATE
-    ${PROJECT_NAME}
+    ${TMIG}
     ${OPENGL_LIBRARIES} glfw
 )
 
