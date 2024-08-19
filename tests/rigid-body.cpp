@@ -80,8 +80,8 @@ public:
         angularMomentum += totalTorque * dt;
 
         // Apply drag to reduce momentum
-        linearMomentum *= .99f;
-        angularMomentum *= .99f;
+        linearMomentum *= 1.0f - linearDrag * dt;
+        angularMomentum *= 1.0f - angularDrag * dt;
 
         // Reset force and torque
         totalForce = glm::vec3{0.0f};
@@ -105,7 +105,7 @@ public:
 
         // Set constants based on scale
         mass = scale.x * scale.y * scale.z;
-        iBody = mass / 12.0f * glm::mat3{
+        auto iBody = mass / 12.0f * glm::mat3{
             scale2.y + scale2.z, 0.0f, 0.0f,
             0.0f, scale2.x + scale2.z, 0.0f,
             0.0f, 0.0f, scale2.x + scale2.y
@@ -208,6 +208,36 @@ public:
         return glm::mat3{getRotation()} * localVector;
     }
 
+    /// @brief Gets object mass
+    /// @return mass
+    float getMass() const {
+        return mass;
+    }
+
+    /// @brief Sets new linear drag
+    /// @param drag linear drag
+    void setLinearDrag(float drag) {
+        linearDrag = std::max(0.0f, drag);
+    }
+
+    /// @brief Gets current linear drag
+    /// @return linear drag
+    float getLinearDrag() const {
+        return linearDrag;
+    }
+
+    /// @brief Sets new angular drag
+    /// @param drag angular drag
+    void setAngularDrag(float drag) {
+        angularDrag = std::max(0.0f, drag);
+    }
+
+    /// @brief Gets current angular drag
+    /// @return angular drag
+    float getAngularDrag() const {
+        return angularDrag;
+    }
+
 private:
     /// -------------------------------------------------------------- ///
     ///                        MISCELLANEOUS                           ///
@@ -229,12 +259,19 @@ private:
     /// @brief Body mass
     float mass;
 
-    /// @brief Body inertia tensor
-    /// @link https://www.cs.cmu.edu/~baraff/sigcourse/notesd1.pdf
-    glm::mat3 iBody;
-
     /// @brief Inverse of body inertia tensor
+    /// @link https://www.cs.cmu.edu/~baraff/sigcourse/notesd1.pdf
     glm::mat3 iBodyInv;
+
+    /// -------------------------------------------------------------- ///
+    ///                         PROPERTIES                             ///
+    /// -------------------------------------------------------------- ///
+
+    /// @brief How much the object's linear momentum slows down over time
+    float linearDrag = 1.0f;
+
+    /// @brief How much the object's angular momentum slows down over time
+    float angularDrag = 0.5f;
 
     /// -------------------------------------------------------------- ///
     ///                        CURRENT STATE                           ///
@@ -422,7 +459,7 @@ int main()
     auto app = std::make_shared<App>();
 
     // Run
-    std::cout << "Verlet Physics\n";
+    std::cout << "Rigid Body Physics\n";
     app->start();
 
     // Terminate tmig engine when app finishes running
