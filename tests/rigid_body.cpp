@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "tmig/init.hpp"
-#include "tmig/physics/rigid-body.hpp"
+#include "tmig/physics/rigid_body.hpp"
 #include "tmig/render/utils/primitives_gmesh.hpp"
 #include "tmig/render/utils/shaders.hpp"
 #include "tmig/render/window.hpp"

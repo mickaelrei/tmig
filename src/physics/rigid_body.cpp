@@ -1,6 +1,7 @@
 #include "glad/glad.h"
 
-#include "tmig/physics/rigid-body.hpp"
+#include "tmig/physics/collision/collider.hpp"
+#include "tmig/physics/rigid_body.hpp"
 
 #include "tmig/render/utils/primitives_gmesh.hpp"
 

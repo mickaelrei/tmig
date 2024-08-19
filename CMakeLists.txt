@@ -39,7 +39,9 @@ set(
     ENGINE_SOURCE_FILES
 
     # Physics objects
-    ${SOURCE_DIR}/physics/rigid-body.cpp
+    ${SOURCE_DIR}/physics/collision/mesh_collider.cpp
+    ${SOURCE_DIR}/physics/collision/sphere_collider.cpp
+    ${SOURCE_DIR}/physics/rigid_body.cpp
 
     # Render GL resources
     ${SOURCE_DIR}/render/gl/ebo.cpp
@@ -105,20 +107,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 # Source files
 set(
     SCENE_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/scene-test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/scene_test.cpp
 )
 
 # Adding executables for testing
-add_executable(scene-test ${SCENE_TEST_SOURCE_FILES})
+add_executable(scene_test ${SCENE_TEST_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    scene-test
+    scene_test
     PRIVATE
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 target_link_libraries(
-    scene-test
+    scene_test
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
@@ -126,7 +128,7 @@ target_link_libraries(
 
 # Header files
 target_include_directories(
-    scene-test
+    scene_test
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
@@ -139,20 +141,20 @@ target_include_directories(
 # Source files
 set(
     RIGIDBODY_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/rigid-body.cpp
+    ${CMAKE_SOURCE_DIR}/tests/rigid_body.cpp
 )
 
 # Adding executables for testing
-add_executable(rigid-body ${RIGIDBODY_SOURCE_FILES})
+add_executable(rigid_body ${RIGIDBODY_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    rigid-body
+    rigid_body
     PRIVATE
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 target_link_libraries(
-    rigid-body
+    rigid_body
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
@@ -160,7 +162,7 @@ target_link_libraries(
 
 # Header files
 target_include_directories(
-    rigid-body
+    rigid_body
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
