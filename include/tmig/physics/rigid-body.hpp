@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "tmig/render/entity.hpp"
 
