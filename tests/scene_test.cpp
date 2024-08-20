@@ -312,7 +312,7 @@ void App::processInput(float dt) {
     }
 
     // Switch polygon mode when pressing G
-    if (isKeyPressed(KeyCode::g)) {
+    if (isKeyPressed(KeyCode::h)) {
         if (polygonMode == GL_LINE) {
             polygonMode = GL_FILL;
         } else if (polygonMode == GL_FILL) {

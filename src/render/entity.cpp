@@ -89,6 +89,22 @@ void Entity::draw(const gl::Shader &shader) const {
     gmesh.vao->unbind();
 }
 
+Mesh Entity::getMesh() const {
+    return gmesh;
+}
+
+const glm::mat4 *Entity::getModelMatrixPointer() const {
+    return &_modelMatrix;
+}
+
+const glm::vec3 *Entity::getPositionPointer() const {
+    return &_position;
+}
+
+const glm::vec3 *Entity::getScalePointer() const {
+    return &_scale;
+}
+
 } // namespace render
 
 } // namespace tmig

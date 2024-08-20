@@ -13,6 +13,9 @@ namespace collision {
 /// @brief Abstract class defining a collider used in collision tests
 class Collider {
 public:
+    /// @brief Destructor
+    virtual ~Collider() {};
+
     /// @brief Gets the furthest point in a given direction
     /// @param direction direction to check
     /// @return furthest point in direction

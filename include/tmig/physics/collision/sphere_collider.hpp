@@ -15,9 +15,9 @@ public:
     SphereCollider() = default;
 
     /// @brief Constructor with sphere data
-    /// @param center sphere center in world space
-    /// @param radius sphere radius
-    SphereCollider(const glm::vec3 &center, float radius);
+    /// @param center read-only pointer to sphere center in world space
+    /// @param radius read-only pointer to sphere radius
+    SphereCollider(const glm::vec3 *center, const float *radius);
 
     /// @brief Gets the furthest point in a direction, based on the sphere center and radius
     /// @param direction direction to check
@@ -25,11 +25,11 @@ public:
     glm::vec3 furthestPoint(const glm::vec3 &direction) const override;
 
 private:
-    /// @brief Sphere center in world space
-    glm::vec3 center;
+    /// @brief Read-only pointer to sphere center in world space
+    const glm::vec3 *center;
 
-    /// @brief Sphere radius
-    float radius;
+    /// @brief Read-only pointer to sphere radius
+    const float *radius;
 };
 
 } // namespace collision

@@ -2,6 +2,7 @@
 
 #include "tmig/init.hpp"
 #include "tmig/physics/rigid_body.hpp"
+#include "tmig/physics/collision/mesh_collider.hpp"
 #include "tmig/render/utils/primitives_gmesh.hpp"
 #include "tmig/render/utils/shaders.hpp"
 #include "tmig/render/window.hpp"
@@ -45,6 +46,8 @@ public:
     std::vector<std::shared_ptr<tmig::physics::RigidBody>> rigidBodies;
 
     std::shared_ptr<tmig::render::Entity> sphere;
+
+    std::shared_ptr<tmig::physics::collision::MeshCollider> meshCollider;
 };
 
 App::App()
@@ -76,11 +79,8 @@ void App::setup() {
     auto rb = std::make_shared<RigidBody>(glm::vec3{1.0f});
     rb->setPosition(glm::vec3{3.0f, 0.0f, 0.0f});
 
-    auto rb1 = std::make_shared<RigidBody>(glm::vec3{12.0f, 1.0f, 4.0f});
-    rb1->setPosition(glm::vec3{-15.0f, 0.0f, 0.0f});
-    rb1->setRotation(glm::rotate(glm::mat4{1.0f}, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f}));
-    rb1->applyForce(glm::vec3{1.0f, 0.0f, -1.0f} * 48.0f);
-    rb1->applyTorque(glm::vec3{2.5f, 3.3f, 4.6f} * 48.0f * 3.0f);
+    auto rb1 = std::make_shared<RigidBody>(glm::vec3{1.0f});
+    meshCollider = std::make_shared<collision::MeshCollider>(rb1->getMesh(), rb1->getModelMatrixPointer());
 
     rbScene = std::make_shared<Scene>();
     rbScene->camera.pos = glm::vec3{0.0f, 5.0f, 5.0f};
@@ -109,20 +109,21 @@ void App::setup() {
 }
 
 void App::update(float dt) {
+    const float s = 0.25f;
     // Move in local right direction
     if (isKeyHeld(KeyCode::r)) {
-        rigidBodies[0]->applyRelativeForce(glm::vec3{1.0f, 0.0f, 0.0f});
+        rigidBodies[0]->applyRelativeForce(s * glm::vec3{1.0f, 0.0f, 0.0f});
     }
 
     // Rotation on each local axis
     if (isKeyHeld(KeyCode::x)) {
-        rigidBodies[0]->applyRelativeTorque(glm::vec3{1.0f, 0.0f, 0.0f});
+        rigidBodies[0]->applyRelativeTorque(s * glm::vec3{1.0f, 0.0f, 0.0f});
     }
     if (isKeyHeld(KeyCode::y)) {
-        rigidBodies[0]->applyRelativeTorque(glm::vec3{0.0f, 1.0f, 0.0f});
+        rigidBodies[0]->applyRelativeTorque(s * glm::vec3{0.0f, 1.0f, 0.0f});
     }
     if (isKeyHeld(KeyCode::z)) {
-        rigidBodies[0]->applyRelativeTorque(glm::vec3{0.0f, 0.0f, 1.0f});
+        rigidBodies[0]->applyRelativeTorque(s * glm::vec3{0.0f, 0.0f, 1.0f});
     }
 
     // Apply force at position
@@ -155,11 +156,10 @@ void App::update(float dt) {
         simulatedTime += dtSimulation;
     } while (simulatedTime < dt);
 
-    // Testing toLocal and toWorld methods
-    auto pos = glm::vec3{-6.0f, 0.5f, 2.0f};
-    pos = rigidBodies[0]->pointToWorldSpace(pos);
-    pos = rigidBodies[0]->pointToLocalSpace(pos);
-    pos = rigidBodies[0]->pointToWorldSpace(pos);
+    // Testing collider furthest point method
+    auto pos = meshCollider->furthestPoint(glm::vec3{1.0f, 0.0f, 0.0f});
+    printf("\n\nPos:\n");
+    printVec3(pos);
     sphere->setPosition(pos);
 
     currentScene->setProjection(getSize());

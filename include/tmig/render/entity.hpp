@@ -73,6 +73,22 @@ public:
     /// @param shader scene shader
     virtual void draw(const gl::Shader &shader) const;
 
+    /// @brief Gets entity mesh
+    /// @return entity mesh
+    Mesh getMesh() const;
+
+    /// @brief Returns read-only pointer to model matrix (used on colliders)
+    /// @return pointer to model matrix
+    const glm::mat4 *getModelMatrixPointer() const;
+
+    /// @brief Returns read-only pointer to position vector (used on colliders)
+    /// @return pointer to position vector
+    const glm::vec3 *getPositionPointer() const;
+
+    /// @brief Returns read-only pointer to scale vector (used on colliders)
+    /// @return pointer to scale vector
+    const glm::vec3 *getScalePointer() const;
+
 protected:
     /// @brief Entity graphic mesh
     GMesh gmesh;

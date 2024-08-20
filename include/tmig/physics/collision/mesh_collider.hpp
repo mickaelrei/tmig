@@ -17,7 +17,8 @@ public:
 
     /// @brief Constructor with vertices
     /// @param vertices vertices list
-    MeshCollider(const Mesh &mesh);
+    /// @param modelMatrix read-only pointer to model matrix
+    MeshCollider(const Mesh &mesh, const glm::mat4 *modelMatrix);
 
     /// @brief Gets the furthest point in a direction, based on the list of vertices
     /// @param direction direction to check
@@ -27,6 +28,9 @@ public:
 private:
     /// @brief List of vertices for the mesh
     std::vector<glm::vec3> vertices;
+
+    /// @brief Read-only pointer to model matrix
+    const glm::mat4 *modelMatrix;
 };
 
 } // namespace collision

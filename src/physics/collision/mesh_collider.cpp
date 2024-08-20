@@ -6,7 +6,8 @@ namespace physics {
 
 namespace collision {
 
-MeshCollider::MeshCollider(const Mesh &mesh) {
+MeshCollider::MeshCollider(const Mesh &mesh, const glm::mat4 *modelMatrix)
+    : modelMatrix{modelMatrix} {
     // Allocate enough space
     const size_t size = mesh.vertices.size();
     vertices.resize(size);
@@ -30,12 +31,18 @@ glm::vec3 MeshCollider::furthestPoint(const glm::vec3 &direction) const {
     glm::vec3 furthest;
     float maxDot = -std::numeric_limits<float>::max();
 
+    // Get model translation
+    glm::vec3 translation = (*modelMatrix)[3];
+
     // Get point with maximum dot
     const size_t size = vertices.size();
     for (size_t i = 0; i < size; ++i) {
-        glm::vec3 pos = vertices[i];
-        float dot = glm::dot(normDir, pos);
+        // Convert to world space
+        glm::vec3 pos = (*modelMatrix) * glm::vec4{vertices[i], 0.0f};
+        pos += translation;
 
+        // Check new dot
+        float dot = glm::dot(normDir, pos);
         if (dot > maxDot) {
             maxDot = dot;
             furthest = pos;
