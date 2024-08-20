@@ -16,10 +16,14 @@ public:
     /// @brief Destructor
     virtual ~Collider() {};
 
-    /// @brief Gets the furthest point in a given direction
+    /// @brief Gets the furthest point in world space for a given direction
     /// @param direction direction to check
     /// @return furthest point in direction
     virtual glm::vec3 furthestPoint(const glm::vec3 &direction) const = 0;
+
+    /// @brief Gets the collider center in world space
+    /// @return center point
+    virtual glm::vec3 getCenter() const = 0;
 };
 
 } // namespace collision

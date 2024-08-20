@@ -19,10 +19,9 @@ public:
     /// @param radius read-only pointer to sphere radius
     SphereCollider(const glm::vec3 *center, const float *radius);
 
-    /// @brief Gets the furthest point in a direction, based on the sphere center and radius
-    /// @param direction direction to check
-    /// @return furthest point in direction
     glm::vec3 furthestPoint(const glm::vec3 &direction) const override;
+
+    glm::vec3 getCenter() const override;
 
 private:
     /// @brief Read-only pointer to sphere center in world space

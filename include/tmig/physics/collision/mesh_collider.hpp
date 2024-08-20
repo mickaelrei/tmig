@@ -20,10 +20,9 @@ public:
     /// @param modelMatrix read-only pointer to model matrix
     MeshCollider(const Mesh &mesh, const glm::mat4 *modelMatrix);
 
-    /// @brief Gets the furthest point in a direction, based on the list of vertices
-    /// @param direction direction to check
-    /// @return furthest point in direction
     glm::vec3 furthestPoint(const glm::vec3 &direction) const override;
+
+    glm::vec3 getCenter() const override;
 
 private:
     /// @brief List of vertices for the mesh

@@ -52,6 +52,10 @@ glm::vec3 MeshCollider::furthestPoint(const glm::vec3 &direction) const {
     return furthest;
 }
 
+glm::vec3 MeshCollider::getCenter() const {
+    return (*modelMatrix)[3];
+}
+
 } // namespace collision
 
 } // namespace physics

@@ -2,6 +2,7 @@
 
 #include "tmig/init.hpp"
 #include "tmig/physics/rigid_body.hpp"
+#include "tmig/physics/collision/collision_test.hpp"
 #include "tmig/physics/collision/mesh_collider.hpp"
 #include "tmig/render/utils/primitives_gmesh.hpp"
 #include "tmig/render/utils/shaders.hpp"
@@ -47,7 +48,8 @@ public:
 
     std::shared_ptr<tmig::render::Entity> sphere;
 
-    std::shared_ptr<tmig::physics::collision::MeshCollider> meshCollider;
+    std::shared_ptr<tmig::physics::collision::MeshCollider> collider0;
+    std::shared_ptr<tmig::physics::collision::MeshCollider> collider1;
 };
 
 App::App()
@@ -76,11 +78,14 @@ void App::setup() {
     auto floor = std::make_shared<RigidBody>(glm::vec3{10.0f, 1.0f, 10.0f});
     floor->setPosition(glm::vec3{0.0f, -3.0f, 0.0f});
 
-    auto rb = std::make_shared<RigidBody>(glm::vec3{1.0f});
-    rb->setPosition(glm::vec3{3.0f, 0.0f, 0.0f});
+    // Create two rigid bodies and their colliders
+    auto rb0 = std::make_shared<RigidBody>(glm::vec3{1.0f});
+    rb0->setPosition(glm::vec3{-3.0f, 0.0f, 0.0f});
+    collider0 = std::make_shared<collision::MeshCollider>(rb0->getMesh(), rb0->getModelMatrixPointer());
 
     auto rb1 = std::make_shared<RigidBody>(glm::vec3{1.0f});
-    meshCollider = std::make_shared<collision::MeshCollider>(rb1->getMesh(), rb1->getModelMatrixPointer());
+    rb1->setPosition(glm::vec3{3.0f, 0.0f, 0.0f});
+    collider1 = std::make_shared<collision::MeshCollider>(rb1->getMesh(), rb1->getModelMatrixPointer());
 
     rbScene = std::make_shared<Scene>();
     rbScene->camera.pos = glm::vec3{0.0f, 5.0f, 5.0f};
@@ -99,8 +104,8 @@ void App::setup() {
     rbScene->addEntity(floor);
     rbScene->addLight(light);
 
-    // rbScene->addEntity(rb);
-    // rigidBodies.push_back(rb);
+    rbScene->addEntity(rb0);
+    rigidBodies.push_back(rb0);
 
     rigidBodies.push_back(rb1);
     rbScene->addEntity(rb1);
@@ -129,7 +134,7 @@ void App::update(float dt) {
     // Apply force at position
     if (isKeyPressed(KeyCode::g)) {
         auto& body = rigidBodies[0];
-        float f = 70.0f;
+        float f = 1.0f;
 
         body->applyForceAtPosition(
             body->vectorToWorldSpace(glm::vec3{0.0f, 0.0f, -f}),
@@ -157,10 +162,19 @@ void App::update(float dt) {
     } while (simulatedTime < dt);
 
     // Testing collider furthest point method
-    auto pos = meshCollider->furthestPoint(glm::vec3{1.0f, 0.0f, 0.0f});
-    printf("\n\nPos:\n");
-    printVec3(pos);
+    auto pos = collider0->furthestPoint(glm::vec3{1.0f, 0.0f, 0.0f});
     sphere->setPosition(pos);
+
+    // Testing collision
+    bool colliding = tmig::physics::collision::hasCollision(
+        collider0.get(),
+        collider1.get()
+    );
+    if (colliding) {
+        rigidBodies[0]->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    } else {
+        rigidBodies[0]->setColor(glm::vec4{1.0f, 1.0f, 1.0f, 1.0f});
+    }
 
     currentScene->setProjection(getSize());
     rbScene->update(dt);

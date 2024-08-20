@@ -17,6 +17,10 @@ glm::vec3 SphereCollider::furthestPoint(const glm::vec3 &direction) const {
     return direction * (*radius) + (*center);
 }
 
+glm::vec3 SphereCollider::getCenter() const {
+    return *center;
+}
+
 } // namespace collision
 
 } // namespace physics

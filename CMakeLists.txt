@@ -39,6 +39,7 @@ set(
     ENGINE_SOURCE_FILES
 
     # Physics objects
+    ${SOURCE_DIR}/physics/collision/collision_test.cpp
     ${SOURCE_DIR}/physics/collision/mesh_collider.cpp
     ${SOURCE_DIR}/physics/collision/sphere_collider.cpp
     ${SOURCE_DIR}/physics/rigid_body.cpp
