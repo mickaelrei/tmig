@@ -9,6 +9,11 @@
 #include "tmig/render/window.hpp"
 #include "tmig/render/glm.hpp"
 
+// Returns fov based on size ratio
+float H2VFOV(float fov, float ratio) {
+	return glm::degrees(2.0f * glm::atan(glm::tan(fov * 0.5f) / ratio));
+}
+
 class App : public tmig::render::Window {
 public:
     void setup() override;
@@ -16,6 +21,9 @@ public:
     void update(float dt) override;
 
     void processInput(float dt) override;
+
+    void renderView360(float dt);
+    void renderRearMirror(float dt);
 
 private:
     std::shared_ptr<tmig::render::Scene> flashlightScene;
@@ -26,6 +34,7 @@ private:
     std::shared_ptr<tmig::render::Entity> rotatingEntity;
 
     bool flashlightFollowing = true;
+    bool render360 = false;
     unsigned int polygonMode = GL_FILL;
 };
 
@@ -231,7 +240,7 @@ void App::setup() {
         flashlightScene->addEntity(box);
     }
 
-    int dim = 25;
+    int dim = 0;
     for (int i = -dim; i < dim; ++i) {
         for (int j = -dim; j < dim; ++j) {
             glm::vec3 pos{(float)i, (float)(rand() % 2 - 1) - 2.0f, (float)j};
@@ -262,9 +271,54 @@ void App::update(float dt) {
         // });
     } else if (flashlightFollowing) {
         flashlight->pos = currentScene->camera.pos;
-        flashlight->dir = currentScene->camera.getForward();
+        flashlight->dir = currentScene->camera.forward();
     }
 
+    if (render360) {
+        renderView360(dt);
+    } else {
+        renderRearMirror(dt);
+    }
+}
+
+void App::renderView360(float dt) {
+    // Number of renders
+    const int n = 30;
+
+    // Save original euler angles
+    auto &cam = currentScene->camera;
+    float origYaw, origPitch, origRoll;
+    cam.getPitchYawRoll(&origPitch, &origYaw, &origRoll);
+
+    // Get render width
+    auto size = getSize();
+    float angleStep = M_PIf * 2.0f / (float)n;
+    int renderWidth = size.x / n;
+
+    // Update projection matrix
+    currentScene->setProjection(glm::ivec2{renderWidth, size.y});
+    currentScene->update(dt);
+
+    // Set new fov
+    float fov = H2VFOV(angleStep, (float)renderWidth / (float)size.y);
+    cam.fov = fov;
+
+    // Start rendering looking back
+    auto rotation = cam.getRotation();
+    rotation *= glm::mat3{glm::eulerAngleXYZ(0.0f, -M_PIf, 0.0f)};
+
+    // Render all parts
+    for (int i = 0; i <= n; ++i) {
+        cam.setRotation(rotation * glm::mat3{glm::eulerAngleXYZ(0.0f, -angleStep * i, 0.0f)});
+        glViewport(i * renderWidth - renderWidth / 2, 0, renderWidth, size.y);
+        currentScene->render();
+    }
+
+    // Set original euler angles back
+    cam.setPitchYawRoll(origPitch, origYaw, origRoll);
+}
+
+void App::renderRearMirror(float dt) {
     // Render scene normally
     auto size = getSize();
     currentScene->setProjection(size);
@@ -272,10 +326,10 @@ void App::update(float dt) {
     currentScene->render();
 
     // Render "rear-view" scene
-    // Set negative forward
+    // Save original rotation and look back
     auto &cam = currentScene->camera;
-    auto forward = cam.getForward();
-    cam.setForward(-forward);
+    auto originalRotation = cam.getRotation();
+    cam.rotate(M_PIf, glm::vec3{0.0f, 1.0f, 0.0f});
 
     // Set new viewport rect and clear depth buffer
     glm::ivec2 rearviewSize{300, 150};
@@ -288,9 +342,9 @@ void App::update(float dt) {
     // Update projection
     currentScene->setProjection(rearviewSize);
 
-    // Re-render and set forward back to normal
+    // Re-render and set rotation back to original
     currentScene->render();
-    cam.setForward(forward);
+    cam.setRotation(originalRotation);
 
     // Set viewport and projection back to original
     glViewport(0, 0, size.x, size.y);
@@ -325,6 +379,11 @@ void App::processInput(float dt) {
 
         // TODO: This should be wrapped in another method/enum
         glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+    }
+
+    // Switch render types
+    if (isKeyPressed(KeyCode::x)) {
+        render360 = !render360;
     }
 }
 

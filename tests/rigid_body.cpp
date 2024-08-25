@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include "tmig/init.hpp"
 #include "tmig/physics/rigid_body.hpp"
 #include "tmig/physics/collision/collision_test.hpp"
