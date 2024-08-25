@@ -284,28 +284,30 @@ void App::update(float dt) {
 void App::renderView360(float dt) {
     // Number of renders
     const int n = 30;
+    const float totalFOV = M_PIf * 2.0f * 1.0f;
 
     // Save original euler angles
     auto &cam = currentScene->camera;
     float origYaw, origPitch, origRoll;
+    float origFOV = cam.fov;
     cam.getPitchYawRoll(&origPitch, &origYaw, &origRoll);
 
     // Get render width
     auto size = getSize();
-    float angleStep = M_PIf * 2.0f / (float)n;
+    float angleStep = totalFOV / (float)n;
     int renderWidth = size.x / n;
-
-    // Update projection matrix
-    currentScene->setProjection(glm::ivec2{renderWidth, size.y});
-    currentScene->update(dt);
 
     // Set new fov
     float fov = H2VFOV(angleStep, (float)renderWidth / (float)size.y);
     cam.fov = fov;
 
+    // Update projection matrix
+    currentScene->setProjection(glm::ivec2{renderWidth, size.y});
+    currentScene->update(dt);
+
     // Start rendering looking back
     auto rotation = cam.getRotation();
-    rotation *= glm::mat3{glm::eulerAngleXYZ(0.0f, -M_PIf, 0.0f)};
+    rotation *= glm::mat3{glm::eulerAngleXYZ(0.0f, -totalFOV * 0.5f, 0.0f)};
 
     // Render all parts
     for (int i = 0; i <= n; ++i) {
@@ -316,6 +318,8 @@ void App::renderView360(float dt) {
 
     // Set original euler angles back
     cam.setPitchYawRoll(origPitch, origYaw, origRoll);
+    cam.fov = origFOV;
+    currentScene->setProjection(size);
 }
 
 void App::renderRearMirror(float dt) {
