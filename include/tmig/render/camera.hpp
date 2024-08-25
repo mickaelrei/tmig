@@ -50,31 +50,63 @@ public:
     /// @param dt delta time
     void moveDown(float dt);
 
-    /// @brief Rotate camera
-    /// @param rx rotation offset on X axis in degrees
-    /// @param ry rotation offset on Y axis in degrees
-    void rotate(float rx, float ry);
+    /// @brief Rotate camera by pitch, yaw and roll
+    /// @param rx rotation offset on world X axis in degrees (pitch)
+    /// @param ry rotation offset on world Y axis in degrees (yaw)
+    /// @param rz rotation offset on world Z axis in degrees (roll)
+    void rotate(float rx, float ry, float rz = 0.0f);
+
+    /// @brief Rotate with angle-axis mode
+    /// @param angle angle in radians
+    /// @param axis axis to rotate around
+    void rotate(float angle, const glm::vec3 &axis);
+
+    /// @brief Set new rotation
+    /// @param mat rotation matrix
+    void setRotation(const glm::mat3 &mat);
+
+    /// @brief Get camera's rotation matrix
+    /// @return mat3 for rotation matrix
+    glm::mat3 getRotation() const;
 
     /// @brief Get camera's forward direction vector
     /// @return vec3 for forward direction
-    glm::vec3 getForward() const;
+    glm::vec3 forward() const;
 
-    /// @brief Set new forward vector
-    /// @param forward vector to be used as forward
-    void setForward(const glm::vec3 &forward);
+    /// @brief Get camera's right direction vector
+    /// @return vec3 for right direction
+    glm::vec3 right() const;
 
-    /// @brief Get camera current pitch
-    /// @return camera pitch
-    float getPitch() const;
+    /// @brief Get camera's up direction vector
+    /// @return vec3 for up direction
+    glm::vec3 up() const;
 
-    /// @brief Get camera current yaw
-    /// @return camera yaw
-    float getYaw() const;
+    /// @brief Make camera look at [target] positioned at [pos]
+    /// @param pos new camera position
+    /// @param target camera look target
+    /// @param up optional up vector for camera Z rotation
+    void lookAt(
+        const glm::vec3 &pos,
+        const glm::vec3 &target,
+        const glm::vec3 &up = glm::vec3{0.0f, 1.0f, 0.0f}
+    );
+
+    /// @brief Get current euler angles in radians
+    /// @param pitch output pitch value
+    /// @param yaw output yaw value
+    /// @param roll output roll value
+    void getPitchYawRoll(float *pitch, float *yaw, float *roll) const;
+
+    /// @brief Set new euler angles in radians
+    /// @param pitch new pitch (rotation on X)
+    /// @param yaw new yaw (rotation on Y)
+    /// @param roll new roll (rotation on Z)
+    void setPitchYawRoll(float pitch, float yaw, float roll);
 
     /// @brief Current position
     glm::vec3 pos;
 
-    /// @brief Field-of-view (FOV)
+    /// @brief Field-of-view (FOV) in degrees
     float fov = 70.0f;
 
     /// @brief Minimum render distance
@@ -87,33 +119,29 @@ public:
     float moveSpeed = 3.0f;
 
     /// @brief Rotation speed
-    float rotationSpeed = 100.0f;
+    float rotationSpeed = 0.25f;
+
+    /// @brief Whether it is the first click on the window (used for rotation with mouse)
+    bool firstClick = true;
 
 private:
-    /// @brief Camera forward
-    glm::vec3 forward = glm::vec3{0.0f, 0.0f, -1.0f};
-
-    /// @brief Camera up
-    glm::vec3 up = glm::vec3{0.0f, 1.0f, 0.0f};
-
-    /// @brief Camera right
-    glm::vec3 right = glm::vec3{1.0f, 0.0f, 0.0f};
-
     /// @brief Cached view matrix
     glm::mat4 viewMatrix;
 
-    /// @brief World up vector
-    glm::vec3 worldUp = glm::vec3{0.0f, 1.0f, 0.0f};
-
-    /// @brief Current pitch (rotation on X axis)
+    /// @brief Current pitch in radians (rotation on X axis)
     float pitch = 0.0f;
 
-    /// @brief Current yaw (rotation on Y axis)
-    float yaw = -90.0f;
+    /// @brief Current yaw in radians (rotation on Y axis)
+    float yaw = 0.0f;
 
-    /// @brief Update vectors after rotation changes
-    /// @param calculateForward whether to calculate forward vector
-    void updateVectors(bool calculateForward = true);
+    /// @brief Current roll in radians (rotation on Z axis)
+    float roll = 0.0f;
+
+    /// @brief Rotation matrix
+    glm::mat3 rotation = glm::mat3{1.0f};
+
+    /// @brief Update cached view matrix
+    void updateView();
 };
 
 } // namespace render

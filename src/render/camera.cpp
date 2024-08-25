@@ -1,7 +1,16 @@
-#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
 #include "tmig/render/camera.hpp"
+
+/// @brief Forward vector in world space
+static const glm::vec3 worldForward = glm::vec3{0.0f, 0.0f, -1.0f};
+
+/// @brief Right vector in world space
+static const glm::vec3 worldRight = glm::vec3{1.0f, 0.0f, 0.0f};
+
+/// @brief Up vector in world space
+static const glm::vec3 worldUp = glm::vec3{0.0f, 1.0f, 0.0f};
 
 namespace tmig {
 
@@ -15,7 +24,7 @@ Camera::Camera()
 Camera::Camera(const glm::vec3 &pos)
     : pos{pos}
 {
-    updateVectors();
+    updateView();
 }
 
 glm::mat4 Camera::getViewMatrix() const
@@ -25,81 +34,130 @@ glm::mat4 Camera::getViewMatrix() const
 
 void Camera::moveForward(float dt)
 {
-    pos += forward * moveSpeed * dt;
+    pos += (rotation * worldForward) * moveSpeed * dt;
 }
 
 void Camera::moveBack(float dt)
 {
-    pos -= forward * moveSpeed * dt;
+    pos -= (rotation * worldForward) * moveSpeed * dt;
 }
 
 void Camera::moveLeft(float dt)
 {
-    pos -= right * moveSpeed * dt;
+    pos -= (rotation * worldRight) * moveSpeed * dt;
 }
 
 void Camera::moveRight(float dt)
 {
-    pos += right * moveSpeed * dt;
+    pos += (rotation * worldRight) * moveSpeed * dt;
 }
 
 void Camera::moveUp(float dt)
 {
-    pos += up * moveSpeed * dt;
+    pos += (rotation * worldUp) * moveSpeed * dt;
 }
 
 void Camera::moveDown(float dt)
 {
-    pos -= up * moveSpeed * dt;
+    pos -= (rotation * worldUp) * moveSpeed * dt;
 }
 
-void Camera::rotate(float rx, float ry)
+void Camera::rotate(float rx, float ry, float rz)
 {
-    yaw += ry * rotationSpeed;
     pitch += rx * rotationSpeed;
+    yaw += ry * rotationSpeed;
+    roll += rz * rotationSpeed;
 
     // Clamp to avoid gimball lock
-    pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    const float pitchOffset = 0.01f;
+    pitch = glm::clamp(
+        pitch,
+        -M_PIf * 0.5f + pitchOffset,
+        M_PIf * 0.5f - pitchOffset
+    );
 
-    updateVectors();
+    // Get new rotation matrix
+    rotation = glm::yawPitchRoll(yaw, pitch, roll);
+
+    updateView();
 }
 
-glm::vec3 Camera::getForward() const {
-    return forward;
+void Camera::rotate(float angle, const glm::vec3 &axis) {
+    rotation = glm::rotate(glm::mat4{rotation}, angle, axis);
+    updateView();
 }
 
-void Camera::setForward(const glm::vec3 &forward) {
-    if (glm::length2(forward) == 0.0f) return;
-
-    Camera::forward = glm::normalize(forward);
-    updateVectors(false);
+void Camera::setRotation(const glm::mat3 &mat) {
+    rotation = mat;
+    updateView();
 }
 
-float Camera::getPitch() const {
-    return pitch;
+glm::mat3 Camera::getRotation() const {
+    return rotation;
 }
 
-float Camera::getYaw() const {
-    return yaw;
+glm::vec3 Camera::forward() const {
+    return rotation * worldForward;
 }
 
-void Camera::updateVectors(bool calculateForward)
+glm::vec3 Camera::right() const {
+    return rotation * worldRight;
+}
+
+glm::vec3 Camera::up() const {
+    return rotation * worldUp;
+}
+
+void Camera::lookAt(
+    const glm::vec3 &pos,
+    const glm::vec3 &target,
+    const glm::vec3 &up
+) {
+    if (glm::length2(pos - target) == 0.0f) return;
+
+    viewMatrix = glm::lookAt(pos, target, up);
+
+    // To get rotation-matrix from view-matrix, remove position and invert from view to world space
+    rotation = glm::translate(viewMatrix, pos);
+    rotation = glm::inverse(rotation);
+}
+
+void Camera::getPitchYawRoll(float *pitch, float *yaw, float *roll) const {
+    if (pitch != nullptr)
+        *pitch = Camera::pitch;
+
+    if (yaw != nullptr)
+        *yaw = Camera::yaw;
+
+    if (roll != nullptr)
+        *roll = Camera::roll;
+}
+
+void Camera::setPitchYawRoll(float pitch, float yaw, float roll) {
+    Camera::pitch = pitch;
+    Camera::yaw = yaw;
+    Camera::roll = roll;
+
+    // Clamp to avoid gimball lock
+    const float pitchOffset = 0.01f;
+    pitch = glm::clamp(
+        pitch,
+        -M_PIf * 0.5f + pitchOffset,
+        M_PIf * 0.5f - pitchOffset
+    );
+
+    // Get new rotation matrix
+    rotation = glm::yawPitchRoll(yaw, pitch, roll);
+    updateView();
+}
+
+void Camera::updateView()
 {
-    if (calculateForward) {
-        // Update direction
-        glm::vec3 front;
-        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front.y = sin(glm::radians(pitch));
-        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        forward = glm::normalize(front);
-    }
-
-    // Update other vectors
-    right = glm::normalize(glm::cross(forward, worldUp));
-    up = glm::normalize(glm::cross(right, forward));
+    auto myForward = glm::normalize(rotation * worldForward);
+    auto myUp = glm::normalize(rotation * worldUp);
 
     // Update view matrix
-    viewMatrix = glm::lookAt(pos, pos + forward, up);
+    viewMatrix = glm::lookAt(pos, pos + myForward, myUp);
 }
 
 } // namespace render

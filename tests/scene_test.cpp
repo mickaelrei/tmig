@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include "tmig/init.hpp"
 #include "tmig/render/light.hpp"
 #include "tmig/render/utils/shaders.hpp"

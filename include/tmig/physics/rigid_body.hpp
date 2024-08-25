@@ -100,6 +100,18 @@ public:
     /// @return angular drag
     float getAngularDrag() const;
 
+    /// @brief Gets body's forward vector
+    /// @return forward vector
+    glm::vec3 forward() const;
+
+    /// @brief Gets body's right vector
+    /// @return right vector
+    glm::vec3 right() const;
+
+    /// @brief Gets body's up vector
+    /// @return up vector
+    glm::vec3 up() const;
+
 private:
     /// -------------------------------------------------------------- ///
     ///                        MISCELLANEOUS                           ///

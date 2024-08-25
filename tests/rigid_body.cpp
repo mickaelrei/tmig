@@ -87,7 +87,7 @@ void App::setup() {
 
     rbScene = std::make_shared<Scene>();
     rbScene->camera.pos = glm::vec3{0.0f, 5.0f, 5.0f};
-    rbScene->camera.rotate(-45.0f / rbScene->camera.rotationSpeed, 0.0f);
+    rbScene->camera.rotate(-M_PIf * 0.25f / rbScene->camera.rotationSpeed, 0.0f);
     rbScene->setShader(utils::entityShader());
     rbScene->skybox = utils::Skybox{gl::TextureCube::create(
         "resources/textures/skybox/right.jpg",
