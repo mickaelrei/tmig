@@ -146,6 +146,10 @@ glm::vec3 RigidBody::vectorToWorldSpace(const glm::vec3 &localVector) const {
     return glm::mat3{getRotation()} * localVector;
 }
 
+glm::vec3 RigidBody::velocityAtPoint(const glm::vec3 &point) const {
+    return vel + glm::cross(omega, point - getPosition());
+}
+
 float RigidBody::getMass() const {
     return mass;
 }

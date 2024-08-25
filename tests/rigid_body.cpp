@@ -37,8 +37,6 @@ class App : public tmig::render::Window {
 public:
     App();
 
-    glm::quat a;
-
     void setup() override;
     void update(float dt) override;
     void processInput(float dt) override;
@@ -177,8 +175,8 @@ void App::update(float dt) {
     }
 
     currentScene->setProjection(getSize());
-    rbScene->update(dt);
-    rbScene->render();
+    currentScene->update(dt);
+    currentScene->render();
 }
 
 void App::processInput(float dt) {
@@ -191,7 +189,7 @@ int main()
     tmig::init();
 
     // Create app
-    auto app = std::make_shared<App>();
+    std::shared_ptr<App> app{new App()};
 
     // Run
     std::cout << "Rigid Body Physics\n";

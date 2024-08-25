@@ -75,6 +75,11 @@ public:
     /// @return vector in world space
     glm::vec3 vectorToWorldSpace(const glm::vec3 &localVector) const;
 
+    /// @brief Gets the velocity of a point on a rigid body
+    /// @param point point to check
+    /// @return velocity at given point
+    glm::vec3 velocityAtPoint(const glm::vec3 &point) const;
+
     /// @brief Gets object mass
     /// @return mass
     float getMass() const;
