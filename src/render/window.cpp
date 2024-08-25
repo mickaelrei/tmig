@@ -74,6 +74,10 @@ glm::vec2 Window::getCursorPos() const {
     return glm::vec2{pos};
 }
 
+void Window::setCursorPos(const glm::vec2 &pos) const {
+    glfwSetCursorPos(window, (double)pos.x, (double)pos.y);
+}
+
 float Window::elapsedTime() const {
     return (float)glfwGetTime();
 }
@@ -123,27 +127,31 @@ void Window::processInput(float dt)
         cam.moveDown(dt);
     }
 
-    // Camera rotation
-    float rx = 0.0f;
-    float ry = 0.0f;
-    if (isKeyHeld(KeyCode::left))
-    {
-        ry -= 1.0f;
-    }
-    if (isKeyHeld(KeyCode::right))
-    {
-        ry += 1.0f;
-    }
-    if (isKeyHeld(KeyCode::up))
-    {
-        rx += 1.0f;
-    }
-    if (isKeyHeld(KeyCode::down))
-    {
-        rx -= 1.0f;
-    }
+    if (isMouseKeyPressed(MouseKey::right)) {
+        setCursorMode(CursorMode::disabled);
 
-    cam.rotate(rx * dt, ry * dt);
+        // Get screen center
+        auto screenCenter = glm::vec2{getSize()} * 0.5f;
+
+        // If first click, reset to center
+        if (currentScene->camera.firstClick) {
+            setCursorPos(screenCenter);
+        }
+
+        currentScene->camera.firstClick = false;
+
+        // Get offset from center and rotate
+        auto pos = getCursorPos();
+        auto offset = pos - screenCenter;
+        currentScene->camera.rotate(-offset.y * dt, -offset.x * dt);
+
+        // Set cursor back to center
+        setCursorPos(screenCenter);
+    } else {
+        // Show cursor again
+        setCursorMode(CursorMode::normal);
+        currentScene->camera.firstClick = true;
+    }
 }
 
 void Window::setShouldClose(bool shouldClose) const {
@@ -189,6 +197,20 @@ bool Window::isKeyReleased(KeyCode key) {
 
     // Key is released if it was pressed and got released now
     return newState == KeyState::released && previousState == KeyState::pressed;
+}
+
+Window::MouseKeyState Window::getKeyState(MouseKey key) const {
+    int keyInt = static_cast<int>(key);
+    return static_cast<MouseKeyState>(glfwGetMouseButton(window, keyInt));
+}
+
+bool Window::isMouseKeyPressed(MouseKey key) const {
+    return getKeyState(key) == MouseKeyState::pressed;
+}
+
+void Window::setCursorMode(CursorMode mode) const {
+    int modeInt = static_cast<int>(mode);
+    glfwSetInputMode(window, GLFW_CURSOR, modeInt);
 }
 
 void Window::start() {

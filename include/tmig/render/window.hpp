@@ -17,6 +17,39 @@ namespace render {
 /// @brief GLFWWindow wrapper class
 class Window {
 public:
+    /// @brief Wrapper enum for GLFW mouse key code
+    enum class MouseKey {
+        left = GLFW_MOUSE_BUTTON_LEFT,
+        right = GLFW_MOUSE_BUTTON_RIGHT,
+        middle = GLFW_MOUSE_BUTTON_MIDDLE,
+        four = GLFW_MOUSE_BUTTON_4,
+        five = GLFW_MOUSE_BUTTON_5,
+        six = GLFW_MOUSE_BUTTON_6,
+        seven = GLFW_MOUSE_BUTTON_7,
+        eight = GLFW_MOUSE_BUTTON_8
+    };
+
+    /// @brief Wrapper enum for GLFW mouse key state
+    enum class MouseKeyState {
+        /// @brief Key is pressed
+        pressed = GLFW_PRESS,
+
+        /// @brief Key is released
+        released = GLFW_RELEASE
+    };
+
+    /// @brief Wrapper enum for GLFW cursor mode
+    enum class CursorMode {
+        /// @brief Normal mode
+        normal = GLFW_CURSOR_NORMAL,
+
+        /// @brief Cursor is hidden
+        hidden = GLFW_CURSOR_HIDDEN,
+
+        /// @brief Cursor is disabled
+        disabled = GLFW_CURSOR_DISABLED
+    };
+
     /// @brief Wrapper enum for GLFW key codes
     enum class KeyCode {
         space = GLFW_KEY_SPACE,
@@ -183,6 +216,10 @@ public:
     /// @return Cursor position vector
     glm::vec2 getCursorPos() const;
 
+    /// @brief Set cursor pos
+    /// @param pos position vector
+    void setCursorPos(const glm::vec2 &pos) const;
+
     /// @brief Get elapsed time since engine initialization
     /// @return Elapsed time in seconds
     float elapsedTime() const;
@@ -210,6 +247,20 @@ public:
     /// @param key key to test
     /// @return Whether key was released in the called frame
     bool isKeyReleased(KeyCode key);
+
+    /// @brief Get state from mouse key
+    /// @param key mouse key
+    /// @return current state for mouse key
+    MouseKeyState getKeyState(MouseKey key) const;
+
+    /// @brief Check if mouse key is pressed
+    /// @param key mouse key to test
+    /// @return Whether mouse key is pressed
+    bool isMouseKeyPressed(MouseKey key) const;
+
+    /// @brief Set new cursor mode for window
+    /// @param mode new cursor mode
+    void setCursorMode(CursorMode mode) const;
 
     /// @brief Setup objects, called once before render loop
     virtual void setup();
