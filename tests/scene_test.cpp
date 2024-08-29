@@ -25,6 +25,8 @@ public:
     void renderView360(float dt);
     void renderRearMirror(float dt);
 
+    void scrollCallback(float xOffset, float yOffset) override;
+
 private:
     std::shared_ptr<tmig::render::Scene> flashlightScene;
     std::shared_ptr<tmig::render::SpotLight> flashlight;
@@ -353,6 +355,10 @@ void App::renderRearMirror(float dt) {
     // Set viewport and projection back to original
     glViewport(0, 0, size.x, size.y);
     currentScene->setProjection(size);
+}
+
+void App::scrollCallback(float xOffset, float yOffset) {
+    printf("App::scrollCallback called: (%.3f, %.3f)\n", xOffset, yOffset);
 }
 
 void App::processInput(float dt) {

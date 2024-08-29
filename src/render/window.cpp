@@ -17,11 +17,20 @@ namespace tmig {
 
 namespace render {
 
-// Window resize
-static void frameBufferSizeCallback(GLFWwindow *window, int width, int height)
-{
-    (void)window;
-    glViewport(0, 0, width, height);
+// Window frame buffer resize callback
+static void default_frameBufferSizeCallback(GLFWwindow *window, int width, int height) {
+    auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    if (w == nullptr) return;
+
+    w->frameBufferSizeCallback(width, height);
+}
+
+// Window mouse scroll callback
+static void default_scrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
+    auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    if (w == nullptr) return;
+
+    w->scrollCallback((float)xOffset, (float)yOffset);
 }
 
 Window::Window()
@@ -40,7 +49,9 @@ Window::Window(const std::string &title)
 
     // Set callbacks
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, default_frameBufferSizeCallback);
+    glfwSetScrollCallback(window, default_scrollCallback);
 
     // Initialize GLAD
     initGLAD();
@@ -49,6 +60,52 @@ Window::Window(const std::string &title)
 Window::~Window()
 {
     glfwDestroyWindow(window);
+}
+
+void Window::setup() {}
+
+void Window::update(float dt)
+{
+    (void)dt;
+}
+
+void Window::start() {
+    // Call setup before starting
+    setup();
+
+    float last = (float)glfwGetTime();
+    while (!glfwWindowShouldClose(window))
+    {
+        // Clear screen
+        glm::vec4 clearColor{0.05f, 0.05f, 0.05f, 1.0f};
+        if (currentScene != nullptr) {
+            clearColor = currentScene->clearColor;
+        }
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Calculate delta time
+        float t = glfwGetTime();
+        float dt = t - last;
+        last = t;
+
+        // Call process input
+        processInput(dt);
+
+        if (currentScene != nullptr) {
+            utils::entityShader()->setVec3("viewPos", currentScene->camera.pos);
+        }
+
+        // Call update
+        update(dt);
+
+        // Update keyboard state
+        updatePreviousKeyboardState();
+
+        // Update GLFW resources
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
 }
 
 void Window::setTitle(const std::string &title)
@@ -80,13 +137,6 @@ void Window::setCursorPos(const glm::vec2 &pos) const {
 
 float Window::elapsedTime() const {
     return (float)glfwGetTime();
-}
-
-void Window::setup() {}
-
-void Window::update(float dt)
-{
-    (void)dt;
 }
 
 void Window::processInput(float dt)
@@ -213,43 +263,13 @@ void Window::setCursorMode(CursorMode mode) const {
     glfwSetInputMode(window, GLFW_CURSOR, modeInt);
 }
 
-void Window::start() {
-    // Call setup before starting
-    setup();
+void Window::frameBufferSizeCallback(int width, int height) {
+    glViewport(0, 0, width, height);
+}
 
-    float last = (float)glfwGetTime();
-    while (!glfwWindowShouldClose(window))
-    {
-        // Clear screen
-        glm::vec4 clearColor{0.05f, 0.05f, 0.05f, 1.0f};
-        if (currentScene != nullptr) {
-            clearColor = currentScene->clearColor;
-        }
-        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Calculate delta time
-        float t = glfwGetTime();
-        float dt = t - last;
-        last = t;
-
-        // Call process input
-        processInput(dt);
-
-        if (currentScene != nullptr) {
-            utils::entityShader()->setVec3("viewPos", currentScene->camera.pos);
-        }
-
-        // Call update
-        update(dt);
-
-        // Update keyboard state
-        updatePreviousKeyboardState();
-
-        // Update GLFW resources
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+void Window::scrollCallback(float xOffset, float yOffset) {
+    (void)xOffset;
+    (void)yOffset;
 }
 
 } // namespace render

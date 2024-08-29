@@ -200,6 +200,13 @@ public:
     /// @brief Start rendering loop
     void start();
 
+    /// @brief Setup objects, called once before render loop
+    virtual void setup();
+
+    /// @brief Update application, called on each render update
+    /// @param dt delta time
+    virtual void update(float dt);
+
     /// @brief Set window title
     /// @param title new title
     void setTitle(const std::string &title);
@@ -262,12 +269,15 @@ public:
     /// @param mode new cursor mode
     void setCursorMode(CursorMode mode) const;
 
-    /// @brief Setup objects, called once before render loop
-    virtual void setup();
+    /// @brief Callback for window frame buffer resize. By default resizes the viewport
+    /// @param width new frame buffer width
+    /// @param height new frame buffer height
+    virtual void frameBufferSizeCallback(int width, int height);
 
-    /// @brief Update application, called on each render update
-    /// @param dt delta time
-    virtual void update(float dt);
+    /// @brief Callback for mouse scroll on the window. By default does nothing
+    /// @param xOffset offset in x-axis
+    /// @param yOffset offset in y-axis
+    virtual void scrollCallback(float xOffset, float yOffset);
 
 protected:
     /// @brief Process input, called before each render update
