@@ -34,7 +34,7 @@ struct GMesh : public Mesh {
 
 private:
     /// @brief Whether setup was called (should be only once)
-    bool _setupCalled;
+    bool _setupCalled = false;
 };
 
 } // namespace render

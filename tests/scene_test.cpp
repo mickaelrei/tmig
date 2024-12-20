@@ -52,6 +52,8 @@ void App::setup() {
         // Enable depth test
         glEnable(GL_DEPTH_TEST);
 
+        glPointSize(15.0f);
+
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK); // not needed, GL_BACK is the default culled/ignored face
     }
@@ -60,7 +62,8 @@ void App::setup() {
     // ----------------------------------------------------------
     // Create scene testing multiple lights
     lightsScene = std::make_shared<Scene>();
-    lightsScene->camera.pos = glm::vec3{0.0f, 0.0f, 3.0f};
+    lightsScene->camera.pos = glm::vec3{0.0f, 2.0f, 0.25f};
+    lightsScene->camera.setPitchYawRoll(-M_PIf * 0.5f, M_PIf, 0.0f);
     lightsScene->setShader(utils::entityShader());
     lightsScene->skybox = utils::Skybox{gl::TextureCube::create(
         "resources/textures/skybox/right.jpg",
@@ -128,9 +131,9 @@ void App::setup() {
         lightsScene->addEntity(wallFront);
         lightsScene->addEntity(wallBottom);
         lightsScene->addEntity(wallTop);
-        lightsScene->addTransparentEntity(transparentObj);
-        lightsScene->addTransparentEntity(rotatingEntity);
-        lightsScene->addTransparentEntity(movingEntity);
+        // lightsScene->addTransparentEntity(transparentObj);
+        // lightsScene->addTransparentEntity(rotatingEntity);
+        // lightsScene->addTransparentEntity(movingEntity);
 
         float s = 0.75f;
         auto light1 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 0.0f}, s, glm::vec3{0.0f, 2.0f, 0.0f});
@@ -140,12 +143,12 @@ void App::setup() {
         auto light5 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 1.0f}, s, glm::vec3{0.0f, 0.0f, 2.0f});
         auto light6 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 1.0f}, s, glm::vec3{0.0f, 0.0f, -2.0f});
 
-        lightsScene->addLight(light1);
-        lightsScene->addLight(light2);
-        lightsScene->addLight(light3);
-        lightsScene->addLight(light4);
-        lightsScene->addLight(light5);
-        lightsScene->addLight(light6);
+        // lightsScene->addLight(light1);
+        // lightsScene->addLight(light2);
+        // lightsScene->addLight(light3);
+        // lightsScene->addLight(light4);
+        // lightsScene->addLight(light5);
+        // lightsScene->addLight(light6);
 
         auto lightCube1 = std::make_shared<Entity>(utils::boxGMesh());
         lightCube1->setColor(glm::vec4{light1->color, 1.0f});
@@ -177,12 +180,12 @@ void App::setup() {
         lightCube6->setPosition(glm::vec3{0.0f, 0.0f, -2.0f});
         lightCube6->setScale(glm::vec3{.2f});
 
-        lightsScene->addEntity(lightCube1);
-        lightsScene->addEntity(lightCube2);
-        lightsScene->addEntity(lightCube3);
-        lightsScene->addEntity(lightCube4);
-        lightsScene->addEntity(lightCube5);
-        lightsScene->addEntity(lightCube6);
+        // lightsScene->addEntity(lightCube1);
+        // lightsScene->addEntity(lightCube2);
+        // lightsScene->addEntity(lightCube3);
+        // lightsScene->addEntity(lightCube4);
+        // lightsScene->addEntity(lightCube5);
+        // lightsScene->addEntity(lightCube6);
     }
 
     // ----------------------------------------------------------
@@ -203,7 +206,7 @@ void App::setup() {
 
     flashlight = std::make_shared<SpotLight>(
         glm::vec3{1.0f, 1.0f, 1.0f},
-        2.5f,
+        0.5f,
         glm::vec3{0.0f, 0.0f, 2.0f},
         glm::vec3{0.0f, 0.0f, -1.0f},
         glm::radians(12.5f),
@@ -215,7 +218,7 @@ void App::setup() {
     floor->setColor(glm::vec4{1.0f, 0.5f, 0.25f, 1.0f});
     floor->setScale(glm::vec3{10.f, 1.0f, 30.0f});
     floor->setPosition(glm::vec3{0.0f, -2.0f, 0.0f});
-    // flashlightScene->addEntity(floor);
+    flashlightScene->addEntity(floor);
 
     glm::vec3 pos[] = {
         {0.7f, 0.6f, -1.0f},
@@ -251,6 +254,119 @@ void App::setup() {
             flashlightScene->addEntity(box);
         }
     }
+
+    // Parameters for new mesh
+    const float radius = 1.0f;
+    const size_t res = 50;
+    tmig::Mesh mesh;
+    float step = 2.0f * radius / (float)(res - 1);
+
+    for (size_t i = 0; i < res; ++i) {
+        float x = -radius + (float)i * step;
+        float z = glm::sqrt(glm::pow(radius, 2.0f) - glm::pow(x, 2.0f));
+
+        // Floor vertices
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, 0.0f, 0.0f},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f}
+        });
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, 0.0f, z},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f}
+        });
+
+        // Back vertices
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, 0.0f, z},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f},
+        });
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, z, z},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f},
+        });
+
+        // Top vertices
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, z, z},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f},
+        });
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, z, 0.0f},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f},
+        });
+
+        // Front vertices
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, z, 0.0f},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f},
+        });
+        mesh.vertices.push_back(tmig::Vertex{
+            glm::vec3{x, 0.0f, 0.0f},
+            glm::vec2{0.0f},
+            glm::vec3{0.0f, 0.0f, 0.0f},
+        });
+
+        // Skip faces if on last iteration
+        if (i >= res - 1) continue;
+
+        // Floor faces
+        mesh.indices.push_back(i * 8 + 0);
+        mesh.indices.push_back((i + 1) * 8 + 0);
+        mesh.indices.push_back((i + 1) * 8 + 1);
+
+        mesh.indices.push_back(i * 8 + 0);
+        mesh.indices.push_back((i + 1) * 8 + 1);
+        mesh.indices.push_back(i * 8 + 1);
+
+        // Back faces
+        mesh.indices.push_back(i * 8 + 2);
+        mesh.indices.push_back((i + 1) * 8 + 2);
+        mesh.indices.push_back((i + 1) * 8 + 3);
+
+        mesh.indices.push_back(i * 8 + 2);
+        mesh.indices.push_back((i + 1) * 8 + 3);
+        mesh.indices.push_back(i * 8 + 3);
+
+        // Top faces
+        mesh.indices.push_back(i * 8 + 4);
+        mesh.indices.push_back((i + 1) * 8 + 4);
+        mesh.indices.push_back((i + 1) * 8 + 5);
+
+        mesh.indices.push_back(i * 8 + 4);
+        mesh.indices.push_back((i + 1) * 8 + 5);
+        mesh.indices.push_back(i * 8 + 5);
+
+        // Front faces
+        mesh.indices.push_back(i * 8 + 6);
+        mesh.indices.push_back((i + 1) * 8 + 6);
+        mesh.indices.push_back((i + 1) * 8 + 7);
+
+        mesh.indices.push_back(i * 8 + 6);
+        mesh.indices.push_back((i + 1) * 8 + 7);
+        mesh.indices.push_back(i * 8 + 7);
+    }
+
+    // Calculate triangle normals
+    auto numIndices = mesh.indices.size();
+    for (size_t i = 0; i < numIndices; i += 3) {
+        auto &a = mesh.vertices[mesh.indices[i]];
+        auto &b = mesh.vertices[mesh.indices[i + 1]];
+        auto &c = mesh.vertices[mesh.indices[i + 2]];
+
+        auto normal = glm::normalize(glm::cross(b.pos - a.pos, c.pos - a.pos));
+        a.normal = normal;
+        b.normal = normal;
+        c.normal = normal;
+    }
+
+    flashlightScene->addEntity(std::make_shared<Entity>(GMesh{mesh}));
 
     // Start with lights scene
     currentScene = lightsScene;
