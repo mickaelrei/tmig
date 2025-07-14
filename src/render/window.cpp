@@ -1,277 +1,172 @@
-#include <iostream>
 #include <memory>
+#include <stdexcept>
 
-#include <glm/gtc/matrix_transform.hpp>
 #include "glad/glad.h"
+#include <GLFW/glfw3.h>
 
-#include "tmig/init.hpp"
 #include "tmig/render/window.hpp"
-#include "tmig/render/utils/shaders.hpp"
-#include "tmig/render/gl/shader.hpp"
-#include "tmig/render/entity.hpp"
-#include "tmig/render/utils/skybox.hpp"
+#include "tmig/util/debug.hpp"
 
-#include "tmig/render/utils/primitives_gmesh.hpp"
-
-namespace tmig {
-
-namespace render {
-
-// Window frame buffer resize callback
-static void default_frameBufferSizeCallback(GLFWwindow *window, int width, int height) {
-    auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (w == nullptr) return;
-
-    w->frameBufferSizeCallback(width, height);
+// Default callback for framebuffer resize
+// TODO: Make a way for user to set their own callbacks
+void defaultFramebufferSizeCallback(GLFWwindow *window, int width, int height) {
+    (void)window;
+    glViewport(0, 0, width, height); glCheckError();
 }
 
-// Window mouse scroll callback
-static void default_scrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
-    auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (w == nullptr) return;
+// Flag for initialized
+static bool initialized = false;
 
-    w->scrollCallback((float)xOffset, (float)yOffset);
-}
+// Local variable for the window used in the engine
+static std::shared_ptr<GLFWwindow> glfwWindow = nullptr;
 
-Window::Window()
-    : Window::Window("Tmig Engine") {}
+// Struct for terminating GLFW resources when window shared pointer gets deleted
+struct WindowDeleter {
+    void operator()(GLFWwindow *window) {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        initialized = false;
+    }
+};
 
-Window::Window(const std::string &title)
-    : title{title}
-{
+namespace tmig::render::window {
+
+void init(int width,int height, const std::string &title) {
+    if (initialized) return;
+    initialized = true;
+
+    // Init GLFW
+    if (glfwInit() == GLFW_FALSE) {
+        throw std::runtime_error{"Failed to initialize GLFW\n"};
+    }
+
+    // Set window hints
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4); // Enable 4x MSAA
+
     // Create window
-    window = glfwCreateWindow(600, 600, title.c_str(), NULL, NULL);
-    if (window == NULL)
-    {
-        throw std::runtime_error{"Failed to create GLFW window\n"};
-        return;
-    }
+    glfwWindow = std::shared_ptr<GLFWwindow>{
+        glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr),
+        WindowDeleter{}
+    };
 
-    // Set callbacks
-    glfwMakeContextCurrent(window);
-    glfwSetWindowUserPointer(window, this);
-    glfwSetFramebufferSizeCallback(window, default_frameBufferSizeCallback);
-    glfwSetScrollCallback(window, default_scrollCallback);
+    // Set window callbacks
+    glfwSetFramebufferSizeCallback(glfwWindow.get(), defaultFramebufferSizeCallback);
 
-    // Initialize GLAD
-    initGLAD();
-}
-
-Window::~Window()
-{
-    glfwDestroyWindow(window);
-}
-
-void Window::setup() {}
-
-void Window::update(float dt)
-{
-    (void)dt;
-}
-
-void Window::start() {
-    // Call setup before starting
-    setup();
-
-    float last = (float)glfwGetTime();
-    while (!glfwWindowShouldClose(window))
-    {
-        // Clear screen
-        glm::vec4 clearColor{0.05f, 0.05f, 0.05f, 1.0f};
-        if (currentScene != nullptr) {
-            clearColor = currentScene->clearColor;
-        }
-        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Calculate delta time
-        float t = glfwGetTime();
-        float dt = t - last;
-        last = t;
-
-        // Call process input
-        processInput(dt);
-
-        if (currentScene != nullptr) {
-            utils::entityShader()->setVec3("viewPos", currentScene->camera.pos);
-        }
-
-        // Call update
-        update(dt);
-
-        // Update keyboard state
-        updatePreviousKeyboardState();
-
-        // Update GLFW resources
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+    // Load GLAD
+    glfwMakeContextCurrent(glfwWindow.get());
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        glfwTerminate();
+        throw std::runtime_error{"Failed to initialize GLAD\n"};
     }
 }
 
-void Window::setTitle(const std::string &title)
-{
-    Window::title = title;
-    glfwSetWindowTitle(window, title.c_str());
+double getRuntime() {
+    return glfwGetTime();
 }
 
-void Window::setSize(const glm::ivec2 &size) const
-{
-    glfwSetWindowSize(window, size.x, size.y);
+bool shouldClose() {
+#ifdef DEBUG
+    if (!initialized) return false;
+#endif
+
+    return static_cast<bool>(glfwWindowShouldClose(glfwWindow.get()));
 }
 
-glm::ivec2 Window::getSize() const {
-    glm::ivec2 size;
-    glfwGetWindowSize(window, &size.x, &size.y);
+void setShouldClose(bool close) {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwSetWindowShouldClose(glfwWindow.get(), static_cast<int>(close));
+}
+
+void swapBuffers() {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwSwapBuffers(glfwWindow.get());
+}
+
+void pollEvents() {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwPollEvents();
+}
+
+void setSize(const glm::ivec2 &size) {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwSetWindowSize(glfwWindow.get(), size.x, size.y);
+}
+
+glm::ivec2 getSize() {
+    glm::ivec2 size{0, 0};
+
+#ifdef DEBUG
+    if (!initialized) return size;
+#endif
+
+    glfwGetWindowSize(glfwWindow.get(), &size.x, &size.y);
     return size;
 }
 
-glm::vec2 Window::getCursorPos() const {
-    glm::dvec2 pos;
-    glfwGetCursorPos(window, &pos.x, &pos.y);
-    return glm::vec2{pos};
+void setTitle(const std::string &title) {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwSetWindowTitle(glfwWindow.get(), title.c_str());
 }
 
-void Window::setCursorPos(const glm::vec2 &pos) const {
-    glfwSetCursorPos(window, (double)pos.x, (double)pos.y);
+int getKeyState(int key) {
+#ifdef DEBUG
+    if (!initialized) return -1;
+#endif
+
+    return glfwGetKey(glfwWindow.get(), key);
 }
 
-float Window::elapsedTime() const {
-    return (float)glfwGetTime();
+int getMouseButtonState(int button) {
+#ifdef DEBUG
+    if (!initialized) return -1;
+#endif
+
+    return glfwGetMouseButton(glfwWindow.get(), button);
 }
 
-void Window::processInput(float dt)
-{
-    // Check for window close
-    if (isKeyPressed(KeyCode::escape))
-    {
-        setShouldClose(true);
-    }
+void setCursorMode(int mode) {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
 
-    if (currentScene == nullptr) return;
-
-    auto &cam = currentScene->camera;
-
-    // Camera movement
-    if (isKeyHeld(KeyCode::w))
-    {
-        cam.moveForward(dt);
-    }
-    if (isKeyHeld(KeyCode::s))
-    {
-        cam.moveBack(dt);
-    }
-    if (isKeyHeld(KeyCode::d))
-    {
-        cam.moveRight(dt);
-    }
-    if (isKeyHeld(KeyCode::a))
-    {
-        cam.moveLeft(dt);
-    }
-    if (isKeyHeld(KeyCode::e))
-    {
-        cam.moveUp(dt);
-    }
-    if (isKeyHeld(KeyCode::q))
-    {
-        cam.moveDown(dt);
-    }
-
-    if (isMouseKeyPressed(MouseKey::right)) {
-        setCursorMode(CursorMode::disabled);
-
-        // Get screen center
-        auto screenCenter = glm::vec2{getSize()} * 0.5f;
-
-        // If first click, reset to center
-        if (currentScene->camera.firstClick) {
-            setCursorPos(screenCenter);
-        }
-
-        currentScene->camera.firstClick = false;
-
-        // Get offset from center and rotate
-        auto pos = getCursorPos();
-        auto offset = pos - screenCenter;
-        currentScene->camera.rotate(-offset.y * dt, -offset.x * dt);
-
-        // Set cursor back to center
-        setCursorPos(screenCenter);
-    } else {
-        // Show cursor again
-        setCursorMode(CursorMode::normal);
-        currentScene->camera.firstClick = true;
-    }
+    glfwSetInputMode(glfwWindow.get(), GLFW_CURSOR, mode);
 }
 
-void Window::setShouldClose(bool shouldClose) const {
-    glfwSetWindowShouldClose(window, shouldClose);
+void setCursorPos(const glm::vec2 &pos) {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwSetCursorPos(glfwWindow.get(), pos.x, pos.y);
 }
 
-Window::KeyState Window::getKeyState(KeyCode key) const {
-    auto keyInt = static_cast<int>(key);
-    return static_cast<KeyState>(glfwGetKey(window, keyInt));
+glm::vec2 getCursorPos() {
+    double x, y;
+
+#ifdef DEBUG
+    if (!initialized) return glm::vec2{};
+#endif
+
+    glfwGetCursorPos(glfwWindow.get(), &x, &y);
+    return glm::vec2{x, y};
 }
 
-void Window::setKeyState(KeyCode key, KeyState state) {
-    keyboardState[key] = state;
-}
-
-void Window::updatePreviousKeyboardState() {
-    for (auto pair : keyboardState) {
-        keyboardPreviousState[pair.first] = pair.second;
-    }
-}
-
-bool Window::isKeyPressed(KeyCode key) {
-    auto newState = getKeyState(key);
-    auto previousState = keyboardPreviousState[key];
-    setKeyState(key, newState);
-
-    // Key is pressed if it was released and got pressed now
-    return newState == KeyState::pressed && previousState == KeyState::released;
-}
-
-bool Window::isKeyHeld(KeyCode key) {
-    auto newState = getKeyState(key);
-    setKeyState(key, newState);
-
-    // Key is held if it is pressed
-    return newState == KeyState::pressed;
-}
-
-bool Window::isKeyReleased(KeyCode key) {
-    auto newState = getKeyState(key);
-    auto previousState = keyboardPreviousState[key];
-    setKeyState(key, newState);
-
-    // Key is released if it was pressed and got released now
-    return newState == KeyState::released && previousState == KeyState::pressed;
-}
-
-Window::MouseKeyState Window::getKeyState(MouseKey key) const {
-    int keyInt = static_cast<int>(key);
-    return static_cast<MouseKeyState>(glfwGetMouseButton(window, keyInt));
-}
-
-bool Window::isMouseKeyPressed(MouseKey key) const {
-    return getKeyState(key) == MouseKeyState::pressed;
-}
-
-void Window::setCursorMode(CursorMode mode) const {
-    int modeInt = static_cast<int>(mode);
-    glfwSetInputMode(window, GLFW_CURSOR, modeInt);
-}
-
-void Window::frameBufferSizeCallback(int width, int height) {
-    glViewport(0, 0, width, height);
-}
-
-void Window::scrollCallback(float xOffset, float yOffset) {
-    (void)xOffset;
-    (void)yOffset;
-}
-
-} // namespace render
-
-} // namespace tmig
+} // namespace tmig::render::window

@@ -12,61 +12,48 @@ static const glm::vec3 worldRight = glm::vec3{1.0f, 0.0f, 0.0f};
 /// @brief Up vector in world space
 static const glm::vec3 worldUp = glm::vec3{0.0f, 1.0f, 0.0f};
 
-namespace tmig {
-
-namespace render {
+namespace tmig::render {
 
 Camera::Camera()
-    : Camera::Camera(glm::vec3{0.0f})
-{
+    : Camera::Camera(glm::vec3{0.0f}) {
 }
 
 Camera::Camera(const glm::vec3 &pos)
-    : pos{pos}
-{
+    : pos{pos} {
+    // Set initial rotation
+    const float pitchOffset = 0.01f;
+    pitch = glm::clamp(
+        pitch,
+        -M_PIf * 0.5f + pitchOffset,
+        M_PIf * 0.5f - pitchOffset
+    );
+    rotation = glm::yawPitchRoll(yaw, pitch, roll);
     updateView();
 }
 
-glm::mat4 Camera::getViewMatrix() const
-{
-    return viewMatrix;
+void Camera::setPosition(const glm::vec3 &position) {
+    pos = position;
+    updateView();
 }
 
-void Camera::moveForward(float dt)
-{
-    pos += (rotation * worldForward) * moveSpeed * dt;
+glm::vec3 Camera::getPosition() const {
+    return pos;
 }
 
-void Camera::moveBack(float dt)
-{
-    pos -= (rotation * worldForward) * moveSpeed * dt;
+void Camera::move(const glm::vec3 &offset) {
+    pos += offset;
+    updateView();
 }
 
-void Camera::moveLeft(float dt)
-{
-    pos -= (rotation * worldRight) * moveSpeed * dt;
+void Camera::moveRelative(const glm::vec3 &offset) {
+    pos += rotation * offset;
+    updateView();
 }
 
-void Camera::moveRight(float dt)
-{
-    pos += (rotation * worldRight) * moveSpeed * dt;
-}
-
-void Camera::moveUp(float dt)
-{
-    pos += (rotation * worldUp) * moveSpeed * dt;
-}
-
-void Camera::moveDown(float dt)
-{
-    pos -= (rotation * worldUp) * moveSpeed * dt;
-}
-
-void Camera::rotate(float rx, float ry, float rz)
-{
-    pitch += rx * rotationSpeed;
-    yaw += ry * rotationSpeed;
-    roll += rz * rotationSpeed;
+void Camera::rotate(float rx, float ry, float rz) {
+    pitch += rx;
+    yaw += ry;
+    roll += rz;
 
     // Clamp to avoid gimball lock
     const float pitchOffset = 0.01f;
@@ -106,6 +93,10 @@ glm::vec3 Camera::right() const {
 
 glm::vec3 Camera::up() const {
     return rotation * worldUp;
+}
+
+glm::mat4 Camera::getViewMatrix() const {
+    return viewMatrix;
 }
 
 void Camera::lookAt(
@@ -151,8 +142,7 @@ void Camera::setPitchYawRoll(float pitch, float yaw, float roll) {
     updateView();
 }
 
-void Camera::updateView()
-{
+void Camera::updateView() {
     auto myForward = glm::normalize(rotation * worldForward);
     auto myUp = glm::normalize(rotation * worldUp);
 
@@ -160,6 +150,4 @@ void Camera::updateView()
     viewMatrix = glm::lookAt(pos, pos + myForward, myUp);
 }
 
-} // namespace render
-
-} // namespace tmig
+} // namespace tmig::render
