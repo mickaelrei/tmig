@@ -121,7 +121,7 @@ void App::setup() {
         transparentObj->setColor(glm::vec4{1.0f, 0.0f, 0.0f, 0.5f});
 
         rotatingEntity = std::make_shared<Entity>(utils::torusGMesh());
-        // rotatingEntity->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
+        rotatingEntity->setScale(glm::vec3{1.0f, 3.0f, 1.0f});
         rotatingEntity->setScale(glm::vec3{0.5f});
         rotatingEntity->setColor(glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});
 
@@ -132,7 +132,7 @@ void App::setup() {
         lightsScene->addEntity(wallBottom);
         lightsScene->addEntity(wallTop);
         // lightsScene->addTransparentEntity(transparentObj);
-        // lightsScene->addTransparentEntity(rotatingEntity);
+        lightsScene->addTransparentEntity(rotatingEntity);
         // lightsScene->addTransparentEntity(movingEntity);
 
         float s = 0.75f;
@@ -143,12 +143,12 @@ void App::setup() {
         auto light5 = std::make_shared<PointLight>(glm::vec3{1.0f, 0.0f, 1.0f}, s, glm::vec3{0.0f, 0.0f, 2.0f});
         auto light6 = std::make_shared<PointLight>(glm::vec3{0.0f, 1.0f, 1.0f}, s, glm::vec3{0.0f, 0.0f, -2.0f});
 
-        // lightsScene->addLight(light1);
-        // lightsScene->addLight(light2);
-        // lightsScene->addLight(light3);
-        // lightsScene->addLight(light4);
-        // lightsScene->addLight(light5);
-        // lightsScene->addLight(light6);
+        lightsScene->addLight(light1);
+        lightsScene->addLight(light2);
+        lightsScene->addLight(light3);
+        lightsScene->addLight(light4);
+        lightsScene->addLight(light5);
+        lightsScene->addLight(light6);
 
         auto lightCube1 = std::make_shared<Entity>(utils::boxGMesh());
         lightCube1->setColor(glm::vec4{light1->color, 1.0f});
