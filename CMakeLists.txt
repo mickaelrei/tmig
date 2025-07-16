@@ -84,25 +84,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 
 #######################################################
 #######################################################
-# Main test
+# Instanced test
 
 # Source files
 set(
-    MAIN_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/main.cpp
+    INSTANCED_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/instanced.cpp
 )
 
 # Adding executables for testing
-add_executable(main ${MAIN_TEST_SOURCE_FILES})
+add_executable(instanced ${INSTANCED_TEST_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    main
+    instanced
     PRIVATE
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 target_link_libraries(
-    main
+    instanced
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
@@ -110,7 +110,42 @@ target_link_libraries(
 
 # Header files
 target_include_directories(
-    main
+    instanced
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
+)
+
+#######################################################
+#######################################################
+# Non-instanced test
+
+# Source files
+set(
+    NON_INSTANCED_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/non_instanced.cpp
+)
+
+# Adding executables for testing
+add_executable(non_instanced ${NON_INSTANCED_TEST_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    non_instanced
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    non_instanced
+    PRIVATE
+    ${TMIG}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    non_instanced
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include

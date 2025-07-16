@@ -24,26 +24,25 @@ int main() {
     srand(3);
 
     render::init();
-    render::window::setTitle("Vertex attribute test");
+    render::window::setTitle("Vertex attribute test | Instancing OFF");
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
     camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
 
     auto shader = render::Shader::create(
-        util::getResourcePath("shaders/entity.vs"),
-        util::getResourcePath("shaders/entity.fs")
+        util::getResourcePath("shaders/non_instanced.vert"),
+        util::getResourcePath("shaders/base.frag")
     );
 
     // Generate instancing data
     struct instanceData {
         glm::vec4 color;
-        glm::vec3 pos;
-        float radius;
+        glm::mat4 model;
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 50000; ++i) {
+    for (int i = 0; i < 100000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -57,35 +56,30 @@ int main() {
 
         // size
         float sx = (float)(rand() % 900 + 100) / 100.0f;
-        // float sy = (float)(rand() % 900 + 100) / 100.0f;
-        // float sz = (float)(rand() % 900 + 100) / 100.0f;
+        float sy = (float)(rand() % 900 + 100) / 100.0f;
+        float sz = (float)(rand() % 900 + 100) / 100.0f;
 
-        // glm::mat4 m{1.0f};
-        // m = glm::translate(m, glm::vec3{x, y, z});
-        // m = glm::scale(m, glm::vec3{sx, sy, sz});
+        glm::mat4 m{1.0f};
+        m = glm::translate(m, glm::vec3{x, y, z});
+        m = glm::scale(m, glm::vec3{sx, sy, sz});
 
-        instances.push_back(instanceData{.color = color, .pos = glm::vec3{x, y, z}, .radius = sx});
+        instances.push_back(instanceData{.color = color, .model = m});
     }
 
     // Generate mesh vertices
     std::vector<util::GeneralVertex> vertices;
     std::vector<unsigned int> indices;
-    util::generateSphereMesh([&](auto v) { vertices.push_back(v); }, indices, 20);
+    util::generateBoxMesh([&](auto v) { vertices.push_back(v); }, indices);
     printf("vertices: %ld | indices: %ld\n", vertices.size(), indices.size());
     
     // Set attributes and data
-    render::Mesh<util::GeneralVertex, instanceData> mesh;
+    render::Mesh<util::GeneralVertex> mesh;
     mesh.setAttributes({
         render::VertexAttributeType::Float3, // position
         render::VertexAttributeType::Float3, // normal
-    }, {
-        render::VertexAttributeType::Float4, // color
-        render::VertexAttributeType::Float3, // pos
-        render::VertexAttributeType::Float,  // radius
     });
     mesh.setVertexBufferData(vertices.data(), vertices.size());
     mesh.setIndexBufferData(indices);
-    mesh.setInstanceBufferData(instances.data(), instances.size());
 
     float lastTime = render::window::getRuntime();
     while (!render::window::shouldClose()) {
@@ -98,20 +92,6 @@ int main() {
         if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             render::window::setShouldClose(true);
         }
-
-        for (size_t i = 0; i < instances.size(); ++i) {
-            glm::vec3 pos = glm::vec3(instances[i].pos);
-            pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f};
-
-            float radius = instances[i].radius;
-
-            float t = runtime * 10.0f + i * 0.01f;
-            radius = glm::sin(t) * 4.5f + 10.0f;
-
-            instances[i].pos = pos;
-            instances[i].radius = radius;
-        }
-        mesh.setInstanceBufferData(instances.data(), instances.size());
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
@@ -129,12 +109,35 @@ int main() {
         render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 
-        shader->setMat4("model", glm::mat4{1.0f});
         shader->setMat4("view", view);
         shader->setMat4("projection", projection);
         shader->setVec3("viewPos", camera.getPosition());
-        shader->setVec4("meshColor", glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
-        mesh.render();
+
+        for (size_t i = 0; i < instances.size(); ++i) {
+            glm::vec3 pos = glm::vec3(instances[i].model[3]);
+            pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f};
+
+            // Extract scale from model matrix
+            glm::vec3 scale = glm::vec3(
+                glm::length(glm::vec3(instances[i].model[0])),
+                glm::length(glm::vec3(instances[i].model[1])),
+                glm::length(glm::vec3(instances[i].model[2]))
+            );
+
+            float t = runtime * 10.0f + i * 0.01f;
+            scale.x = glm::sin(t) * 4.5f + 10.0f;
+            scale.y = glm::cos(t) * 4.5f + 10.0f;
+            scale.z = glm::sin(t + 1.0f) * 4.5f + 10.0f;
+
+            glm::mat4 model{1.0f};
+            model = glm::translate(model, pos);
+            model = glm::scale(model, scale);
+            instances[i].model = model;
+
+            shader->setVec4("color", instances[i].color);
+            shader->setMat4("model", instances[i].model);
+            mesh.render();
+        }
 
         render::window::swapBuffers();
         render::window::pollEvents();
