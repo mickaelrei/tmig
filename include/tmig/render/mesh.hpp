@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 
+#include "tmig/render/data_buffer.hpp"
 #include "tmig/util/debug.hpp"
 
 namespace tmig::render {
@@ -32,15 +33,18 @@ enum class VertexAttributeType {
 template<typename V>
 class Mesh {
 public:
-    /// @brief Default constructor
-    Mesh() = default;
+    /// @brief Constructor
+    Mesh();
+
+    /// @brief Destructor
+    ~Mesh();
 
     /// @brief Set attributes for this mesh
     /// @param vertexAttributes Attributes per vertex
     void setAttributes(const std::vector<VertexAttributeType> &vertexAttributes);
 
-    /// @brief Set per-vertex data
-    void setVertexBufferData(const V *data, size_t count);
+    /// @brief Set per-vertex buffer
+    void setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer);
 
     /// @brief Set indices buffer data
     void setIndexBufferData(const std::vector<unsigned int> &indices);
@@ -52,8 +56,8 @@ private:
     /// @brief Vertex Attribute Object tied to this mesh
     unsigned int vao = 0;
 
-    /// @brief Buffer data for per-vertex attributes
-    unsigned int vertexVbo = 0;
+    /// @brief Pointer to vertex buffer
+    std::shared_ptr<DataBuffer<V>> vertexBuffer;
 
     /// @brief Elements/indices buffer data
     unsigned int ebo = 0;
@@ -63,6 +67,9 @@ private:
 
     /// @brief Per-vertex attributes
     std::vector<VertexAttributeType> vertexAttributes;
+
+    /// @brief Whether vertex attributes are configured
+    bool vertexAttributesConfigured = false;
 
     /// @brief Internally configure attributes
     void configureVertexAttributes();

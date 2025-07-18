@@ -43,40 +43,37 @@ static size_t getAttributeType(VertexAttributeType type) {
 }
 
 template<typename V>
-void Mesh<V>::setAttributes(const std::vector<VertexAttributeType> &_vertexAttributes) {
-    // Generate VAO if needed
-    if (vao == 0) {
-        glGenVertexArrays(1, &vao); glCheckError();
-    }
-
-    // Update attribute vectors
-    vertexAttributes = _vertexAttributes;
-
-    // Delete old buffers
-    if (vertexVbo != 0) {
-        glDeleteBuffers(1, &vertexVbo); glCheckError();
-    }
-
-    // New vertex buffer
-    glGenBuffers(1, &vertexVbo); glCheckError();
-
-    configureVertexAttributes();
+Mesh<V>::Mesh() {
+    glGenVertexArrays(1, &vao); glCheckError();
+    util::debugPrint("Created VAO %ld\n", vao);
 }
 
 template<typename V>
-void Mesh<V>::setVertexBufferData(const V *data, size_t count) {
-    static_assert(!std::is_same_v<V, void>, "Template for vertex data must not be void");
-    
-    if (vertexVbo == 0) return;
+Mesh<V>::~Mesh() {
+    auto _vao = vao;
+    glDeleteVertexArrays(1, &vao); glCheckError();
+    util::debugPrint("Deleted VAO %ld\n", _vao);
+}
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertexVbo); glCheckError();
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(V), data, GL_STATIC_DRAW); glCheckError();
+template<typename V>
+void Mesh<V>::setAttributes(const std::vector<VertexAttributeType> &_vertexAttributes) {
+    vertexAttributes = _vertexAttributes;
+    vertexAttributesConfigured = false;
+}
+
+template<typename V>
+void Mesh<V>::setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer) {
+    if (vertexAttributes.empty()) {
+        throw std::runtime_error{"Cannot bind vertex buffer without attribute layout (setAttributes)"};
+    }
+    
+    vertexBuffer = buffer;
+    configureVertexAttributes();
+    vertexAttributesConfigured = true;
 }
 
 template<typename V>
 void Mesh<V>::setIndexBufferData(const std::vector<unsigned int> &indices) {
-    if (vertexVbo == 0) return;
-
     indexCount = static_cast<int>(indices.size());
     if (ebo == 0) {
         glGenBuffers(1, &ebo); glCheckError();
@@ -105,7 +102,7 @@ void Mesh<V>::configureVertexAttributes() {
     }
 
     // Ensure stride size matches template type size
-    util::debugPrint("vert str %ld | sizeV %ld\n", vertexStride, sizeof(V));
+    util::debugPrint("vertex stride: %ld | sizeof(V): %ld\n", vertexStride, sizeof(V));
     if (vertexStride != sizeof(V)) {
         throw std::runtime_error{"Vertex type size does not match vertex stride size"};
     }
@@ -113,7 +110,7 @@ void Mesh<V>::configureVertexAttributes() {
     // Set vertex attributes
     size_t vertexOffset = 0;
     GLuint attribIndex = 0;
-    glBindBuffer(GL_ARRAY_BUFFER, vertexVbo); glCheckError();
+    vertexBuffer->bind();
     for (auto attr : vertexAttributes) {
         if (attr == VertexAttributeType::Mat4x4) {
             for (int i = 0; i < 4; ++i) {

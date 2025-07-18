@@ -66,20 +66,44 @@ int main() {
         instances.push_back(instanceData{.color = color, .model = m});
     }
 
-    // Generate mesh vertices
-    std::vector<util::GeneralVertex> vertices;
-    std::vector<unsigned int> indices;
-    util::generateBoxMesh([&](auto v) { vertices.push_back(v); }, indices);
-    printf("vertices: %ld | indices: %ld\n", vertices.size(), indices.size());
+    // Generate high-resolution sphere mesh
+    std::vector<util::GeneralVertex> highResVertices;
+    std::vector<unsigned int> highResIndices;
+    util::generateSphereMesh([&](auto v) { highResVertices.push_back(v); }, highResIndices, 20);
+    printf(
+        "high-res vertices: %ld | high-res indices: %ld\n",
+        highResVertices.size(),
+        highResIndices.size()
+    );
+
+    // Generate low-resolution sphere mesh
+    std::vector<util::GeneralVertex> lowResVertices;
+    std::vector<unsigned int> lowResIndices;
+    util::generateSphereMesh([&](auto v) { lowResVertices.push_back(v); }, lowResIndices, 3);
+    printf(
+        "low-res vertices: %ld | low-res indices: %ld\n",
+        lowResVertices.size(),
+        lowResIndices.size()
+    );
+
+    // Create high-res vertex data buffer
+    auto highResBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
+    highResBuffer->setData(highResVertices);
+
+    // Create low-res vertex data buffer
+    auto lowResBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
+    lowResBuffer->setData(lowResVertices);
     
-    // Set attributes and data
+    // Set mesh attributes
     render::Mesh<util::GeneralVertex> mesh;
     mesh.setAttributes({
         render::VertexAttributeType::Float3, // position
         render::VertexAttributeType::Float3, // normal
     });
-    mesh.setVertexBufferData(vertices.data(), vertices.size());
-    mesh.setIndexBufferData(indices);
+
+    // Start with high res
+    mesh.setIndexBufferData(highResIndices);
+    mesh.setVertexBuffer(highResBuffer);
 
     float lastTime = render::window::getRuntime();
     while (!render::window::shouldClose()) {
@@ -91,6 +115,16 @@ int main() {
         // Close window if ESC was pressed
         if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             render::window::setShouldClose(true);
+        }
+        if (render::window::getKeyState(GLFW_KEY_E) == GLFW_PRESS) {
+            // Change to low-res data on E key
+            mesh.setIndexBufferData(lowResIndices);
+            mesh.setVertexBuffer(lowResBuffer);
+        }
+        if (render::window::getKeyState(GLFW_KEY_F) == GLFW_PRESS) {
+            // Change to high-res data on F key
+            mesh.setIndexBufferData(highResIndices);
+            mesh.setVertexBuffer(highResBuffer);
         }
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
@@ -124,7 +158,7 @@ int main() {
                 glm::length(glm::vec3(instances[i].model[2]))
             );
 
-            float t = runtime * 10.0f + i * 0.01f;
+            float t = runtime * 1.0f + i * 0.01f;
             scale.x = glm::sin(t) * 4.5f + 10.0f;
             scale.y = glm::cos(t) * 4.5f + 10.0f;
             scale.z = glm::sin(t + 1.0f) * 4.5f + 10.0f;
