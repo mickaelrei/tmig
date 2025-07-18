@@ -42,7 +42,7 @@ int main() {
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 100000; ++i) {
+    for (int i = 0; i < 25000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -69,7 +69,7 @@ int main() {
     // Generate high-resolution sphere mesh
     std::vector<util::GeneralVertex> highResVertices;
     std::vector<unsigned int> highResIndices;
-    util::generateSphereMesh([&](auto v) { highResVertices.push_back(v); }, highResIndices, 20);
+    util::generateSphereMesh([&](auto v) { highResVertices.push_back(v); }, highResIndices, 40);
     printf(
         "high-res vertices: %ld | high-res indices: %ld\n",
         highResVertices.size(),

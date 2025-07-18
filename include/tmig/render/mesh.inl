@@ -9,39 +9,6 @@
 
 namespace tmig::render {
 
-static size_t getAttributeSize(VertexAttributeType type) {
-    switch (type) {
-        case VertexAttributeType::Float:  return 1  * sizeof(float);
-        case VertexAttributeType::Float2: return 2  * sizeof(float);
-        case VertexAttributeType::Float3: return 3  * sizeof(float);
-        case VertexAttributeType::Float4: return 4  * sizeof(float);
-        case VertexAttributeType::Mat4x4: return 16 * sizeof(float);
-    }
-    return 0;
-}
-
-static size_t getAttributeCount(VertexAttributeType type) {
-    switch (type) {
-        case VertexAttributeType::Float:  return 1;
-        case VertexAttributeType::Float2: return 2;
-        case VertexAttributeType::Float3: return 3;
-        case VertexAttributeType::Float4: return 4;
-        case VertexAttributeType::Mat4x4: return 16;
-    }
-    return 0;
-}
-
-static size_t getAttributeType(VertexAttributeType type) {
-    switch (type) {
-        case VertexAttributeType::Float:  return GL_FLOAT;
-        case VertexAttributeType::Float2: return GL_FLOAT;
-        case VertexAttributeType::Float3: return GL_FLOAT;
-        case VertexAttributeType::Float4: return GL_FLOAT;
-        case VertexAttributeType::Mat4x4: return GL_FLOAT;
-    }
-    return 0;
-}
-
 template<typename V>
 Mesh<V>::Mesh() {
     glGenVertexArrays(1, &vao); glCheckError();
@@ -69,7 +36,6 @@ void Mesh<V>::setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer) {
     
     vertexBuffer = buffer;
     configureVertexAttributes();
-    vertexAttributesConfigured = true;
 }
 
 template<typename V>
@@ -93,7 +59,7 @@ void Mesh<V>::render() {
 }
 
 template<typename V>
-void Mesh<V>::configureVertexAttributes() {
+unsigned int Mesh<V>::configureVertexAttributes() {
     glBindVertexArray(vao); glCheckError();
 
     size_t vertexStride = 0;
@@ -114,12 +80,14 @@ void Mesh<V>::configureVertexAttributes() {
     for (auto attr : vertexAttributes) {
         if (attr == VertexAttributeType::Mat4x4) {
             for (int i = 0; i < 4; ++i) {
+                util::debugPrint("glVertexAttribPointer(%ld, 4, %ld, GL_FALSE, %ld, (void*)%ld);\n", attribIndex, GL_FLOAT, vertexStride, vertexOffset + sizeof(glm::vec4) * i);
                 glVertexAttribPointer(attribIndex, 4, GL_FLOAT, GL_FALSE, vertexStride, (void*)(vertexOffset + sizeof(glm::vec4) * i)); glCheckError();
                 glEnableVertexAttribArray(attribIndex); glCheckError();
                 attribIndex++;
             }
             vertexOffset += getAttributeSize(attr);
         } else {
+            util::debugPrint("glVertexAttribPointer(%ld, %ld, %ld, GL_FALSE, %ld, (void*)%ld);\n", attribIndex, getAttributeCount(attr), getAttributeType(attr), vertexStride, vertexOffset);
             glVertexAttribPointer(attribIndex, getAttributeCount(attr), getAttributeType(attr), GL_FALSE, vertexStride, (void*)vertexOffset); glCheckError();
             glEnableVertexAttribArray(attribIndex); glCheckError();
             vertexOffset += getAttributeSize(attr);
@@ -128,6 +96,8 @@ void Mesh<V>::configureVertexAttributes() {
     }
 
     glBindVertexArray(0); glCheckError();
+    vertexAttributesConfigured = true;
+    return attribIndex;
 }
 
 } // namespace tmig::render

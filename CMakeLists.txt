@@ -42,6 +42,7 @@ set(
     ${SOURCE_DIR}/render/camera.cpp
     ${SOURCE_DIR}/render/render.cpp
     ${SOURCE_DIR}/render/shader.cpp
+    ${SOURCE_DIR}/render/vertex_attribute.cpp
     ${SOURCE_DIR}/render/window.cpp
 
     # Utility module

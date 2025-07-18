@@ -42,7 +42,7 @@ int main() {
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 100000; ++i) {
+    for (int i = 0; i < 250000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -71,6 +71,14 @@ int main() {
     std::vector<unsigned int> indices;
     util::generateBoxMesh([&](auto v) { vertices.push_back(v); }, indices);
     printf("vertices: %ld | indices: %ld\n", vertices.size(), indices.size());
+
+    // Create vertex data buffer
+    auto vertexBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
+    vertexBuffer->setData(vertices);
+
+    // Create instance data buffer
+    auto instanceBuffer = std::make_shared<render::DataBuffer<instanceData>>();
+    instanceBuffer->setData(instances);
     
     // Set attributes and data
     render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
@@ -79,11 +87,11 @@ int main() {
         render::VertexAttributeType::Float3, // normal
     }, {
         render::VertexAttributeType::Float4, // color
-        render::VertexAttributeType::Mat4x4,  // radius
+        render::VertexAttributeType::Mat4x4, // model
     });
-    mesh.setVertexBufferData(vertices.data(), vertices.size());
+    mesh.setVertexBuffer(vertexBuffer);
+    mesh.setInstanceBuffer(instanceBuffer);
     mesh.setIndexBufferData(indices);
-    mesh.setInstanceBufferData(instances.data(), instances.size());
 
     float lastTime = render::window::getRuntime();
     while (!render::window::shouldClose()) {
@@ -118,7 +126,7 @@ int main() {
             model = glm::scale(model, scale);
             instances[i].model = model;
         }
-        mesh.setInstanceBufferData(instances.data(), instances.size());
+        instanceBuffer->setData(instances);
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 

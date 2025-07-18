@@ -24,7 +24,8 @@ void DataBuffer<T>::bind() {
 }
 
 template<typename T>
-void DataBuffer<T>::setData(const T* data, size_t count) {
+void DataBuffer<T>::setData(const T* data, size_t _count) {
+    count = _count;
     bind();
     glBufferData(GL_ARRAY_BUFFER, count * sizeof(T), data, GL_STATIC_DRAW); glCheckError();
 }

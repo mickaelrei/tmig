@@ -26,9 +26,15 @@ public:
     /// @brief Set buffer data
     void setData(const std::vector<T> &vector);
 
+    /// @brief Get current buffer data count
+    size_t getCount() const { return count; }
+
 private:
     /// @brief OpenGL identifier
     unsigned int id;
+
+    /// @brief Data count
+    size_t count;
 };
 
 } // namespace tmig::render

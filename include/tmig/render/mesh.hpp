@@ -3,32 +3,15 @@
 #include <vector>
 #include <memory>
 
+#include "tmig/render/vertex_attribute.hpp"
 #include "tmig/render/data_buffer.hpp"
 #include "tmig/util/debug.hpp"
 
 namespace tmig::render {
 
-/// @brief Enum for supported vertex attribute types. Used in Meshes to send vertex data
-enum class VertexAttributeType {
-    /// @brief Single float attribute
-    Float,
-
-    /// @brief Two floats attribute, used as vec2 in shader
-    Float2,
-
-    /// @brief Three floats attribute, used as vec3 in shader
-    Float3,
-
-    /// @brief Four floats attribute, used as vec4 in shader
-    Float4,
-
-    /// @brief 4x4 matrix attribute, used as mat4 in shader
-    Mat4x4,
-};
-
 /// @brief Class for creating and rendering a mesh
 /// @tparam V type used as vertex data
-/// @note Make sure to call `setAttributes` before calling `setVertexBufferData` and `setIndexBufferData`.
+/// @note Make sure to call `setAttributes` before calling `setVertexBuffer`.
 /// Also make sure to pass matching attributes based on the template typename.
 template<typename V>
 class Mesh {
@@ -44,15 +27,15 @@ public:
     void setAttributes(const std::vector<VertexAttributeType> &vertexAttributes);
 
     /// @brief Set per-vertex buffer
-    void setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer);
+    virtual void setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer);
 
     /// @brief Set indices buffer data
-    void setIndexBufferData(const std::vector<unsigned int> &indices);
+    virtual void setIndexBufferData(const std::vector<unsigned int> &indices);
 
     /// @brief Render this mesh
-    void render();
+    virtual void render();
 
-private:
+protected:
     /// @brief Vertex Attribute Object tied to this mesh
     unsigned int vao = 0;
 
@@ -72,7 +55,8 @@ private:
     bool vertexAttributesConfigured = false;
 
     /// @brief Internally configure attributes
-    void configureVertexAttributes();
+    /// @return How many attributes were used
+    virtual unsigned int configureVertexAttributes();
 };
 
 } // namespace tmig::render
