@@ -17,9 +17,6 @@ public:
     /// @note Deletes the buffer
     ~DataBuffer();
 
-    /// @brief Binds this buffer
-    void bind();
-
     /// @brief Set buffer data
     void setData(const T *data, size_t count);
 
@@ -27,14 +24,22 @@ public:
     void setData(const std::vector<T> &vector);
 
     /// @brief Get current buffer data count
-    size_t getCount() const { return count; }
+    size_t count() const { return _count; }
+
+    unsigned int id() const { return _id; }
 
 private:
     /// @brief OpenGL identifier
-    unsigned int id;
+    unsigned int _id = 0;
 
-    /// @brief Data count
-    size_t count;
+    /// @brief Buffer current count
+    size_t _count = 0;
+
+    /// @brief Buffer max capacity
+    size_t capacity = 0;
+
+    /// @brief Allocate storage for the buffer
+    void allocate(size_t newCapacity);
 };
 
 } // namespace tmig::render

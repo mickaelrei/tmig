@@ -53,7 +53,6 @@ set(
 
     # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
-    ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
 )
 
 # Adding engine shared library

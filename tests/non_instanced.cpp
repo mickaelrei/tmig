@@ -90,9 +90,17 @@ int main() {
     auto highResBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
     highResBuffer->setData(highResVertices);
 
+    // Create high-res index buffer
+    auto highResIndexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
+    highResIndexBuffer->setData(highResIndices);
+
     // Create low-res vertex data buffer
     auto lowResBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
     lowResBuffer->setData(lowResVertices);
+
+    // Create low-res index buffer
+    auto lowResIndexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
+    lowResIndexBuffer->setData(lowResIndices);
     
     // Set mesh attributes
     render::Mesh<util::GeneralVertex> mesh;
@@ -102,7 +110,7 @@ int main() {
     });
 
     // Start with high res
-    mesh.setIndexBufferData(highResIndices);
+    mesh.setIndexBuffer(highResIndexBuffer);
     mesh.setVertexBuffer(highResBuffer);
 
     float lastTime = render::window::getRuntime();
@@ -118,12 +126,12 @@ int main() {
         }
         if (render::window::getKeyState(GLFW_KEY_E) == GLFW_PRESS) {
             // Change to low-res data on E key
-            mesh.setIndexBufferData(lowResIndices);
+            mesh.setIndexBuffer(lowResIndexBuffer);
             mesh.setVertexBuffer(lowResBuffer);
         }
         if (render::window::getKeyState(GLFW_KEY_F) == GLFW_PRESS) {
             // Change to high-res data on F key
-            mesh.setIndexBufferData(highResIndices);
+            mesh.setIndexBuffer(highResIndexBuffer);
             mesh.setVertexBuffer(highResBuffer);
         }
 

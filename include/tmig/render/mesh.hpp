@@ -29,8 +29,8 @@ public:
     /// @brief Set per-vertex buffer
     virtual void setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer);
 
-    /// @brief Set indices buffer data
-    virtual void setIndexBufferData(const std::vector<unsigned int> &indices);
+    /// @brief Set indices buffer
+    virtual void setIndexBuffer(std::shared_ptr<DataBuffer<unsigned int>> buffer);
 
     /// @brief Render this mesh
     virtual void render();
@@ -42,21 +42,14 @@ protected:
     /// @brief Pointer to vertex buffer
     std::shared_ptr<DataBuffer<V>> vertexBuffer;
 
-    /// @brief Elements/indices buffer data
-    unsigned int ebo = 0;
-
-    /// @brief How many indices are in the indices buffer
-    int indexCount = 0;
+    /// @brief Pointer to index buffer
+    std::shared_ptr<DataBuffer<unsigned int>> indexBuffer;
 
     /// @brief Per-vertex attributes
     std::vector<VertexAttributeType> vertexAttributes;
 
-    /// @brief Whether vertex attributes are configured
-    bool vertexAttributesConfigured = false;
-
-    /// @brief Internally configure attributes
-    /// @return How many attributes were used
-    virtual unsigned int configureVertexAttributes();
+    /// @brief Internally configure per-vertex attributes
+    void configureVertexAttributes();
 };
 
 } // namespace tmig::render

@@ -13,8 +13,6 @@ namespace tmig::render {
 /// @tparam I type used as instance data
 /// @note - Make sure to call `setAttributes` before calling `setVertexBuffer`. Also make sure to pass
 /// matching attributes based on the two template typenames.
-/// @note - Make sure to pass a vertex buffer before passing an instance buffer, that is, calling 
-/// `setVertexBuffer` before calling `setInstanceBuffer`
 template<typename V, typename I>
 class InstancedMesh : private Mesh<V> {
 public:
@@ -39,8 +37,8 @@ public:
     }
 
     /// @brief Set indices buffer data
-    void setIndexBufferData(const std::vector<unsigned int> &indices) override {
-        Mesh<V>::setIndexBufferData(indices);
+    void setIndexBuffer(std::shared_ptr<DataBuffer<unsigned int>> buffer) override {
+        Mesh<V>::setIndexBuffer(buffer);
     }
 
     /// @brief Render this mesh
@@ -56,8 +54,8 @@ protected:
     /// @brief Whether instance attributes are configured
     bool instanceAttributesConfigured = false;
 
-    /// @brief Internally configure attributes
-    unsigned int configureVertexAttributes() override;
+    /// @brief Internally configure per-instance attributes
+    void configureInstanceAttributes();
 };
 
 } // namespace tmig::render

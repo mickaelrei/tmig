@@ -33,8 +33,9 @@ size_t getAttributeSize(VertexAttributeType type);
 size_t getAttributeCount(VertexAttributeType type);
 
 /// @brief Returns the OpenGL type for this attribute type
-/// @param type 
-/// @return 
 size_t getAttributeType(VertexAttributeType type);
+
+/// @brief Helper function for getting a stride size based on a list of attribute types
+size_t getStrideSize(const VertexAttributeType *types, size_t count);
 
 } // namespace tmig::render

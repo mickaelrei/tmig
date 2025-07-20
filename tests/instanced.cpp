@@ -13,7 +13,7 @@
 #include "tmig/util/camera.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
-
+ 
 using namespace tmig;
 
 bool firstSinceLast = true;
@@ -42,7 +42,7 @@ int main() {
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 250000; ++i) {
+    for (int i = 0; i < 100000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -79,6 +79,10 @@ int main() {
     // Create instance data buffer
     auto instanceBuffer = std::make_shared<render::DataBuffer<instanceData>>();
     instanceBuffer->setData(instances);
+
+    // Create index buffer
+    auto indexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
+    indexBuffer->setData(indices);
     
     // Set attributes and data
     render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
@@ -89,9 +93,9 @@ int main() {
         render::VertexAttributeType::Float4, // color
         render::VertexAttributeType::Mat4x4, // model
     });
-    mesh.setVertexBuffer(vertexBuffer);
     mesh.setInstanceBuffer(instanceBuffer);
-    mesh.setIndexBufferData(indices);
+    mesh.setIndexBuffer(indexBuffer);
+    mesh.setVertexBuffer(vertexBuffer);
 
     float lastTime = render::window::getRuntime();
     while (!render::window::shouldClose()) {

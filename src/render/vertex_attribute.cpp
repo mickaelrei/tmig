@@ -37,4 +37,12 @@ size_t getAttributeType(VertexAttributeType type) {
     return 0;
 }
 
+size_t getStrideSize(const VertexAttributeType *types, size_t count) {
+    size_t stride = 0;
+    for (size_t i = 0; i < count; ++i) {
+        stride += getAttributeSize(types[i]);
+    }
+    return stride;
+}
+
 } // namespace tmig::render

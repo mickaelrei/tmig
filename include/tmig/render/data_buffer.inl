@@ -7,27 +7,20 @@ namespace tmig::render {
 
 template<typename T>
 DataBuffer<T>::DataBuffer() {
-    glGenBuffers(1, &id); glCheckError();
-    util::debugPrint("Created VBO %ld\n", id);
+    glCreateBuffers(1, &_id); glCheckError();
+    util::debugPrint("Created VBO %ld\n", _id);
 }
 
 template<typename T>
 DataBuffer<T>::~DataBuffer() {
-    auto _id = id;
-    glDeleteBuffers(1, &id); glCheckError();
-    util::debugPrint("Deleted VBO %ld\n", _id);
+    util::debugPrint("Deleting VBO %ld\n", _id);
+    glDeleteBuffers(1, &_id); glCheckError();
 }
 
 template<typename T>
-void DataBuffer<T>::bind() {
-    glBindBuffer(GL_ARRAY_BUFFER, id); glCheckError();
-}
-
-template<typename T>
-void DataBuffer<T>::setData(const T* data, size_t _count) {
-    count = _count;
-    bind();
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(T), data, GL_STATIC_DRAW); glCheckError();
+void DataBuffer<T>::setData(const T* data, size_t count) {
+    _count = count;
+    glNamedBufferData(_id, _count * sizeof(T), data, GL_STATIC_DRAW); glCheckError();
 }
 
 template<typename T>
