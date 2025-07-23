@@ -28,4 +28,14 @@ void DataBuffer<T>::setData(const std::vector<T> &vector) {
     setData(vector.data(), vector.size());
 }
 
+template<typename T>
+void DataBuffer<T>::setSubset(size_t offset, size_t count, const T *data) {
+#ifdef DEBUG
+    if (offset >= _count || offset + count >= _count) return;
+#endif
+
+    glNamedBufferSubData(_id, offset, count * sizeof(T), data);
+}
+
+
 } // namespace tmig::render

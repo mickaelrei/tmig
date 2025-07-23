@@ -11,8 +11,17 @@ void generateSphereMesh(
 
     size_t i, j;
     for (i = 0; i <= resolution; ++i) {
+        float v = 1.0f - (float)i * step;
         float theta = (float)i * step * M_PIf;
+
         for (j = 0; j < resolution; ++j) {
+            float u;
+            if (j <= resolution / 2) {
+                u = (float)j * step * 2.0f;
+            } else {
+                u = 2.0f - (float)j * step * 2.0f;
+            }
+
             float phi = (float)j * step * 2.0f * M_PIf;
 
             float x = std::sin(theta) * std::sin(phi);
@@ -20,8 +29,9 @@ void generateSphereMesh(
             float z = std::sin(theta) * std::cos(phi);
 
             vertexCallback(GeneralVertex{
-                glm::vec3{x, y, z} * 0.5f,
-                glm::vec3{x, y, z}
+                .position = glm::vec3{x, y, z} * 0.5f,
+                .normal   = glm::vec3{x, y, z},
+                .uv       = glm::vec2{u, v}
             });
         }
     }
@@ -54,43 +64,56 @@ void generateCylinderMesh(
 ) {
     // Add top and bottom vertex
     vertexCallback(GeneralVertex{
-        glm::vec3{0.0f, 0.5f, 0.0f},
-        glm::vec3{0.0f, 1.0f, 0.0f}
+        .position = glm::vec3{0.0f, 0.5f, 0.0f},
+        .normal   = glm::vec3{0.0f, 1.0f, 0.0f},
+        .uv       = glm::vec2{0.5f, 1.0f},
     });
     vertexCallback(GeneralVertex{
-        glm::vec3{0.0f, -0.5f, 0.0f},
-        glm::vec3{0.0f, -1.0f, 0.0f}
+        .position = glm::vec3{0.0f, -0.5f, 0.0f},
+        .normal   = glm::vec3{0.0f, -1.0f, 0.0f},
+        .uv       = glm::vec2{0.5f, 0.0f},
     });
 
     // Add bottom vertices
     float step = 1.0f / (float)resolution;
     for (size_t i = 0; i < resolution; ++i) {
+        float u;
+        if (i <= resolution / 2) {
+            u = (float)i * step * 2.0f;
+        } else {
+            u = 2.0f - (float)i * step * 2.0f;
+        }
+
         float angle = (float)i * step * 2.0f * M_PIf;
         float c = std::cos(angle);
         float s = std::sin(angle);
 
         // Vertex for top face
         vertexCallback(GeneralVertex{
-            glm::vec3{c * 0.5f, 0.5f, s * 0.5f},
-            glm::vec3{0.0f, 1.0f, 0.0f}
+            .position = glm::vec3{c * 0.5f, 0.5f, s * 0.5f},
+            .normal   = glm::vec3{0.0f, 1.0f, 0.0f},
+            .uv       = glm::vec2{u, 0.75f},
         });
 
         // Vertex for bottom face
         vertexCallback(GeneralVertex{
-            glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
-            glm::vec3{0.0f, -1.0f, 0.0f}
+            .position = glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
+            .normal   = glm::vec3{0.0f, -1.0f, 0.0f},
+            .uv       = glm::vec2{u, 0.25f},
         });
 
         // Vertices for side face
         // Top
         vertexCallback(GeneralVertex{
-            glm::vec3{c * 0.5f, 0.5f, s * 0.5f},
-            glm::vec3{c, 0.0f, s}
+            .position = glm::vec3{c * 0.5f, 0.5f, s * 0.5f},
+            .normal   = glm::vec3{c, 0.0f, s},
+            .uv       = glm::vec2{u, 0.75f},
         });
         // Bottom
         vertexCallback(GeneralVertex{
-            glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
-            glm::vec3{c, 0.0f, s}
+            .position = glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
+            .normal   = glm::vec3{c, 0.0f, s},
+            .uv       = glm::vec2{u, 0.25f},
         });
     }
 
@@ -125,31 +148,42 @@ void generateConeMesh(
 ) {
     // Add top and bottom vertex
     vertexCallback(GeneralVertex{
-        glm::vec3{0.0f, 0.5f, 0.0f},
-        glm::vec3{0.0f, 1.0f, 0.0f}
+        .position = glm::vec3{0.0f, 0.5f, 0.0f},
+        .normal   = glm::vec3{0.0f, 1.0f, 0.0f},
+        .uv       = glm::vec2{0.5f, 1.0f},
     });
     vertexCallback(GeneralVertex{
-        glm::vec3{0.0f, -0.5f, 0.0f},
-        glm::vec3{0.0f, -1.0f, 0.0f}
+        .position = glm::vec3{0.0f, -0.5f, 0.0f},
+        .normal   = glm::vec3{0.0f, -1.0f, 0.0f},
+        .uv       = glm::vec2{0.5f, 0.0f},
     });
 
     // Add bottom vertices
     float step = 1.0f / (float)resolution;
     for (size_t i = 0; i < resolution; ++i) {
+        float u;
+        if (i <= resolution / 2) {
+            u = (float)i * step * 2.0f;
+        } else {
+            u = 2.0f - (float)i * step * 2.0f;
+        }
+
         float angle = (float)i * step * 2.0f * M_PIf;
         float c = std::cos(angle);
         float s = std::sin(angle);
 
         // Vertex for top face
         vertexCallback(GeneralVertex{
-            glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
-            glm::vec3{c, 0.0f, s}
+            .position = glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
+            .normal   = glm::vec3{c, 0.0f, s},
+            .uv       = glm::vec2{u, 0.5f},
         });
 
         // Vertex for bottom face
         vertexCallback(GeneralVertex{
-            glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
-            glm::vec3{0.0f, -1.0f, 0.0f}
+            .position = glm::vec3{c * 0.5f, -0.5f, s * 0.5f},
+            .normal   = glm::vec3{0.0f, -1.0f, 0.0f},
+            .uv       = glm::vec2{u, 0.5f},
         });
     }
 
@@ -176,11 +210,26 @@ void generateTorusMesh(
     float step = 1.0f / (float)resolution;
     size_t i, j;
     for (i = 0; i < resolution; ++i) {
+        float u;
+        if (i <= resolution / 2) {
+            u = (float)i * step * 2.0f;
+        } else {
+            u = 2.0f - (float)i * step * 2.0f;
+        }
+
         float angle0 = (float)i * step * 2.0f * M_PIf;
         float x0 = std::cos(angle0);
         float z0 = std::sin(angle0);
 
         for (j = 0; j < resolution; ++j) {
+            float v;
+            if (j <= resolution / 2) {
+                v = (float)j * step * 2.0f;
+            } else {
+                v = 2.0f - (float)j * step * 2.0f;
+            }
+            v = 1.0f - v;
+
             float angle = (float)j * step * 2.0f * M_PIf;
             float c = std::cos(angle);
             float s = std::sin(angle);
@@ -190,8 +239,9 @@ void generateTorusMesh(
             float z = z0 + s * z0 * 0.5f;
 
             vertexCallback(GeneralVertex{
-                glm::vec3{x, y, z},
-                glm::normalize(glm::vec3{s * x0, c, s * z0})
+                .position = glm::vec3{x, y, z},
+                .normal   = glm::normalize(glm::vec3{s * x0, c, s * z0}),
+                .uv       = glm::vec2{u, v},
             });
         }
     }
@@ -220,40 +270,40 @@ void generateTorusMesh(
 void generateBoxMesh(const VertexGenerateCallback &vertexCallback, std::vector<unsigned int> &indices) {
     std::vector<GeneralVertex> vertices = {
         // Front
-        {glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{0.0f, 0.0f, 1.0f}},
-        {glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec3{0.0f, 0.0f, 1.0f}},
-        {glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec3{0.0f, 0.0f, 1.0f}},
-        {glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec3{0.0f, 0.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.0f,  1.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.0f,  1.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.0f,  1.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.0f,  1.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Back
-        {glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
-        {glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
-        {glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
-        {glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Left
-        {glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
-        {glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
-        {glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
-        {glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f, -0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f,  0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f, -0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Right
-        {glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
-        {glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
-        {glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
-        {glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f,  0.5f}, .normal = glm::vec3{ 1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{ 1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f, -0.5f}, .normal = glm::vec3{ 1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f,  0.5f}, .normal = glm::vec3{ 1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Top
-        {glm::vec3{-0.5f,  0.5f,  0.5f}, glm::vec3{0.0f, 1.0f, 0.0f}},
-        {glm::vec3{ 0.5f,  0.5f,  0.5f}, glm::vec3{0.0f, 1.0f, 0.0f}},
-        {glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec3{0.0f, 1.0f, 0.0f}},
-        {glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec3{0.0f, 1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f,  0.5f}, .normal = glm::vec3{0.0f,  1.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f,  0.5f}, .normal = glm::vec3{0.0f,  1.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f,  1.0f, 0.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f,  1.0f, 0.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Bottom
-        {glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
-        {glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
-        {glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
-        {glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{0.0f, 1.0f}},
     };
 
     for (auto v : vertices) {
@@ -290,32 +340,32 @@ void generateBoxMesh(const VertexGenerateCallback &vertexCallback, std::vector<u
 void generateWedgeMesh(const VertexGenerateCallback &vertexCallback, std::vector<unsigned int> &indices) {
     std::vector<GeneralVertex> vertices = {
         // Back
-        {glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
-        {glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
-        {glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
-        {glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec3{0.0f, 0.0f, -1.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Bottom
-        {glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
-        {glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
-        {glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
-        {glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{0.0f, -1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, -1.0f, 0.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Top
-        {glm::vec3{-0.5f,  -0.5f,  0.5f}, glm::vec3{0.0f, 0.707f, 0.707f}},
-        {glm::vec3{ 0.5f,  -0.5f,  0.5f}, glm::vec3{0.0f, 0.707f, 0.707f}},
-        {glm::vec3{ 0.5f,   0.5f, -0.5f}, glm::vec3{0.0f, 0.707f, 0.707f}},
-        {glm::vec3{-0.5f,   0.5f, -0.5f}, glm::vec3{0.0f, 0.707f, 0.707f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.707f, 0.707f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.707f, 0.707f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.707f, 0.707f}, .uv = glm::vec2{1.0f, 1.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.707f, 0.707f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Left
-        {glm::vec3{-0.5f, -0.5f, -0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
-        {glm::vec3{-0.5f, -0.5f,  0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
-        {glm::vec3{-0.5f,  0.5f, -0.5f}, glm::vec3{-1.0f, 0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f, -0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{-0.5f,  0.5f, -0.5f}, .normal = glm::vec3{-1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 1.0f}},
 
         // Right
-        {glm::vec3{ 0.5f, -0.5f,  0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
-        {glm::vec3{ 0.5f, -0.5f, -0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
-        {glm::vec3{ 0.5f,  0.5f, -0.5f}, glm::vec3{1.0f, 0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f,  0.5f}, .normal = glm::vec3{1.0f, 0.0f, 0.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+        GeneralVertex{.position = glm::vec3{ 0.5f,  0.5f, -0.5f}, .normal = glm::vec3{1.0f, 0.0f, 0.0f}, .uv = glm::vec2{1.0f, 1.0f}},
     };
 
     for (auto v : vertices) {

@@ -32,8 +32,13 @@ int main() {
 
     auto shader = render::Shader::create(
         util::getResourcePath("shaders/non_instanced.vert"),
-        util::getResourcePath("shaders/base.frag")
+        util::getResourcePath("shaders/non_instanced.frag")
     );
+
+    struct myVertex {
+        glm::vec3 pos;
+        glm::vec3 normal;
+    };
 
     // Generate instancing data
     struct instanceData {
@@ -67,9 +72,14 @@ int main() {
     }
 
     // Generate high-resolution sphere mesh
-    std::vector<util::GeneralVertex> highResVertices;
+    std::vector<myVertex> highResVertices;
     std::vector<unsigned int> highResIndices;
-    util::generateSphereMesh([&](auto v) { highResVertices.push_back(v); }, highResIndices, 40);
+    util::generateSphereMesh([&](auto v) {
+        highResVertices.push_back(myVertex{
+            .pos = v.position,
+            .normal = v.normal,
+        });
+    }, highResIndices, 40);
     printf(
         "high-res vertices: %ld | high-res indices: %ld\n",
         highResVertices.size(),
@@ -77,9 +87,14 @@ int main() {
     );
 
     // Generate low-resolution sphere mesh
-    std::vector<util::GeneralVertex> lowResVertices;
+    std::vector<myVertex> lowResVertices;
     std::vector<unsigned int> lowResIndices;
-    util::generateSphereMesh([&](auto v) { lowResVertices.push_back(v); }, lowResIndices, 3);
+    util::generateSphereMesh([&](auto v) {
+        lowResVertices.push_back(myVertex{
+            .pos = v.position,
+            .normal = v.normal,
+        });
+    }, lowResIndices, 3);
     printf(
         "low-res vertices: %ld | low-res indices: %ld\n",
         lowResVertices.size(),
@@ -87,7 +102,7 @@ int main() {
     );
 
     // Create high-res vertex data buffer
-    auto highResBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
+    auto highResBuffer = std::make_shared<render::DataBuffer<myVertex>>();
     highResBuffer->setData(highResVertices);
 
     // Create high-res index buffer
@@ -95,15 +110,15 @@ int main() {
     highResIndexBuffer->setData(highResIndices);
 
     // Create low-res vertex data buffer
-    auto lowResBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
+    auto lowResBuffer = std::make_shared<render::DataBuffer<myVertex>>();
     lowResBuffer->setData(lowResVertices);
 
     // Create low-res index buffer
     auto lowResIndexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
     lowResIndexBuffer->setData(lowResIndices);
-    
+
     // Set mesh attributes
-    render::Mesh<util::GeneralVertex> mesh;
+    render::Mesh<myVertex> mesh;
     mesh.setAttributes({
         render::VertexAttributeType::Float3, // position
         render::VertexAttributeType::Float3, // normal
@@ -147,7 +162,7 @@ int main() {
         );
 
         auto start = std::chrono::high_resolution_clock::now();
-        
+
         render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 

@@ -44,7 +44,7 @@ void Mesh<V>::setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer) {
     if (vertexAttributes.empty()) {
         throw std::runtime_error{"Cannot bind vertex buffer without attribute layout (setAttributes)"};
     }
-    
+
     vertexBuffer = buffer;
 
     // Bind the buffer to binding index 0
@@ -54,7 +54,7 @@ void Mesh<V>::setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer) {
 }
 
 template<typename V>
-void Mesh<V>::setIndexBuffer(std::shared_ptr<DataBuffer<unsigned int>> buffer) {
+void Mesh<V>::setIndexBuffer(std::shared_ptr<DataBuffer<uint32_t>> buffer) {
     if (buffer == nullptr) return;
 
     indexBuffer = buffer;

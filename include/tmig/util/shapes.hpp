@@ -14,6 +14,9 @@ struct GeneralVertex {
 
     /// @brief Vertex normal direction
     glm::vec3 normal;
+
+    /// @brief Texture coordinates
+    glm::vec2 uv;
 };
 
 /// @brief Type definition for a callback for generated vertices

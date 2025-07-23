@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "tmig/render/mesh.hpp"
-#include "tmig/util/debug.hpp"
 
 namespace tmig::render {
 
@@ -27,7 +26,7 @@ public:
         const std::vector<VertexAttributeType> &vertexAttributes,
         const std::vector<VertexAttributeType> &instanceAttributes
     );
-    
+
     /// @brief Set per-instance buffer
     void setInstanceBuffer(std::shared_ptr<DataBuffer<I>> buffer);
 
@@ -37,7 +36,7 @@ public:
     }
 
     /// @brief Set indices buffer data
-    void setIndexBuffer(std::shared_ptr<DataBuffer<unsigned int>> buffer) override {
+    void setIndexBuffer(std::shared_ptr<DataBuffer<uint32_t>> buffer) override {
         Mesh<V>::setIndexBuffer(buffer);
     }
 

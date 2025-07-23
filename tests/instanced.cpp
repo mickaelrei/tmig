@@ -10,14 +10,15 @@
 #include "tmig/render/render.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/window.hpp"
+#include "tmig/render/texture2D.hpp"
 #include "tmig/util/camera.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
- 
+
 using namespace tmig;
 
 bool firstSinceLast = true;
-float cameraSpeed = 1000.0f;
+float cameraSpeed = 100.0f;
 float cameraRotationSpeed = 0.3f;
 
 int main() {
@@ -32,8 +33,17 @@ int main() {
 
     auto shader = render::Shader::create(
         util::getResourcePath("shaders/instanced.vert"),
-        util::getResourcePath("shaders/base.frag")
+        util::getResourcePath("shaders/instanced.frag")
     );
+
+    // Creating texture, binding at unit and setting in shader uniform
+    render::Texture2D texture;
+    if (!texture.loadFromFile(util::getResourcePath("images/container.jpg"))) {
+        std::cout << "Failed to load texture\n";
+        return 1;
+    }
+    texture.bind(0);
+    shader->setInt("tex", 0);
 
     // Generate instancing data
     struct instanceData {
@@ -42,7 +52,7 @@ int main() {
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 100000; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -69,7 +79,7 @@ int main() {
     // Generate mesh vertices
     std::vector<util::GeneralVertex> vertices;
     std::vector<unsigned int> indices;
-    util::generateBoxMesh([&](auto v) { vertices.push_back(v); }, indices);
+    util::generateSphereMesh([&](auto v) { vertices.push_back(v); }, indices, 20);
     printf("vertices: %ld | indices: %ld\n", vertices.size(), indices.size());
 
     // Create vertex data buffer
@@ -83,12 +93,13 @@ int main() {
     // Create index buffer
     auto indexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
     indexBuffer->setData(indices);
-    
+
     // Set attributes and data
     render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
     mesh.setAttributes({
         render::VertexAttributeType::Float3, // position
         render::VertexAttributeType::Float3, // normal
+        render::VertexAttributeType::Float2, // uv
     }, {
         render::VertexAttributeType::Float4, // color
         render::VertexAttributeType::Mat4x4, // model
@@ -111,7 +122,7 @@ int main() {
 
         for (size_t i = 0; i < instances.size(); ++i) {
             glm::vec3 pos = glm::vec3(instances[i].model[3]);
-            pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f};
+            pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f} * .1f;
 
             // Extract scale from model matrix
             glm::vec3 scale = glm::vec3(
@@ -120,7 +131,7 @@ int main() {
                 glm::length(glm::vec3(instances[i].model[2]))
             );
 
-            float t = runtime * 10.0f + i * 0.01f;
+            float t = runtime * 2.0f + i * 0.01f;
             scale.x = glm::sin(t) * 4.5f + 10.0f;
             scale.y = glm::cos(t) * 4.5f + 10.0f;
             scale.z = glm::sin(t + 1.0f) * 4.5f + 10.0f;
@@ -144,7 +155,7 @@ int main() {
         );
 
         auto start = std::chrono::high_resolution_clock::now();
-        
+
         render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 

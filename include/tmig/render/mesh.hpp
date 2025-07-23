@@ -1,11 +1,11 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 #include <memory>
 
 #include "tmig/render/vertex_attribute.hpp"
 #include "tmig/render/data_buffer.hpp"
-#include "tmig/util/debug.hpp"
 
 namespace tmig::render {
 
@@ -30,20 +30,20 @@ public:
     virtual void setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer);
 
     /// @brief Set indices buffer
-    virtual void setIndexBuffer(std::shared_ptr<DataBuffer<unsigned int>> buffer);
+    virtual void setIndexBuffer(std::shared_ptr<DataBuffer<uint32_t>> buffer);
 
     /// @brief Render this mesh
     virtual void render();
 
 protected:
     /// @brief Vertex Attribute Object tied to this mesh
-    unsigned int vao = 0;
+    uint32_t vao = 0;
 
     /// @brief Pointer to vertex buffer
     std::shared_ptr<DataBuffer<V>> vertexBuffer;
 
     /// @brief Pointer to index buffer
-    std::shared_ptr<DataBuffer<unsigned int>> indexBuffer;
+    std::shared_ptr<DataBuffer<uint32_t>> indexBuffer;
 
     /// @brief Per-vertex attributes
     std::vector<VertexAttributeType> vertexAttributes;

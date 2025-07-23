@@ -68,7 +68,7 @@ void InstancedMesh<V, I>::configureInstanceAttributes() {
             attribIndex += 1;
         }
     }
-    
+
     // Configure the instance attributes to the VAO at binding index 1 to not conflict with per-vertex attributes at binding 0
     const GLuint bindingIndex = 1;
     size_t instanceOffset = 0;

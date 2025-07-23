@@ -42,6 +42,7 @@ set(
     ${SOURCE_DIR}/render/camera.cpp
     ${SOURCE_DIR}/render/render.cpp
     ${SOURCE_DIR}/render/shader.cpp
+    ${SOURCE_DIR}/render/texture2D.cpp
     ${SOURCE_DIR}/render/vertex_attribute.cpp
     ${SOURCE_DIR}/render/window.cpp
 
@@ -53,6 +54,7 @@ set(
 
     # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
+    ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
 )
 
 # Adding engine shared library
