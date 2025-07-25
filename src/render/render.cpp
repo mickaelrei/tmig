@@ -32,7 +32,7 @@ bool isInitialized() {
     return initialized;
 }
 
-void setClearColor(const glm::vec4 &color) {
+void setClearColor(const glm::vec4& color) {
 #ifdef DEBUG
     if (!initialized) return;
 #endif

@@ -10,9 +10,34 @@
 namespace tmig::render {
 
 template<typename V, typename I>
+InstancedMesh<V, I>::InstancedMesh(InstancedMesh&& other) noexcept
+    : Mesh<V>{std::move(other)},
+     instanceBuffer{other.instanceBuffer},
+     instanceAttributes{std::move(other.instanceAttributes)},
+     instanceAttributesConfigured{other.instanceAttributesConfigured}
+{
+    other.instanceBuffer = nullptr;
+    other.instanceAttributesConfigured = false;
+}
+
+template<typename V, typename I>
+InstancedMesh<V, I>& InstancedMesh<V, I>::operator=(InstancedMesh&& other) noexcept {
+    if (this != &other) {
+        Mesh<V>::operator=(std::move(other));
+        instanceBuffer = other.instanceBuffer;
+        instanceAttributes = std::move(other.instanceAttributes);
+        instanceAttributesConfigured = other.instanceAttributesConfigured;
+
+        other.instanceBuffer = nullptr;
+        other.instanceAttributesConfigured = false;
+    }
+    return *this;
+}
+
+template<typename V, typename I>
 void InstancedMesh<V, I>::setAttributes(
-    const std::vector<VertexAttributeType> &_vertexAttributes,
-    const std::vector<VertexAttributeType> &_instanceAttributes
+    const std::vector<VertexAttributeType>& _vertexAttributes,
+    const std::vector<VertexAttributeType>& _instanceAttributes
 ) {
     if (_vertexAttributes.size() == 0 || _instanceAttributes.size() == 0) return;
 
@@ -34,7 +59,7 @@ void InstancedMesh<V, I>::setAttributes(
 }
 
 template<typename V, typename I>
-void InstancedMesh<V, I>::setInstanceBuffer(std::shared_ptr<DataBuffer<I>> buffer) {
+void InstancedMesh<V, I>::setInstanceBuffer(DataBuffer<I>* buffer) {
     if (buffer == nullptr) return;
 
     if (instanceAttributes.empty()) {

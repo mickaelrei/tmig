@@ -31,10 +31,10 @@ int main() {
     camera.maxDist = 10000.0f;
     camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
 
-    auto shader = render::Shader::create(
+    auto shader = render::Shader{
         util::getResourcePath("shaders/instanced.vert"),
         util::getResourcePath("shaders/instanced.frag")
-    );
+    };
 
     // Creating texture, binding at unit and setting in shader uniform
     render::Texture2D texture;
@@ -43,7 +43,7 @@ int main() {
         return 1;
     }
     texture.bind(0);
-    shader->setInt("tex", 0);
+    shader.setInt("tex", 0);
 
     // Generate instancing data
     struct instanceData {
@@ -52,7 +52,7 @@ int main() {
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 10000; ++i) {
+    for (int i = 0; i < 200000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -79,20 +79,19 @@ int main() {
     // Generate mesh vertices
     std::vector<util::GeneralVertex> vertices;
     std::vector<unsigned int> indices;
-    util::generateSphereMesh([&](auto v) { vertices.push_back(v); }, indices, 20);
+    util::generateBoxMesh([&](auto v) { vertices.push_back(v); }, indices);
     printf("vertices: %ld | indices: %ld\n", vertices.size(), indices.size());
 
     // Create vertex data buffer
-    auto vertexBuffer = std::make_shared<render::DataBuffer<util::GeneralVertex>>();
+    auto vertexBuffer = new render::DataBuffer<util::GeneralVertex>;
     vertexBuffer->setData(vertices);
 
     // Create instance data buffer
-    auto instanceBuffer = std::make_shared<render::DataBuffer<instanceData>>();
+    auto instanceBuffer = new render::DataBuffer<instanceData>;
     instanceBuffer->setData(instances);
 
     // Create index buffer
-    auto indexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
-    indexBuffer->setData(indices);
+    auto indexBuffer = new render::DataBuffer<unsigned int>;indexBuffer->setData(indices);
 
     // Set attributes and data
     render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
@@ -138,10 +137,12 @@ int main() {
 
             glm::mat4 model{1.0f};
             model = glm::translate(model, pos);
+            model = glm::rotate(model, runtime + i * 0.01f, glm::vec3{0.3f, -0.7f, 0.4f});
             model = glm::scale(model, scale);
             instances[i].model = model;
         }
-        instanceBuffer->setData(instances);
+        // instanceBuffer->setData(instances);
+        instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
@@ -159,11 +160,11 @@ int main() {
         render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 
-        shader->setMat4("model", glm::mat4{1.0f});
-        shader->setMat4("view", view);
-        shader->setMat4("projection", projection);
-        shader->setVec3("viewPos", camera.getPosition());
-        shader->setVec4("meshColor", glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+        shader.setMat4("model", glm::mat4{1.0f});
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+        shader.setVec3("viewPos", camera.getPosition());
+        shader.setVec4("meshColor", glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
         mesh.render();
 
         render::window::swapBuffers();
@@ -176,6 +177,10 @@ int main() {
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
+
+    delete vertexBuffer;
+    delete instanceBuffer;
+    delete indexBuffer;
 
     return 0;
 }

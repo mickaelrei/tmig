@@ -9,7 +9,7 @@
 
 // Default callback for framebuffer resize
 // TODO: Make a way for user to set their own callbacks
-void defaultFramebufferSizeCallback(GLFWwindow *window, int width, int height) {
+void defaultFramebufferSizeCallback(GLFWwindow* window, int width, int height) {
     (void)window;
     glViewport(0, 0, width, height); glCheckError();
 }
@@ -22,7 +22,7 @@ static std::shared_ptr<GLFWwindow> glfwWindow = nullptr;
 
 // Struct for terminating GLFW resources when window shared pointer gets deleted
 struct WindowDeleter {
-    void operator()(GLFWwindow *window) {
+    void operator()(GLFWwindow* window) {
         glfwDestroyWindow(window);
         glfwTerminate();
         initialized = false;
@@ -99,7 +99,7 @@ void pollEvents() {
     glfwPollEvents();
 }
 
-void setSize(const glm::ivec2 &size) {
+void setSize(const glm::ivec2& size) {
 #ifdef DEBUG
     if (!initialized) return;
 #endif
@@ -118,7 +118,7 @@ glm::ivec2 getSize() {
     return size;
 }
 
-void setTitle(const std::string &title) {
+void setTitle(const std::string& title) {
 #ifdef DEBUG
     if (!initialized) return;
 #endif
@@ -150,7 +150,7 @@ void setCursorMode(int mode) {
     glfwSetInputMode(glfwWindow.get(), GLFW_CURSOR, mode);
 }
 
-void setCursorPos(const glm::vec2 &pos) {
+void setCursorPos(const glm::vec2& pos) {
 #ifdef DEBUG
     if (!initialized) return;
 #endif

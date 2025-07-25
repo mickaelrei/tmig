@@ -30,10 +30,10 @@ int main() {
     camera.maxDist = 10000.0f;
     camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
 
-    auto shader = render::Shader::create(
+    auto shader = render::Shader{
         util::getResourcePath("shaders/non_instanced.vert"),
         util::getResourcePath("shaders/non_instanced.frag")
-    );
+    };
 
     struct myVertex {
         glm::vec3 pos;
@@ -101,20 +101,20 @@ int main() {
         lowResIndices.size()
     );
 
-    // Create high-res vertex data buffer
-    auto highResBuffer = std::make_shared<render::DataBuffer<myVertex>>();
+    // Create high-res vertex data buffer using move semantics
+    auto highResBuffer = new render::DataBuffer<myVertex>;
     highResBuffer->setData(highResVertices);
 
     // Create high-res index buffer
-    auto highResIndexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
+    auto highResIndexBuffer = new render::DataBuffer<unsigned int>;
     highResIndexBuffer->setData(highResIndices);
 
     // Create low-res vertex data buffer
-    auto lowResBuffer = std::make_shared<render::DataBuffer<myVertex>>();
+    auto lowResBuffer = new render::DataBuffer<myVertex>;
     lowResBuffer->setData(lowResVertices);
 
     // Create low-res index buffer
-    auto lowResIndexBuffer = std::make_shared<render::DataBuffer<unsigned int>>();
+    auto lowResIndexBuffer = new render::DataBuffer<unsigned int>;
     lowResIndexBuffer->setData(lowResIndices);
 
     // Set mesh attributes
@@ -166,9 +166,9 @@ int main() {
         render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 
-        shader->setMat4("view", view);
-        shader->setMat4("projection", projection);
-        shader->setVec3("viewPos", camera.getPosition());
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+        shader.setVec3("viewPos", camera.getPosition());
 
         for (size_t i = 0; i < instances.size(); ++i) {
             glm::vec3 pos = glm::vec3(instances[i].model[3]);
@@ -188,11 +188,12 @@ int main() {
 
             glm::mat4 model{1.0f};
             model = glm::translate(model, pos);
+            model = glm::rotate(model, runtime + i * 0.01f, glm::vec3{0.3f, -0.7f, 0.4f});
             model = glm::scale(model, scale);
             instances[i].model = model;
 
-            shader->setVec4("color", instances[i].color);
-            shader->setMat4("model", instances[i].model);
+            shader.setVec4("color", instances[i].color);
+            shader.setMat4("model", instances[i].model);
             mesh.render();
         }
 
@@ -206,6 +207,11 @@ int main() {
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
+
+    delete highResBuffer;
+    delete highResIndexBuffer;
+    delete lowResBuffer;
+    delete lowResIndexBuffer;
 
     return 0;
 }

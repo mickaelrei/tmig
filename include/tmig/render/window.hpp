@@ -10,7 +10,7 @@ namespace tmig::render::window {
 void init(
     int width = 600,
     int height = 600,
-    const std::string &title = "tmig"
+    const std::string& title = "tmig"
 );
 
 /// @brief Gets the current time since the render module was initialized
@@ -38,7 +38,7 @@ void pollEvents();
 /// @brief Sets new window size
 /// @param size New window size in screen coordinates
 /// @note Depends on `render::init()`
-void setSize(const glm::ivec2 &size);
+void setSize(const glm::ivec2& size);
 
 /// @brief Returns the current window size in screen coordinates
 /// @note Depends on `render::init()`
@@ -47,7 +47,7 @@ glm::ivec2 getSize();
 /// @brief Sets a new title for the window
 /// @param title New window title
 /// @note Depends on `render::init()`
-void setTitle(const std::string &title);
+void setTitle(const std::string& title);
 
 /// @brief Gets the current state of a key
 /// @param key GLFW key code
@@ -65,7 +65,7 @@ int getMouseButtonState(int button);
 void setCursorMode(int mode);
 
 /// @brief Set cursor position in screen coordinates relative to top-left corner
-void setCursorPos(const glm::vec2 &pos);
+void setCursorPos(const glm::vec2& pos);
 
 /// @brief Get cursor position in screen coordinates relative to top-left corner
 glm::vec2 getCursorPos();

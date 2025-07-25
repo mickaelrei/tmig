@@ -6,9 +6,9 @@
 namespace tmig::util {
 
 void firstPersonCameraMovement(
-    render::Camera &camera,
+    render::Camera& camera,
     float dt,
-    bool &firstSinceLast,
+    bool& firstSinceLast,
     float cameraSpeed,
     float cameraRotationSpeed
 ) {
@@ -62,13 +62,13 @@ void firstPersonCameraMovement(
 }
 
 void orbitalCameraMovement(
-    render::Camera &camera,
+    render::Camera& camera,
     float dt,
     glm::vec3 target,
-    float &radius,
-    float &azimuth,
-    float &elevation,
-    bool &firstSinceLast,
+    float& radius,
+    float& azimuth,
+    float& elevation,
+    bool& firstSinceLast,
     float cameraSpeed,
     float cameraRotationSpeed
 ) {

@@ -8,7 +8,7 @@ namespace tmig::util {
 
 #ifdef DEBUG
 
-void _glCheckError(const char *file, int line) {
+void _glCheckError(const char* file, int line) {
     GLenum errorCode;
     std::string error;
     while ((errorCode = glGetError()) != GL_NO_ERROR) {

@@ -36,6 +36,7 @@ vec3 calculateLighting() {
 
 void main() {
     vec4 texColor = texture(tex, texUV);
+    // vec4 texColor = vec4(texUV, 0.0f, 1.0f);
     // If texture alpha is not 100%, starting mixing with mesh color
     if (texColor.a < 1.0f) {
         texColor = vec4(mix(texColor.rgb, meshColor.rgb, 1.0f - texColor.a), meshColor.a);

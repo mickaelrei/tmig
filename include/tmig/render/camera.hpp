@@ -12,24 +12,24 @@ public:
 
     /// @brief Constructor with position
     /// @param pos Initial position
-    Camera(const glm::vec3 &pos);
+    Camera(const glm::vec3& pos);
 
     /// @brief Destructor
     ~Camera() = default;
 
     /// @brief Set new camera position
-    void setPosition(const glm::vec3 &position);
+    void setPosition(const glm::vec3& position);
 
     /// @brief Returns current position
     glm::vec3 getPosition() const;
 
     /// @brief Move camera by given offset
     /// @param offset Offset in global coordinates
-    void move(const glm::vec3 &offset);
+    void move(const glm::vec3& offset);
 
     /// @brief Move camear by given offset relative to current rotation
     /// @param offset Offset in global coordinates
-    void moveRelative(const glm::vec3 &offset);
+    void moveRelative(const glm::vec3& offset);
 
     /// @brief Rotate camera by pitch, yaw and roll
     /// @param rx Rotation offset on world X axis in degrees (pitch)
@@ -40,10 +40,10 @@ public:
     /// @brief Rotate with angle-axis mode
     /// @param angle Angle in radians
     /// @param axis Axis to rotate around
-    void rotate(float angle, const glm::vec3 &axis);
+    void rotate(float angle, const glm::vec3& axis);
 
     /// @brief Set new rotation
-    void setRotation(const glm::mat3 &mat);
+    void setRotation(const glm::mat3& mat);
 
     /// @brief Get camera's rotation matrix
     glm::mat3 getRotation() const;
@@ -65,9 +65,9 @@ public:
     /// @param target Camera look target
     /// @param up Optional up vector for camera Z rotation
     void lookAt(
-        const glm::vec3 &pos,
-        const glm::vec3 &target,
-        const glm::vec3 &up = glm::vec3{0.0f, 1.0f, 0.0f}
+        const glm::vec3& pos,
+        const glm::vec3& target,
+        const glm::vec3& up = glm::vec3{0.0f, 1.0f, 0.0f}
     );
 
     /// @brief Get current euler angles in radians

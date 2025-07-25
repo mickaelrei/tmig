@@ -23,7 +23,36 @@ Mesh<V>::~Mesh() {
 }
 
 template<typename V>
-void Mesh<V>::setAttributes(const std::vector<VertexAttributeType> &_vertexAttributes) {
+Mesh<V>::Mesh(Mesh&& other) noexcept
+    : vao{other.vao},
+      vertexBuffer{other.vertexBuffer},
+      indexBuffer{other.indexBuffer},
+      vertexAttributes{std::move(other.vertexAttributes)}
+{
+    other.vao = 0;
+    other.vertexBuffer = nullptr;
+    other.indexBuffer = nullptr;
+}
+
+template<typename V>
+Mesh<V>& Mesh<V>::operator=(Mesh&& other) noexcept {
+    if (this != &other) {
+        glDeleteVertexArrays(1, &vao); glCheckError();
+
+        vao = other.vao;
+        vertexBuffer = other.vertexBuffer;
+        indexBuffer = other.indexBuffer;
+        vertexAttributes = std::move(other.vertexAttributes);
+
+        other.vao = 0;
+        other.vertexBuffer = nullptr;
+        other.indexBuffer = nullptr;
+    }
+    return *this;
+}
+
+template<typename V>
+void Mesh<V>::setAttributes(const std::vector<VertexAttributeType>& _vertexAttributes) {
     if (_vertexAttributes.size() == 0) return;
 
     // Ensure stride size matches template type size
@@ -38,7 +67,7 @@ void Mesh<V>::setAttributes(const std::vector<VertexAttributeType> &_vertexAttri
 }
 
 template<typename V>
-void Mesh<V>::setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer) {
+void Mesh<V>::setVertexBuffer(DataBuffer<V>* buffer) {
     if (buffer == nullptr) return;
 
     if (vertexAttributes.empty()) {
@@ -54,7 +83,7 @@ void Mesh<V>::setVertexBuffer(std::shared_ptr<DataBuffer<V>> buffer) {
 }
 
 template<typename V>
-void Mesh<V>::setIndexBuffer(std::shared_ptr<DataBuffer<uint32_t>> buffer) {
+void Mesh<V>::setIndexBuffer(DataBuffer<uint32_t>* buffer) {
     if (buffer == nullptr) return;
 
     indexBuffer = buffer;

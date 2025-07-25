@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "tmig/core/non_copyable.hpp"
+
 namespace tmig::render {
 
 /// @brief Represents supported texture formats for GPU storage and shader sampling.
@@ -69,19 +71,14 @@ enum class TextureFormat {
 };
 
 /// @brief Class representing a 2D texture, used for texturing objects in rendering
-class Texture2D {
+/// @note - This is a non-copyable class, meaning you cannot create a copy of it.
+class Texture2D : protected core::NonCopyable {
 public:
     /// @brief Default constructor
     Texture2D();
 
     /// @brief Destructor
     ~Texture2D();
-
-    /// @brief Copy constructor is disabled
-    Texture2D(const Texture2D&) = delete;
-
-    /// @brief Copy assignment is disabled
-    Texture2D& operator=(const Texture2D&) = delete;
 
     /// @brief Move constructor
     Texture2D(Texture2D&& other) noexcept;
@@ -93,7 +90,7 @@ public:
     /// @param path Path to file
     /// @param flipY whether should flip image vertically
     /// @note This sets the `format` to be whatever format the file is
-    bool loadFromFile(const std::string &path, bool flipY = true);
+    bool loadFromFile(const std::string& path, bool flipY = true);
 
     /// @brief Set pixel data
     /// @note `data` will be interpreted as being in the same format as the current `format`, so make sure it matches

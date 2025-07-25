@@ -9,14 +9,7 @@
 
 namespace tmig::render {
 
-std::shared_ptr<Shader> Shader::create(
-    const std::string &vertexPath,
-    const std::string &fragmentPath
-) {
-    return std::shared_ptr<Shader>{new Shader{vertexPath, fragmentPath}, Deleter{}};
-}
-
-Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
     // Retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
     std::string fragmentCode;
@@ -46,8 +39,8 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     } catch (std::ifstream::failure &e) {
         throw std::runtime_error{"error reading shader source files"};
     }
-    const char *vShaderCode = vertexCode.c_str();
-    const char *fShaderCode = fragmentCode.c_str();
+    const char* vShaderCode = vertexCode.c_str();
+    const char* fShaderCode = fragmentCode.c_str();
 
     // Compile shaders
     unsigned int vertex, fragment;
@@ -79,16 +72,16 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     };
 
     // Shader Program
-    id = glCreateProgram(); glCheckError();
-    util::debugPrint("Created shader: %d\n", id);
+    _id = glCreateProgram(); glCheckError();
+    util::debugPrint("Created shader: %d\n", _id);
 
-    glAttachShader(id, vertex); glCheckError();
-    glAttachShader(id, fragment); glCheckError();
-    glLinkProgram(id); glCheckError();
+    glAttachShader(_id, vertex); glCheckError();
+    glAttachShader(_id, fragment); glCheckError();
+    glLinkProgram(_id); glCheckError();
     // Print linking errors if any
-    glGetProgramiv(id, GL_LINK_STATUS, &success); glCheckError();
+    glGetProgramiv(_id, GL_LINK_STATUS, &success); glCheckError();
     if (!success) {
-        glGetProgramInfoLog(id, 512, NULL, infoLog); glCheckError();
+        glGetProgramInfoLog(_id, 512, NULL, infoLog); glCheckError();
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
             << infoLog << "\n";
     }
@@ -98,50 +91,64 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     glDeleteShader(fragment); glCheckError();
 }
 
+Shader::~Shader() {
+    util::debugPrint("Deleting shader: %d\n", _id);
+    glDeleteProgram(_id); glCheckError();
+}
+
+Shader::Shader(Shader&& other) noexcept
+    : _id{other._id}
+{
+    other._id = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept {
+    if (this != &other) {
+        glDeleteProgram(_id);
+
+        _id = other._id;
+        other._id = 0;
+    }
+    return *this;
+}
+
 void Shader::use() const {
-    glUseProgram(id); glCheckError();
+    glUseProgram(_id); glCheckError();
 }
 
-void Shader::setBool(const std::string &name, bool value) const {
+void Shader::setBool(const std::string& name, bool value) const {
     use();
-    glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value); glCheckError();
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value); glCheckError();
 }
 
-void Shader::setInt(const std::string &name, int value) const {
+void Shader::setInt(const std::string& name, int value) const {
     use();
-    glUniform1i(glGetUniformLocation(id, name.c_str()), value); glCheckError();
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), value); glCheckError();
 }
 
-void Shader::setFloat(const std::string &name, float value) const {
+void Shader::setFloat(const std::string& name, float value) const {
     use();
-    glUniform1f(glGetUniformLocation(id, name.c_str()), value); glCheckError();
+    glUniform1f(glGetUniformLocation(_id, name.c_str()), value); glCheckError();
 }
 
-void Shader::setVec2(const std::string &name, const glm::vec2 &v) const {
+void Shader::setVec2(const std::string& name, const glm::vec2& v) const {
     use();
-    glUniform2f(glGetUniformLocation(id, name.c_str()), v.x, v.y); glCheckError();
+    glUniform2f(glGetUniformLocation(_id, name.c_str()), v.x, v.y); glCheckError();
 }
 
-void Shader::setVec3(const std::string &name, const glm::vec3 v) const {
+void Shader::setVec3(const std::string& name, const glm::vec3& v) const {
     use();
-    glUniform3f(glGetUniformLocation(id, name.c_str()), v.x, v.y, v.z); glCheckError();
+    glUniform3f(glGetUniformLocation(_id, name.c_str()), v.x, v.y, v.z); glCheckError();
 }
 
-void Shader::setVec4(const std::string &name, const glm::vec4 &v) const {
+void Shader::setVec4(const std::string& name, const glm::vec4& v) const {
     use();
-    glUniform4f(glGetUniformLocation(id, name.c_str()), v.x, v.y, v.z, v.w); glCheckError();
+    glUniform4f(glGetUniformLocation(_id, name.c_str()), v.x, v.y, v.z, v.w); glCheckError();
 }
 
-void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const {
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     use();
-    glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, &mat[0][0]); glCheckError();
-}
-
-void Shader::Deleter::operator() (Shader *shader) {
-    glDeleteProgram(shader->id); glCheckError();
-    util::debugPrint("Destroyed shader: %d\n", shader->id);
-    shader->id = 0;
-    delete shader;
+    glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, &mat[0][0]); glCheckError();
 }
 
 } // namespace tmig::render

@@ -3,12 +3,15 @@
 #include <vector>
 #include <cstdint>
 
+#include "tmig/core/non_copyable.hpp"
+
 namespace tmig::render {
 
 /// @brief Class representing a GPU buffer data store
 /// @tparam T type of data stored
+/// @note - This is a non-copyable class, meaning you cannot create a copy of it.
 template<typename T>
-class DataBuffer {
+class DataBuffer : protected core::NonCopyable {
 public:
     /// @brief Constructor
     /// @note Creates the buffer
@@ -16,15 +19,21 @@ public:
 
     /// @brief Constructor
     /// @note Deletes the buffer
-    ~DataBuffer();
+    virtual ~DataBuffer();
+
+    /// @brief Move constructor
+    DataBuffer(DataBuffer&& other) noexcept;
+
+    /// @brief Move assignment operator
+    DataBuffer& operator=(DataBuffer&& other) noexcept;
 
     /// @brief Set buffer data
     /// @note Buffer is entirely reallocated to handle different count; if same count as previous, consider using `setSubset`
-    void setData(const T *data, size_t count);
+    void setData(const T* data, size_t count);
 
     /// @brief Set buffer data
     /// @note Buffer is entirely reallocated to handle different count; if same count as previous, consider using `setSubset`
-    void setData(const std::vector<T> &vector);
+    void setData(const std::vector<T>& vector);
 
     /// @brief Set subset of data
     /// @param offset Data start offset
@@ -32,7 +41,7 @@ public:
     /// @param data Pointer to start of data
     /// @note - Make sure that the `data` pointer based on `count`
     /// @note - Make sure that the `[offset, offset + count]` range is within bounds. Check with `count`
-    void setSubset(size_t offset, size_t count, const T *data);
+    void setSubset(size_t offset, size_t count, const T* data);
 
     /// @brief Get current buffer data count
     size_t count() const { return _count; }

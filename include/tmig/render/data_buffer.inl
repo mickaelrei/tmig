@@ -18,20 +18,46 @@ DataBuffer<T>::~DataBuffer() {
 }
 
 template<typename T>
+DataBuffer<T>::DataBuffer(DataBuffer&& other) noexcept
+    : _id{other._id},
+      _count{other._count}
+{
+    other._id = 0;
+    other._count = 0;
+}
+
+template<typename T>
+DataBuffer<T>& DataBuffer<T>::operator=(DataBuffer&& other) noexcept {
+    if (this != &other) {
+        glDeleteBuffers(1, &_id); glCheckError();
+
+        _id = other._id;
+        _count = other._count;
+
+        other._id = 0;
+        other._count = 0;
+    }
+    return *this;
+}
+
+template<typename T>
 void DataBuffer<T>::setData(const T* data, size_t count) {
     _count = count;
     glNamedBufferData(_id, _count * sizeof(T), data, GL_STATIC_DRAW); glCheckError();
 }
 
 template<typename T>
-void DataBuffer<T>::setData(const std::vector<T> &vector) {
+void DataBuffer<T>::setData(const std::vector<T>& vector) {
     setData(vector.data(), vector.size());
 }
 
 template<typename T>
-void DataBuffer<T>::setSubset(size_t offset, size_t count, const T *data) {
+void DataBuffer<T>::setSubset(size_t offset, size_t count, const T* data) {
 #ifdef DEBUG
-    if (offset >= _count || offset + count >= _count) return;
+    if (offset >= _count || offset + count > _count) {
+        util::debugPrint("DataBuffer::setSubset called with invalid bounds. Current count is %ld, got [offset=%ld, count=%ld]\n", _count, offset, count);
+        return;
+    }
 #endif
 
     glNamedBufferSubData(_id, offset, count * sizeof(T), data);

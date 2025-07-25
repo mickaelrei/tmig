@@ -18,7 +18,7 @@ Camera::Camera()
     : Camera::Camera(glm::vec3{0.0f}) {
 }
 
-Camera::Camera(const glm::vec3 &pos)
+Camera::Camera(const glm::vec3& pos)
     : pos{pos} {
     // Set initial rotation
     const float pitchOffset = 0.01f;
@@ -31,7 +31,7 @@ Camera::Camera(const glm::vec3 &pos)
     updateView();
 }
 
-void Camera::setPosition(const glm::vec3 &position) {
+void Camera::setPosition(const glm::vec3& position) {
     pos = position;
     updateView();
 }
@@ -40,12 +40,12 @@ glm::vec3 Camera::getPosition() const {
     return pos;
 }
 
-void Camera::move(const glm::vec3 &offset) {
+void Camera::move(const glm::vec3& offset) {
     pos += offset;
     updateView();
 }
 
-void Camera::moveRelative(const glm::vec3 &offset) {
+void Camera::moveRelative(const glm::vec3& offset) {
     pos += rotation * offset;
     updateView();
 }
@@ -69,12 +69,12 @@ void Camera::rotate(float rx, float ry, float rz) {
     updateView();
 }
 
-void Camera::rotate(float angle, const glm::vec3 &axis) {
+void Camera::rotate(float angle, const glm::vec3& axis) {
     rotation = glm::rotate(glm::mat4{rotation}, angle, axis);
     updateView();
 }
 
-void Camera::setRotation(const glm::mat3 &mat) {
+void Camera::setRotation(const glm::mat3& mat) {
     rotation = mat;
     updateView();
 }
@@ -100,9 +100,9 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 void Camera::lookAt(
-    const glm::vec3 &pos,
-    const glm::vec3 &target,
-    const glm::vec3 &up
+    const glm::vec3& pos,
+    const glm::vec3& target,
+    const glm::vec3& up
 ) {
     if (glm::length2(pos - target) == 0.0f) return;
 
@@ -113,7 +113,7 @@ void Camera::lookAt(
     rotation = glm::inverse(rotation);
 }
 
-void Camera::getPitchYawRoll(float *pitch, float *yaw, float *roll) const {
+void Camera::getPitchYawRoll(float* pitch, float* yaw, float* roll) const {
     if (pitch != nullptr)
         *pitch = Camera::pitch;
 

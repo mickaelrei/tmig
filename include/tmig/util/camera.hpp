@@ -9,9 +9,9 @@ namespace tmig::util {
 /// @brief Perform basic first-person camera movement
 /// @param firstSinceLast Bool to track if this was called the first time since the last right mouse click
 void firstPersonCameraMovement(
-    render::Camera &camera,
+    render::Camera& camera,
     float dt,
-    bool &firstSinceLast,
+    bool& firstSinceLast,
     float cameraSpeed = 1.0f,
     float cameraRotationSpeed = 1.0f
 );
@@ -23,13 +23,13 @@ void firstPersonCameraMovement(
 /// @param elevation Elevation angle from the Y axis
 /// @param firstSinceLast Bool to track if this was called the first time since the last right mouse click
 void orbitalCameraMovement(
-    render::Camera &camera,
+    render::Camera& camera,
     float dt,
     glm::vec3 target,
-    float &radius,
-    float &azimuth,
-    float &elevation,
-    bool &firstSinceLast,
+    float& radius,
+    float& azimuth,
+    float& elevation,
+    bool& firstSinceLast,
     float cameraSpeed = 1.0f,
     float cameraRotationSpeed = 1.0f
 );

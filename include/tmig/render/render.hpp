@@ -15,7 +15,7 @@ bool isInitialized();
 /// @brief Set window background clear color
 /// @param color New background RGBA color
 /// @note Depends on `render::init()`
-void setClearColor(const glm::vec4 &color);
+void setClearColor(const glm::vec4& color);
 
 /// @brief Clear window buffers
 /// @note Depends on `render::init()`

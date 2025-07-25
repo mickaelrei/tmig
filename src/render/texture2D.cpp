@@ -127,24 +127,30 @@ Texture2D::Texture2D() {
     glCreateTextures(GL_TEXTURE_2D, 1, &_id); glCheckError();
 }
 
+Texture2D::~Texture2D() {
+    glDeleteTextures(1, &_id); glCheckError();
+}
+
 Texture2D::Texture2D(Texture2D&& other) noexcept
-    : _id{other._id},_width{other._width}, _height{other._height}, _internalFormat{other._internalFormat} {
+    : _id{other._id},
+      _width{other._width},
+      _height{other._height},
+      _internalFormat{other._internalFormat}
+{
     other._id = 0;
     other._width = 0;
     other._height = 0;
 }
 
-Texture2D::~Texture2D() {
-    glDeleteTextures(1, &_id); glCheckError();
-}
-
-Texture2D& Texture2D::operator=(Texture2D &&other) noexcept {
+Texture2D& Texture2D::operator=(Texture2D&& other) noexcept {
     if (this != &other) {
         glDeleteTextures(1, &_id);
+
         _id = other._id;
         _width = other._width;
         _height = other._height;
         _internalFormat = other._internalFormat;
+
         other._id = 0;
         other._width = 0;
         other._height = 0;

@@ -6,7 +6,7 @@
 
 namespace tmig::util {
 
-std::string getResourcePath(const std::string &path) {
+std::string getResourcePath(const std::string& path) {
     return std::string{PROJECT_ROOT_FOLDER} + "/resources/" + path;
 }
 
