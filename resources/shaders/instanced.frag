@@ -1,4 +1,4 @@
-#version 330 core
+#version 440 core
 out vec4 FragColor;
 
 // Vertex info
@@ -8,7 +8,13 @@ in vec2 texUV;
 in vec4 meshColor;
 
 // General info
-uniform vec3 viewPos;
+layout(std140, binding = 0) uniform Scene {
+    mat4 projection;
+    mat4 view;
+    vec3 viewPos;
+};
+
+// Renderable info
 uniform sampler2D tex;
 
 // Directional light info

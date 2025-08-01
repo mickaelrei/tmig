@@ -71,7 +71,11 @@ void Mesh<V>::setVertexBuffer(DataBuffer<V>* buffer) {
     if (buffer == nullptr) return;
 
     if (vertexAttributes.empty()) {
+#ifdef DEBUG
         throw std::runtime_error{"Cannot bind vertex buffer without attribute layout (setAttributes)"};
+#else
+        return;
+#endif
     }
 
     vertexBuffer = buffer;

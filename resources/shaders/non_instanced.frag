@@ -1,4 +1,4 @@
-#version 330 core
+#version 440 core
 out vec4 FragColor;
 
 // Vertex info
@@ -7,7 +7,11 @@ in vec3 fragPos;
 in vec4 meshColor;
 
 // General info
-uniform vec3 viewPos;
+layout(std140, binding = 0) uniform Scene {
+    mat4 projection;
+    mat4 view;
+    vec3 viewPos;
+};
 
 // Directional light info
 const float lightIntensity = 0.6f;

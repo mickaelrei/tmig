@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "tmig/render/instanced_mesh.hpp"
+#include "tmig/render/uniform_buffer.hpp"
 #include "tmig/render/render.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/window.hpp"
@@ -107,6 +108,16 @@ int main() {
     mesh.setIndexBuffer(indexBuffer);
     mesh.setVertexBuffer(vertexBuffer);
 
+    // Scene UBO
+    struct sceneData {
+        glm::mat4 projection;
+        glm::mat4 view;
+        glm::vec3 viewPos;
+    };
+    sceneData sceneDataUBO;
+    render::UniformBuffer<sceneData> ubo;
+    ubo.bindTo(0);
+
     float lastTime = render::window::getRuntime();
     while (!render::window::shouldClose()) {
         // Calculate dt
@@ -141,39 +152,35 @@ int main() {
             model = glm::scale(model, scale);
             instances[i].model = model;
         }
-        // instanceBuffer->setData(instances);
         instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
-        // Set projection
-        auto view = camera.getViewMatrix();
+        auto start = std::chrono::high_resolution_clock::now();
+
+        // Set scene UBO data
         auto windowSize = render::window::getSize();
-        auto projection = glm::perspective(
+        sceneDataUBO.viewPos = camera.getPosition();
+        sceneDataUBO.view = camera.getViewMatrix();
+        sceneDataUBO.projection = glm::perspective(
             glm::radians(camera.fov),
             (float)windowSize.x / (float)windowSize.y,
             camera.minDist, camera.maxDist
         );
-
-        auto start = std::chrono::high_resolution_clock::now();
+        ubo.setData(sceneDataUBO);
 
         render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 
         shader.setMat4("model", glm::mat4{1.0f});
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
-        shader.setVec3("viewPos", camera.getPosition());
         shader.setVec4("meshColor", glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
         mesh.render();
 
         render::window::swapBuffers();
         render::window::pollEvents();
 
-        // Time after drawing
-        auto end = std::chrono::high_resolution_clock::now();
-
         // Display time durations
+        auto end = std::chrono::high_resolution_clock::now();
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }

@@ -13,8 +13,9 @@ namespace tmig::render {
 /// @brief Class for creating and rendering a mesh
 /// @tparam V type used as vertex data
 /// @note - Make sure to call `setAttributes` before calling `setVertexBuffer`.
-/// Also make sure to pass matching attributes based on the template typename.
-/// @note - This is a non-copyable class, meaning you cannot create a copy of it. See `InstancedMesh` for rendering "copies" of the same mesh.
+///         Also make sure to pass matching attributes based on the template typename.
+/// @note - This is a non-copyable class, meaning you cannot create a copy of it.
+///         See `InstancedMesh` for rendering "copies" of the same mesh
 template<typename V>
 class Mesh : protected core::NonCopyable {
 public:

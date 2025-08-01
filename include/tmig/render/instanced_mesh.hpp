@@ -11,8 +11,8 @@ namespace tmig::render {
 /// @tparam V type used as vertex data
 /// @tparam I type used as instance data
 /// @note - Make sure to call `setAttributes` before calling `setVertexBuffer`. Also make sure to pass
-/// matching attributes based on the two template typenames.
-/// @note - This is a non-copyable class, meaning you cannot create a copy of it.
+/// matching attributes based on the two template typenames
+/// @note - This is a non-copyable class, meaning you cannot create a copy of it
 template<typename V, typename I>
 class InstancedMesh : private Mesh<V> {
 public:

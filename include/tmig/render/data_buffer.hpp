@@ -9,16 +9,14 @@ namespace tmig::render {
 
 /// @brief Class representing a GPU buffer data store
 /// @tparam T type of data stored
-/// @note - This is a non-copyable class, meaning you cannot create a copy of it.
+/// @note - This is a non-copyable class, meaning you cannot create a copy of it
 template<typename T>
 class DataBuffer : protected core::NonCopyable {
 public:
     /// @brief Constructor
-    /// @note Creates the buffer
     DataBuffer();
 
     /// @brief Constructor
-    /// @note Deletes the buffer
     virtual ~DataBuffer();
 
     /// @brief Move constructor
