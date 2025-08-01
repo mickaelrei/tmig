@@ -38,6 +38,9 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
 
+    # Core module
+    ${SOURCE_DIR}/core/callback_manager.cpp
+
     # Render module
     ${SOURCE_DIR}/render/camera.cpp
     ${SOURCE_DIR}/render/render.cpp

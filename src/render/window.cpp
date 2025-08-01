@@ -5,13 +5,14 @@
 #include <GLFW/glfw3.h>
 
 #include "tmig/render/window.hpp"
+#include "tmig/core/callback_manager.hpp"
 #include "tmig/util/debug.hpp"
 
 // Default callback for framebuffer resize
-// TODO: Make a way for user to set their own callbacks
 void defaultFramebufferSizeCallback(GLFWwindow* window, int width, int height) {
     (void)window;
     glViewport(0, 0, width, height); glCheckError();
+    tmig::core::notifyWindowResize(width, height);
 }
 
 // Flag for initialized
