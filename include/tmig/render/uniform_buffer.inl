@@ -30,10 +30,10 @@ UniformBuffer<T>& UniformBuffer<T>::operator=(UniformBuffer&& other) noexcept {
         glDeleteBuffers(1, &_id); glCheckError();
 
         _id = other._id;
-        bindingPoint = other.bindingPoint;
+        binding = other.binding;
 
         other._id = 0;
-        other.bindingPoint = 0;
+        other.binding = 0;
     }
     return *this;
 }
@@ -44,9 +44,9 @@ void UniformBuffer<T>::setData(const T& data) {
 }
 
 template<typename T>
-void UniformBuffer<T>::bindTo(uint32_t index) {
-    bindingPoint = _bindingPoint;
-    glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, _id); glCheckError();
+void UniformBuffer<T>::bindTo(uint32_t _binding) {
+    binding = _binding;
+    glBindBufferBase(GL_UNIFORM_BUFFER, binding, _id); glCheckError();
 }
 
 } // namespace tmig::render
