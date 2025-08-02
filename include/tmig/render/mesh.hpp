@@ -57,6 +57,9 @@ protected:
     /// @brief Per-vertex attributes
     std::vector<VertexAttributeType> vertexAttributes;
 
+    /// @brief Previous attribute count; used in `configureVertexAttributes` to disable previous layout
+    uint32_t previousAttribCount = 0;
+
     /// @brief Internally configure per-vertex attributes
     void configureVertexAttributes();
 };

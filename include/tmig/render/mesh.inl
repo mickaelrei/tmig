@@ -81,7 +81,7 @@ void Mesh<V>::setVertexBuffer(DataBuffer<V>* buffer) {
     vertexBuffer = buffer;
 
     // Bind the buffer to binding index 0
-    const GLuint bindingIndex = 0;
+    const uint32_t bindingIndex = 0;
     const size_t stride = getStrideSize(vertexAttributes.data(), vertexAttributes.size());
     glVertexArrayVertexBuffer(vao, bindingIndex, vertexBuffer->id(), 0, stride); glCheckError();
 }
@@ -105,10 +105,15 @@ void Mesh<V>::render() {
 
 template<typename V>
 void Mesh<V>::configureVertexAttributes() {
+    // Disable previously enabled attributes
+    for (uint32_t i = 0; i < previousAttribCount; ++i) {
+        glDisableVertexArrayAttrib(vao, i); glCheckError();
+    }
+
     // Configure the vertex attributes to the VAO at binding index 0
-    const GLuint bindingIndex = 0;
+    const uint32_t bindingIndex = 0;
     size_t vertexOffset = 0;
-    GLuint attribIndex = 0;
+    uint32_t attribIndex = 0;
 
     // Set vertex attributes
     for (auto attr : vertexAttributes) {
@@ -117,17 +122,20 @@ void Mesh<V>::configureVertexAttributes() {
                 glVertexArrayAttribFormat(vao, attribIndex, 4, GL_FLOAT, GL_FALSE, vertexOffset + sizeof(glm::vec4) * i); glCheckError();
                 glVertexArrayAttribBinding(vao, attribIndex, bindingIndex); glCheckError();
                 glEnableVertexArrayAttrib(vao, attribIndex); glCheckError();
-                attribIndex++;
+                ++attribIndex;
             }
         } else {
             glVertexArrayAttribFormat(vao, attribIndex, getAttributeCount(attr), getAttributeType(attr), GL_FALSE, vertexOffset); glCheckError();
             glVertexArrayAttribBinding(vao, attribIndex, bindingIndex); glCheckError();
             glEnableVertexArrayAttrib(vao, attribIndex); glCheckError();
-            attribIndex++;
+            ++attribIndex;
         }
 
         vertexOffset += getAttributeSize(attr);
     }
+
+    // Store how many attributes were used
+    previousAttribCount = attribIndex;
 }
 
 } // namespace tmig::render

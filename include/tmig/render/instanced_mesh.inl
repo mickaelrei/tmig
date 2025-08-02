@@ -12,12 +12,10 @@ namespace tmig::render {
 template<typename V, typename I>
 InstancedMesh<V, I>::InstancedMesh(InstancedMesh&& other) noexcept
     : Mesh<V>{std::move(other)},
-     instanceBuffer{other.instanceBuffer},
-     instanceAttributes{std::move(other.instanceAttributes)},
-     instanceAttributesConfigured{other.instanceAttributesConfigured}
+      instanceBuffer{other.instanceBuffer},
+      instanceAttributes{std::move(other.instanceAttributes)}
 {
     other.instanceBuffer = nullptr;
-    other.instanceAttributesConfigured = false;
 }
 
 template<typename V, typename I>
@@ -26,10 +24,8 @@ InstancedMesh<V, I>& InstancedMesh<V, I>::operator=(InstancedMesh&& other) noexc
         Mesh<V>::operator=(std::move(other));
         instanceBuffer = other.instanceBuffer;
         instanceAttributes = std::move(other.instanceAttributes);
-        instanceAttributesConfigured = other.instanceAttributesConfigured;
 
         other.instanceBuffer = nullptr;
-        other.instanceAttributesConfigured = false;
     }
     return *this;
 }
@@ -68,7 +64,7 @@ void InstancedMesh<V, I>::setInstanceBuffer(DataBuffer<I>* buffer) {
     instanceBuffer = buffer;
 
     // Only bind the buffer, do not reconfigure attributes
-    const GLuint instanceBindingIndex = 1;
+    const uint32_t instanceBindingIndex = 1;
     const size_t stride = getStrideSize(instanceAttributes.data(), instanceAttributes.size());
     glVertexArrayVertexBuffer(Mesh<V>::vao, instanceBindingIndex, instanceBuffer->id(), 0, stride); glCheckError();
 }
@@ -85,18 +81,24 @@ void InstancedMesh<V, I>::render() {
 template<typename V, typename I>
 void InstancedMesh<V, I>::configureInstanceAttributes() {
     // Find the starting attribute index (after per-vertex attributes)
-    GLuint attribIndex = 0;
+    uint32_t attribIndex = 0;
     for (auto attr : Mesh<V>::vertexAttributes) {
         if (attr == VertexAttributeType::Mat4x4) {
             attribIndex += 4;
         } else {
-            attribIndex += 1;
+            ++attribIndex;
         }
     }
 
+    // Disable previously enabled instance attributes
+    for (uint32_t i = 0; i < previousInstanceAttribCount; ++i) {
+        glDisableVertexArrayAttrib(Mesh<V>::vao, attribIndex + i); glCheckError();
+    }
+
     // Configure the instance attributes to the VAO at binding index 1 to not conflict with per-vertex attributes at binding 0
-    const GLuint bindingIndex = 1;
+    const uint32_t bindingIndex = 1;
     size_t instanceOffset = 0;
+    uint32_t startingAttribIndex = attribIndex; // Remember where instance attributes start
 
     // Set instance attributes
     for (auto attr : instanceAttributes) {
@@ -106,18 +108,21 @@ void InstancedMesh<V, I>::configureInstanceAttributes() {
                 glVertexArrayAttribBinding(Mesh<V>::vao, attribIndex, bindingIndex); glCheckError();
                 glEnableVertexArrayAttrib(Mesh<V>::vao, attribIndex); glCheckError();
                 glVertexArrayBindingDivisor(Mesh<V>::vao, bindingIndex, 1); glCheckError();
-                attribIndex++;
+                ++attribIndex;
             }
         } else {
             glVertexArrayAttribFormat(Mesh<V>::vao, attribIndex, getAttributeCount(attr), getAttributeType(attr), GL_FALSE, instanceOffset); glCheckError();
             glVertexArrayAttribBinding(Mesh<V>::vao, attribIndex, bindingIndex); glCheckError();
             glEnableVertexArrayAttrib(Mesh<V>::vao, attribIndex); glCheckError();
             glVertexArrayBindingDivisor(Mesh<V>::vao, bindingIndex, 1); glCheckError();
-            attribIndex++;
+            ++attribIndex;
         }
 
         instanceOffset += getAttributeSize(attr);
     }
+
+    // Store how many instance attributes were used
+    previousInstanceAttribCount = attribIndex - startingAttribIndex;
 }
 
 } // namespace tmig::render

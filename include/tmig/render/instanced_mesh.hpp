@@ -57,8 +57,8 @@ protected:
     /// @brief Per-instance attributes
     std::vector<VertexAttributeType> instanceAttributes;
 
-    /// @brief Whether instance attributes are configured
-    bool instanceAttributesConfigured = false;
+    /// @brief Previous attribute count; used in `configureInstanceAttributes` to disable previous layout
+    uint32_t previousInstanceAttribCount = 0;
 
     /// @brief Internally configure per-instance attributes
     void configureInstanceAttributes();
