@@ -43,6 +43,7 @@ int main() {
         std::cout << "Failed to load texture\n";
         return 1;
     }
+    texture.generateMipmaps();
     texture.bind(0);
     shader.setInt("tex", 0);
 

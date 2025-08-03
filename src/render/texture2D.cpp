@@ -1,3 +1,6 @@
+#include <stdexcept>
+#include <cassert>
+
 #include "stb/stb_image.h"
 #include "glad/glad.h"
 
@@ -6,29 +9,42 @@
 
 namespace tmig::render {
 
+bool isMipmapFilter(TextureMinFilter filter) {
+    switch (filter) {
+    case TextureMinFilter::NEAREST_MIPMAP_NEAREST:
+    case TextureMinFilter::LINEAR_MIPMAP_NEAREST:
+    case TextureMinFilter::NEAREST_MIPMAP_LINEAR:
+    case TextureMinFilter::LINEAR_MIPMAP_LINEAR:
+        return true;
+    default:
+        return false;
+    }
+}
+
 /// @brief Convert a `TextureFormat` into a sized OpenGL internal format
 static GLenum toInternalFormat(TextureFormat format) {
     switch (format) {
-    case TextureFormat::R8:       return GL_R8;
-    case TextureFormat::RG8:      return GL_RG8;
-    case TextureFormat::RGB8:     return GL_RGB8;
-    case TextureFormat::RGBA8:    return GL_RGBA8;
+    case TextureFormat::R8:        return GL_R8;
+    case TextureFormat::RG8:       return GL_RG8;
+    case TextureFormat::RGB8:      return GL_RGB8;
+    case TextureFormat::RGBA8:     return GL_RGBA8;
 
-    case TextureFormat::R16F:     return GL_R16F;
-    case TextureFormat::RG16F:    return GL_RG16F;
-    case TextureFormat::RGB16F:   return GL_RGB16F;
-    case TextureFormat::RGBA16F:  return GL_RGBA16F;
+    case TextureFormat::R16F:      return GL_R16F;
+    case TextureFormat::RG16F:     return GL_RG16F;
+    case TextureFormat::RGB16F:    return GL_RGB16F;
+    case TextureFormat::RGBA16F:   return GL_RGBA16F;
 
-    case TextureFormat::R32F:     return GL_R32F;
-    case TextureFormat::RG32F:    return GL_RG32F;
-    case TextureFormat::RGB32F:   return GL_RGB32F;
-    case TextureFormat::RGBA32F:  return GL_RGBA32F;
+    case TextureFormat::R32F:      return GL_R32F;
+    case TextureFormat::RG32F:     return GL_RG32F;
+    case TextureFormat::RGB32F:    return GL_RGB32F;
+    case TextureFormat::RGBA32F:   return GL_RGBA32F;
 
-    case TextureFormat::SRGB8:    return GL_SRGB8;
-    case TextureFormat::SRGBA8:   return GL_SRGB8_ALPHA8;
+    case TextureFormat::SRGB8:     return GL_SRGB8;
+    case TextureFormat::SRGBA8:    return GL_SRGB8_ALPHA8;
 
-    case TextureFormat::DEPTH24:  return GL_DEPTH_COMPONENT24;
-    case TextureFormat::DEPTH32F: return GL_DEPTH_COMPONENT32F;
+    case TextureFormat::DEPTH24:   return GL_DEPTH_COMPONENT24;
+    case TextureFormat::DEPTH32F:  return GL_DEPTH_COMPONENT32F;
+    case TextureFormat::UNDEFINED: return 0;
     }
     return 0;
 }
@@ -61,6 +77,9 @@ static GLenum toFormat(TextureFormat format) {
     case TextureFormat::DEPTH24:
     case TextureFormat::DEPTH32F:
         return GL_DEPTH_COMPONENT;
+
+    case TextureFormat::UNDEFINED:
+        return 0;
     }
     return 0;
 }
@@ -92,42 +111,77 @@ static GLenum toType(TextureFormat format) {
     case TextureFormat::DEPTH24:
         return GL_UNSIGNED_INT;
 
+    case TextureFormat::UNDEFINED:
+        return 0;
     }
     return 0;
 }
 
 inline const char* toString(TextureFormat format) {
     switch (format) {
-        case TextureFormat::R8:       return "R8";
-        case TextureFormat::RG8:      return "RG8";
-        case TextureFormat::RGB8:     return "RGB8";
-        case TextureFormat::RGBA8:    return "RGBA8";
+        case TextureFormat::R8:        return "R8";
+        case TextureFormat::RG8:       return "RG8";
+        case TextureFormat::RGB8:      return "RGB8";
+        case TextureFormat::RGBA8:     return "RGBA8";
 
-        case TextureFormat::R16F:     return "R16F";
-        case TextureFormat::RG16F:    return "RG16F";
-        case TextureFormat::RGB16F:   return "RGB16F";
-        case TextureFormat::RGBA16F:  return "RGBA16F";
+        case TextureFormat::R16F:      return "R16F";
+        case TextureFormat::RG16F:     return "RG16F";
+        case TextureFormat::RGB16F:    return "RGB16F";
+        case TextureFormat::RGBA16F:   return "RGBA16F";
 
-        case TextureFormat::R32F:     return "R32F";
-        case TextureFormat::RG32F:    return "RG32F";
-        case TextureFormat::RGB32F:   return "RGB32F";
-        case TextureFormat::RGBA32F:  return "RGBA32F";
+        case TextureFormat::R32F:      return "R32F";
+        case TextureFormat::RG32F:     return "RG32F";
+        case TextureFormat::RGB32F:    return "RGB32F";
+        case TextureFormat::RGBA32F:   return "RGBA32F";
 
-        case TextureFormat::SRGB8:    return "SRGB8";
-        case TextureFormat::SRGBA8:   return "SRGB8_ALPHA8";
+        case TextureFormat::SRGB8:     return "SRGB8";
+        case TextureFormat::SRGBA8:    return "SRGB8_ALPHA8";
 
-        case TextureFormat::DEPTH24:  return "DEPTH24";
-        case TextureFormat::DEPTH32F: return "DEPTH32F";
+        case TextureFormat::DEPTH24:   return "DEPTH24";
+        case TextureFormat::DEPTH32F:  return "DEPTH32F";
+        case TextureFormat::UNDEFINED: return "UNDEFINED";
 
-        default:                      return "Unknown";
+    }
+
+    return "Unknown";
+}
+
+static GLenum toGL(TextureWrap wrap) {
+    switch (wrap) {
+        case TextureWrap::REPEAT:          return GL_REPEAT;
+        case TextureWrap::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
+        case TextureWrap::CLAMP_TO_EDGE:   return GL_CLAMP_TO_EDGE;
+        default:                           return GL_REPEAT;
+    }
+}
+
+static GLenum toGL(TextureMinFilter filter) {
+    switch (filter) {
+        case TextureMinFilter::NEAREST:                return GL_NEAREST;
+        case TextureMinFilter::LINEAR:                 return GL_LINEAR;
+        case TextureMinFilter::NEAREST_MIPMAP_NEAREST: return GL_NEAREST_MIPMAP_NEAREST;
+        case TextureMinFilter::LINEAR_MIPMAP_NEAREST:  return GL_LINEAR_MIPMAP_NEAREST;
+        case TextureMinFilter::NEAREST_MIPMAP_LINEAR:  return GL_NEAREST_MIPMAP_LINEAR;
+        case TextureMinFilter::LINEAR_MIPMAP_LINEAR:   return GL_LINEAR_MIPMAP_LINEAR;
+        default:                                       return GL_NEAREST;
+    }
+}
+
+static GLenum toGL(TextureMagFilter filter) {
+    switch (filter) {
+        case TextureMagFilter::NEAREST: return GL_NEAREST;
+        case TextureMagFilter::LINEAR:  return GL_LINEAR;
+        default:                        return GL_NEAREST;
     }
 }
 
 Texture2D::Texture2D() {
     glCreateTextures(GL_TEXTURE_2D, 1, &_id); glCheckError();
+    util::debugPrint("Created Texture2D: %u\n", _id);
 }
 
 Texture2D::~Texture2D() {
+    util::debugPrint("Deleting Texture2D: %u\n", _id);
     glDeleteTextures(1, &_id); glCheckError();
 }
 
@@ -183,13 +237,30 @@ bool Texture2D::loadFromFile(const std::string& filename, bool flipY) {
 }
 
 void Texture2D::setData(const void* data) {
-    glTextureSubImage2D(_id, 0, 0, 0, _width, _height, toFormat(_internalFormat), toType(_internalFormat), data); glCheckError();
+#ifdef DEBUG
+    // Validate that texture has been properly initialized
+    if (_width == 0 || _height == 0 || _internalFormat == TextureFormat::UNDEFINED) {
+        throw std::runtime_error{
+            "[Texture2D] Texture is not initialized. Call resize() or loadFromFile() before setting data."
+        };
+    }
+#endif
 
-    // TODO: Let the user manually call a generateMipmaps() method rather than always doing it automatically
-    glGenerateTextureMipmap(_id); glCheckError();
+    glTextureSubImage2D(_id, 0, 0, 0, _width, _height, toFormat(_internalFormat), toType(_internalFormat), data); glCheckError();
 }
 
-void Texture2D::resize(unsigned int width, unsigned int height, TextureFormat format) {
+void Texture2D::resize(uint32_t width, uint32_t height, TextureFormat format) {
+#ifdef DEBUG
+    if (format == TextureFormat::UNDEFINED) {
+        throw std::runtime_error{
+            "[Texture2D] TextureFormat::UNDEFINED is not supported for resize()"
+        };
+    }
+#endif
+
+    // Reset mipmaps flag because resizing removes the existing mipmaps
+    _hasMipmaps = false;
+
     _width = width;
     _height = height;
     _internalFormat = format;
@@ -197,11 +268,35 @@ void Texture2D::resize(unsigned int width, unsigned int height, TextureFormat fo
     glTextureStorage2D(_id, 1, toInternalFormat(_internalFormat), width, height); glCheckError();
 }
 
-void Texture2D::bind(unsigned int unit) const {
+void Texture2D::setWrap(TextureWrap wrapS, TextureWrap wrapT) {
+    glTextureParameteri(_id, GL_TEXTURE_WRAP_S, toGL(wrapS));
+    glTextureParameteri(_id, GL_TEXTURE_WRAP_T, toGL(wrapT));
+}
+
+void Texture2D::setFilter(TextureMinFilter minFilter, TextureMagFilter magFilter) {
+#ifdef DEBUG
+    // Validate mipmap usage
+    if (isMipmapFilter(minFilter) && !_hasMipmaps) {
+        throw std::runtime_error{"[Texture2D] Mipmap filters need mipmaps generated"};
+    }
+#endif
+
+    glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, toGL(minFilter));
+    glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, toGL(magFilter));
+}
+
+void Texture2D::generateMipmaps() {
+    if (_hasMipmaps) return;
+
+    _hasMipmaps = true;
+    glGenerateTextureMipmap(_id); glCheckError();
+}
+
+void Texture2D::bind(uint32_t unit) const {
     glBindTextureUnit(unit, _id); glCheckError();
 }
 
-void Texture2D::unbind(unsigned int unit) {
+void Texture2D::unbind(uint32_t unit) {
     glBindTextureUnit(unit, 0); glCheckError();
 }
 
