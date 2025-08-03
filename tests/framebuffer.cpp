@@ -1,20 +1,22 @@
-#include <chrono>
 #include <iostream>
+#include <vector>
+#include <chrono>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "tmig/render/instanced_mesh.hpp"
-#include "tmig/render/uniform_buffer.hpp"
 #include "tmig/render/render.hpp"
-#include "tmig/render/shader.hpp"
+#include "tmig/render/instanced_mesh.hpp"
+#include "tmig/render/framebuffer.hpp"
+#include "tmig/render/uniform_buffer.hpp"
 #include "tmig/render/window.hpp"
+#include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
 #include "tmig/util/camera.hpp"
-#include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
+#include "tmig/util/resources.hpp"
 
 using namespace tmig;
 
@@ -26,7 +28,7 @@ int main() {
     srand(3);
 
     render::init();
-    render::window::setTitle("Vertex attribute test | Instancing ON");
+    render::window::setTitle("Framebuffer test");
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
@@ -37,9 +39,14 @@ int main() {
         util::getResourcePath("shaders/instanced.frag")
     };
 
+    auto postProcessingShader = render::Shader{
+        util::getResourcePath("shaders/screen_quad.vert"),
+        util::getResourcePath("shaders/post_processing.frag")
+    };
+
     // Creating texture, binding at unit and setting in shader uniform
     render::Texture2D texture;
-    if (!texture.loadFromFile(util::getResourcePath("images/container.jpg"))) {
+    if (!texture.loadFromFile(util::getResourcePath("images/awesomeface.png"))) {
         std::cout << "Failed to load texture\n";
         return 1;
     }
@@ -48,9 +55,7 @@ int main() {
     texture.setMinFilter(render::TextureMinFilter::LINEAR_MIPMAP_LINEAR);
     texture.setMagFilter(render::TextureMagFilter::LINEAR);
     texture.generateMipmaps();
-
-    shader.use();
-    shader.setTexture("tex", texture, 0);
+    shader.setTexture("tex", texture, 1);
 
     // Generate instancing data
     struct instanceData {
@@ -125,8 +130,64 @@ int main() {
     render::UniformBuffer<sceneData> ubo;
     ubo.bindTo(0);
 
+    // Create screen quad for post-processing render
+    struct quadVert {
+        glm::vec3 pos;
+        glm::vec2 uv;
+    };
+    std::vector<quadVert> quadVertices;
+    std::vector<uint32_t> quadIndices;
+    util::generateScreenQuadMesh([&](auto v) { quadVertices.push_back(quadVert{
+        .pos = v.position,
+        .uv = v.uv
+    }); }, quadIndices);
+
+    auto screenQuadVertexBuffer = new render::DataBuffer<quadVert>;
+    screenQuadVertexBuffer->setData(quadVertices);
+
+    auto screenQuadIndexBuffer = new render::DataBuffer<uint32_t>;
+    screenQuadIndexBuffer->setData(quadIndices);
+
+    render::Mesh<quadVert> screenQuadMesh;
+    screenQuadMesh.setAttributes({
+        render::VertexAttributeType::Float3, // position
+        render::VertexAttributeType::Float2, // uv
+    });
+    screenQuadMesh.setIndexBuffer(screenQuadIndexBuffer);
+    screenQuadMesh.setVertexBuffer(screenQuadVertexBuffer);
+
+    // Create framebuffer for post-processing
+    auto sceneOutputTexture = new render::Texture2D;
+    auto sceneDepthTexture = new render::Texture2D;
+    sceneOutputTexture->setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
+    sceneOutputTexture->setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
+
+    render::Framebuffer fb;
+    auto status = fb.setup({
+        .width = 1200,
+        .height = 1200,
+        .colorAttachments = {
+            {0, render::FramebufferAttachment{
+                .texture = sceneOutputTexture,
+                .format = render::TextureFormat::RGBA8,
+            }},
+        },
+        .depthAttachment = render::FramebufferDepthAttachment{
+            .texture = sceneDepthTexture,
+            .format = render::DepthAttachmentFormat::DEPTH24_STENCIL8,
+        },
+    });
+    if (status != render::Framebuffer::Status::COMPLETE) {
+        std::cerr << "Framebuffer failed; status: " << status << "\n";
+    }
+
     float lastTime = render::window::getRuntime();
+    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
+    bool pressingE = false;
+    int effect = 0;
     while (!render::window::shouldClose()) {
+        auto start = std::chrono::high_resolution_clock::now();
+
         // Calculate dt
         float runtime = render::window::getRuntime();
         float dt = runtime - lastTime;
@@ -136,7 +197,17 @@ int main() {
         if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             render::window::setShouldClose(true);
         }
+        if (!pressingE && render::window::getKeyState(GLFW_KEY_E) == GLFW_PRESS) {
+            pressingE = true;
+            effect = (effect + 1) % 5;
+        }
+        if (render::window::getKeyState(GLFW_KEY_E) == GLFW_RELEASE) {
+            pressingE = false;
+        }
 
+        // ------------------------------------------
+        // ------------------------------------------
+        // Render scene
         for (size_t i = 0; i < instances.size(); ++i) {
             glm::vec3 pos = glm::vec3(instances[i].model[3]);
             pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f} * .1f;
@@ -163,8 +234,6 @@ int main() {
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
-        auto start = std::chrono::high_resolution_clock::now();
-
         // Set scene UBO data
         auto windowSize = render::window::getSize();
         sceneDataUBO.viewPos = camera.getPosition();
@@ -176,10 +245,27 @@ int main() {
         );
         ubo.setData(sceneDataUBO);
 
-        render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
-        render::clearBuffers();
-
+        // Render instanced mesh
+        shader.use();
+        fb.bind();
         mesh.render();
+
+        // ------------------------------------------
+        // ------------------------------------------
+        // Post-processing
+
+        // Go back to default framebuffer
+        render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
+
+        // Set scene output texture as input to post-processing shader
+        postProcessingShader.use();
+        postProcessingShader.setInt("effect", effect);
+        postProcessingShader.setTexture("scene", *sceneOutputTexture, 0);
+
+        // Disable depth-testing while rendering and enable it back right after
+        glDisable(GL_DEPTH_TEST);
+        screenQuadMesh.render();
+        glEnable(GL_DEPTH_TEST);
 
         render::window::swapBuffers();
         render::window::pollEvents();
@@ -187,12 +273,17 @@ int main() {
         // Display time durations
         auto end = std::chrono::high_resolution_clock::now();
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        (void)drawDuration;
         printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
 
     delete vertexBuffer;
     delete instanceBuffer;
     delete indexBuffer;
+    delete screenQuadVertexBuffer;
+    delete screenQuadIndexBuffer;
+    delete sceneOutputTexture;
+    delete sceneDepthTexture;
 
     return 0;
 }

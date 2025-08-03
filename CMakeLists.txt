@@ -43,6 +43,7 @@ set(
 
     # Render module
     ${SOURCE_DIR}/render/camera.cpp
+    ${SOURCE_DIR}/render/framebuffer.cpp
     ${SOURCE_DIR}/render/render.cpp
     ${SOURCE_DIR}/render/shader.cpp
     ${SOURCE_DIR}/render/texture2D.cpp
@@ -151,6 +152,41 @@ target_link_libraries(
 # Header files
 target_include_directories(
     non_instanced
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
+)
+
+#######################################################
+#######################################################
+# Framebuffer test
+
+# Source files
+set(
+    FRAMEBUFFER_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/framebuffer.cpp
+)
+
+# Adding executables for testing
+add_executable(framebuffer ${FRAMEBUFFER_TEST_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    framebuffer
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    framebuffer
+    PRIVATE
+    ${TMIG}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    framebuffer
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include

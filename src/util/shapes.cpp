@@ -393,4 +393,30 @@ void generateWedgeMesh(const VertexGenerateCallback& vertexCallback, std::vector
     };
 }
 
+void generateScreenQuadMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices) {
+    std::vector<GeneralVertex> vertices = {
+        // Bottom-left
+        GeneralVertex{.position = glm::vec3{-1.0f, -1.0f, 0.0f}, .normal = glm::vec3{0.0f, 0.0f, 1.0f}, .uv = glm::vec2{0.0f, 0.0f}},
+
+        // Bottom-right
+        GeneralVertex{.position = glm::vec3{ 1.0f, -1.0f, 0.0f}, .normal = glm::vec3{0.0f, 0.0f, 1.0f}, .uv = glm::vec2{1.0f, 0.0f}},
+
+        // Top-right
+        GeneralVertex{.position = glm::vec3{ 1.0f,  1.0f, 0.0f}, .normal = glm::vec3{0.0f, 0.0f, 1.0f}, .uv = glm::vec2{1.0f, 1.0f}},
+
+        // Top-left
+        GeneralVertex{.position = glm::vec3{-1.0f,  1.0f, 0.0f}, .normal = glm::vec3{0.0f, 0.0f, 1.0f}, .uv = glm::vec2{0.0f, 1.0f}},
+    };
+
+    for (auto v : vertices) {
+        vertexCallback(v);
+    }
+
+    indices = {
+        0, 1, 2,
+        0, 2, 3,
+    };
+}
+
+
 } // namespace tmig::util

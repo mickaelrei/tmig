@@ -18,11 +18,13 @@ static void debugMessageCallback(
     GLenum severity,
     GLsizei length,
     const GLchar* message,
-    const void* user_param
+    const void* userParam
 ) {
+    (void)length;
+    (void)userParam;
+
 	auto const src_str = [source]() {
-		switch (source)
-		{
+		switch (source) {
 		case GL_DEBUG_SOURCE_API:             return "API";
 		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   return "WINDOW SYSTEM";
 		case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
@@ -34,8 +36,7 @@ static void debugMessageCallback(
 	}();
 
 	auto const type_str = [type]() {
-		switch (type)
-		{
+		switch (type) {
 		case GL_DEBUG_TYPE_ERROR:               return "ERROR";
 		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
 		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  return "UNDEFINED_BEHAVIOR";

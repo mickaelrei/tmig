@@ -176,12 +176,12 @@ inline const char* toString(TextureFormat format) {
     return "Unknown";
 }
 
-static GLenum toGL(TextureWrap wrap) {
+static GLenum toGL(TextureWrapMode wrap) {
     switch (wrap) {
-        case TextureWrap::REPEAT:          return GL_REPEAT;
-        case TextureWrap::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
-        case TextureWrap::CLAMP_TO_EDGE:   return GL_CLAMP_TO_EDGE;
-        case TextureWrap::CLAMP_TO_BORDER: return GL_CLAMP_TO_BORDER;
+        case TextureWrapMode::REPEAT:          return GL_REPEAT;
+        case TextureWrapMode::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
+        case TextureWrapMode::CLAMP_TO_EDGE:   return GL_CLAMP_TO_EDGE;
+        case TextureWrapMode::CLAMP_TO_BORDER: return GL_CLAMP_TO_BORDER;
         default:                           return GL_REPEAT;
     }
 }
@@ -306,11 +306,11 @@ void Texture2D::resize(uint32_t width, uint32_t height, TextureFormat internalFo
     glTextureStorage2D(_id, 1, toInternalFormat(_internalFormat), width, height); glCheckError();
 }
 
-void Texture2D::setWrapS(TextureWrap wrap) {
+void Texture2D::setWrapS(TextureWrapMode wrap) {
     glTextureParameteri(_id, GL_TEXTURE_WRAP_S, toGL(wrap));
 }
 
-void Texture2D::setWrapT(TextureWrap wrap) {
+void Texture2D::setWrapT(TextureWrapMode wrap) {
     glTextureParameteri(_id, GL_TEXTURE_WRAP_T, toGL(wrap));
 }
 
@@ -323,14 +323,8 @@ void Texture2D::setMagFilter(TextureMagFilter filter) {
 }
 
 void Texture2D::setBorderColor(const glm::vec4& color) {
-    // Ensure we're only using this method with CLAMP_TO_BORDER wrap mode
-    setWrapS(TextureWrap::CLAMP_TO_BORDER);
-    setWrapT(TextureWrap::CLAMP_TO_BORDER);
-
-    GLfloat borderColor[4] = {color.r, color.g, color.b, color.a};
-    glTextureParameterfv(_id, GL_TEXTURE_BORDER_COLOR, borderColor); glCheckError();
+    glTextureParameterfv(_id, GL_TEXTURE_BORDER_COLOR, &color.x); glCheckError();
 }
-
 
 void Texture2D::generateMipmaps() {
     if (_hasMipmaps) return;

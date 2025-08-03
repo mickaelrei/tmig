@@ -74,7 +74,7 @@ int main() {
 
     // Generate high-resolution sphere mesh
     std::vector<myVertex> highResVertices;
-    std::vector<unsigned int> highResIndices;
+    std::vector<uint32_t> highResIndices;
     util::generateSphereMesh([&](auto v) {
         highResVertices.push_back(myVertex{
             .pos = v.position,
@@ -89,7 +89,7 @@ int main() {
 
     // Generate low-resolution sphere mesh
     std::vector<myVertex> lowResVertices;
-    std::vector<unsigned int> lowResIndices;
+    std::vector<uint32_t> lowResIndices;
     util::generateSphereMesh([&](auto v) {
         lowResVertices.push_back(myVertex{
             .pos = v.position,
@@ -107,7 +107,7 @@ int main() {
     highResBuffer->setData(highResVertices);
 
     // Create high-res index buffer
-    auto highResIndexBuffer = new render::DataBuffer<unsigned int>;
+    auto highResIndexBuffer = new render::DataBuffer<uint32_t>;
     highResIndexBuffer->setData(highResIndices);
 
     // Create low-res vertex data buffer
@@ -115,7 +115,7 @@ int main() {
     lowResBuffer->setData(lowResVertices);
 
     // Create low-res index buffer
-    auto lowResIndexBuffer = new render::DataBuffer<unsigned int>;
+    auto lowResIndexBuffer = new render::DataBuffer<uint32_t>;
     lowResIndexBuffer->setData(lowResIndices);
 
     // Set mesh attributes
@@ -139,6 +139,7 @@ int main() {
     render::UniformBuffer<sceneData> ubo;
     ubo.bindTo(0);
 
+    shader.use();
     float lastTime = render::window::getRuntime();
     while (!render::window::shouldClose()) {
         // Calculate dt

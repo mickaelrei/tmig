@@ -62,4 +62,7 @@ void generateBoxMesh(const VertexGenerateCallback& vertexCallback, std::vector<u
 /// @brief Generates a wedge mesh by passing vertices to callback and filling indices vector
 void generateWedgeMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices);
 
+/// @brief Generates a screen quad mesh by passing vertices to callback and filling indices vector
+void generateScreenQuadMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices);
+
 } // namespace tmig::util

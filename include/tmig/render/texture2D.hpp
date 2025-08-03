@@ -81,7 +81,7 @@ enum class TextureFormat {
     /// @brief 24-bit depth, 8-bit stencil combined component
     DEPTH24_STENCIL8,
 
-    /// @brief 16-bit depth component
+    /// @brief 32-bit float depth, 8-bit stencil combined component
     DEPTH32F_STENCIL8,
 
     /// @brief Texture2D starts with this format until a call to `loadFromFile` or `resize` is made
@@ -93,7 +93,7 @@ enum class TextureFormat {
 ///
 /// Texture wrapping modes define how textures behave when texture coordinates are outside the range [0, 1].
 /// These modes determine how the texture is sampled at the edges and beyond.
-enum class TextureWrap {
+enum class TextureWrapMode {
     /// @brief Repeat the texture infinitely in both directions
     REPEAT,
 
@@ -179,10 +179,10 @@ public:
     void resize(uint32_t width, uint32_t height, TextureFormat internalFormat);
 
     /// @brief Set texture wrap for the S axis (horizontal)
-    void setWrapS(TextureWrap wrap);
+    void setWrapS(TextureWrapMode wrap);
 
     /// @brief Set texture wrap for the T axis (vertical)
-    void setWrapT(TextureWrap wrap);
+    void setWrapT(TextureWrapMode wrap);
 
     /// @brief Set minification filter (used when the texture is scaled down)
     /// @note If using mipmap filters (e.g., `LINEAR_MIPMAP_NEAREST`), `generateMipmaps` must be called first.
@@ -192,9 +192,9 @@ public:
     /// @brief Set magnification filter (used when the texture is scaled up)
     void setMagFilter(TextureMagFilter filter);
 
-    /// @brief Set the border color when using CLAMP_TO_BORDER wrap mode
+    /// @brief Set the border color when using `CLAMP_TO_BORDER` wrap mode
     /// @param color The RGBA border color to use
-    /// @note This changes the wrap in both axes (S and T) to be CLAMP_TO_BORDER
+    /// @note This is only noticed if wrap mode in either axis is `CLAMP_TO_BORDER`
     void setBorderColor(const glm::vec4& color);
 
     /// @brief Generate texture mipmap levels
