@@ -11,6 +11,55 @@
 // Flag for initialized
 static bool initialized = false;
 
+static void debugMessageCallback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* user_param
+) {
+	auto const src_str = [source]() {
+		switch (source)
+		{
+		case GL_DEBUG_SOURCE_API:             return "API";
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   return "WINDOW SYSTEM";
+		case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
+		case GL_DEBUG_SOURCE_THIRD_PARTY:     return "THIRD PARTY";
+		case GL_DEBUG_SOURCE_APPLICATION:     return "APPLICATION";
+		case GL_DEBUG_SOURCE_OTHER:           return "OTHER";
+		}
+        return "UNKNOWN";
+	}();
+
+	auto const type_str = [type]() {
+		switch (type)
+		{
+		case GL_DEBUG_TYPE_ERROR:               return "ERROR";
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  return "UNDEFINED_BEHAVIOR";
+		case GL_DEBUG_TYPE_PORTABILITY:         return "PORTABILITY";
+		case GL_DEBUG_TYPE_PERFORMANCE:         return "PERFORMANCE";
+		case GL_DEBUG_TYPE_MARKER:              return "MARKER";
+		case GL_DEBUG_TYPE_OTHER:               return "OTHER";
+		}
+        return "UNKNOWN";
+	}();
+
+	auto const severity_str = [severity]() {
+		switch (severity) {
+		case GL_DEBUG_SEVERITY_NOTIFICATION: return "NOTIFICATION";
+		case GL_DEBUG_SEVERITY_LOW:          return "LOW";
+		case GL_DEBUG_SEVERITY_MEDIUM:       return "MEDIUM";
+		case GL_DEBUG_SEVERITY_HIGH:         return "HIGH";
+		}
+        return "UNKNOWN";
+	}();
+
+    printf("\033[0;93m[(%d) %s | %s - %s]\033[0m %s\n", id, src_str, type_str, severity_str, message);
+}
+
 namespace tmig::render {
 
 void init() {
@@ -25,6 +74,8 @@ void init() {
     glEnable(GL_CULL_FACE); glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glCheckError();
     glEnable(GL_BLEND); glCheckError();
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(debugMessageCallback, nullptr);
     //glfwSwapInterval(0); glCheckError(); // Disable VSync
 }
 

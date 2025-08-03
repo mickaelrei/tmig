@@ -40,11 +40,11 @@ void InstancedMesh<V, I>::setAttributes(
     // Ensure stride size matches template types size
     size_t vertexStride = getStrideSize(_vertexAttributes.data(), _vertexAttributes.size());
     if (vertexStride != sizeof(V)) {
-        throw std::runtime_error{"Vertex type size does not match vertex stride size"};
+        throw std::runtime_error{"[InstancedMesh::setAttributes] Vertex size doesn't match vertex stride"};
     }
     size_t instanceStride = getStrideSize(_instanceAttributes.data(), _instanceAttributes.size());
     if (instanceStride != sizeof(I)) {
-        throw std::runtime_error{"Instance type size does not match instance stride size"};
+        throw std::runtime_error{"[InstancedMesh::setAttributes] Instance size doesn't match instance stride"};
     }
 
     Mesh<V>::setAttributes(_vertexAttributes);
@@ -57,7 +57,7 @@ void InstancedMesh<V, I>::setInstanceBuffer(DataBuffer<I>* buffer) {
     if (buffer == nullptr) return;
 
     if (instanceAttributes.empty()) {
-        throw std::runtime_error{"Cannot bind instance buffer without attribute layout (setAttributes)"};
+        throw std::runtime_error{"[InstancedMesh::setInstanceBuffer] Need attribute layout to set buffer"};
     }
     instanceBuffer = buffer;
 

@@ -72,6 +72,18 @@ enum class TextureFormat {
     /// @brief 32-bit float depth component
     DEPTH32F,
 
+    /// @brief 16-bit depth component
+    DEPTH16,
+
+    /// @brief 8-bit stencil component
+    STENCIL8,
+
+    /// @brief 24-bit depth, 8-bit stencil combined component
+    DEPTH24_STENCIL8,
+
+    /// @brief 16-bit depth component
+    DEPTH32F_STENCIL8,
+
     /// @brief Texture2D starts with this format until a call to `loadFromFile` or `resize` is made
     UNDEFINED,
 };
@@ -150,35 +162,35 @@ public:
     /// @brief Load from file
     /// @param path Path to file
     /// @param flipY whether should flip image vertically
-    /// @note - This loads the texture data and sets the texture format based on the file format
+    /// @note - This loads the texture data and sets the internal format based on the file format
     /// @note - Mipmap generation must be requested manually after loading the texture if desired.
     ///         This method does not automatically generate mipmaps
     bool loadFromFile(const std::string& path, bool flipY = true);
 
     /// @brief Set pixel data
     /// @param data Pointer to the texture data
-    /// @note `data` will be interpreted as being in the same format as the current `format`,
-    ///        so make sure it matches
-    void setData(const void *data);
+    /// @param sourceFormat format of the incoming pixel data
+    void setData(const void *data, TextureFormat sourceFormat);
 
     /// @brief Resize texture
-    /// @note - The `format` passed here will be used in further calls to `setData`, so make sure to
-    ///       always match it
+    /// @param internalFormat format for the internal storage of this texture
     /// @note - This will reallocate storage for the texture, including removing any existing mipmaps.
     ///         If mipmaps are desired, `generateMipmaps` must be called manually after resizing
-    void resize(uint32_t width, uint32_t height, TextureFormat format = TextureFormat::RGBA8);
+    void resize(uint32_t width, uint32_t height, TextureFormat internalFormat);
 
-    /// @brief Set texture wrap parameters
-    /// @param wrapS Texture wrap mode for the S axis (horizontal)
-    /// @param wrapT Texture wrap mode for the T axis (vertical)
-    void setWrap(TextureWrap wrapS, TextureWrap wrapT);
+    /// @brief Set texture wrap for the S axis (horizontal)
+    void setWrapS(TextureWrap wrap);
 
-    /// @brief Set texture filters
-    /// @param minFilter Minification filter (used when the texture is scaled down)
-    /// @param magFilter Magnification filter (used when the texture is scaled up)
+    /// @brief Set texture wrap for the T axis (vertical)
+    void setWrapT(TextureWrap wrap);
+
+    /// @brief Set minification filter (used when the texture is scaled down)
     /// @note If using mipmap filters (e.g., `LINEAR_MIPMAP_NEAREST`), `generateMipmaps` must be called first.
-    ///       Otherwise it throws an assertion
-    void setFilter(TextureMinFilter minFilter, TextureMagFilter magFilter);
+    ///       Otherwise it throws a `runtime_error`
+    void setMinFilter(TextureMinFilter filter);
+
+    /// @brief Set magnification filter (used when the texture is scaled up)
+    void setMagFilter(TextureMagFilter filter);
 
     /// @brief Set the border color when using CLAMP_TO_BORDER wrap mode
     /// @param color The RGBA border color to use
@@ -204,8 +216,11 @@ public:
     /// @brief Texture height
     uint32_t height() const { return _height; }
 
-    /// @brief Current format used internally
+    /// @brief Current internal format
     TextureFormat format() const { return _internalFormat; }
+
+    /// @brief Checks whether an internal and a source texture format are compatible
+    static bool isFormatCompatible(TextureFormat internal, TextureFormat source);
 
 private:
     /// @brief Texture OpenGL identifier

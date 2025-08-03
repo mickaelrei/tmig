@@ -43,7 +43,7 @@ DataBuffer<T>& DataBuffer<T>::operator=(DataBuffer&& other) noexcept {
 template<typename T>
 void DataBuffer<T>::setData(const T* data, size_t count) {
     _count = count;
-    glNamedBufferData(_id, _count * sizeof(T), data, GL_STATIC_DRAW); glCheckError();
+    glNamedBufferData(_id, _count * sizeof(T), data, GL_DYNAMIC_DRAW); glCheckError();
 }
 
 template<typename T>

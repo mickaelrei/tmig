@@ -57,7 +57,7 @@ void Mesh<V>::setAttributes(const std::vector<VertexAttributeType>& _vertexAttri
     // Ensure stride size matches template type size
     size_t vertexStride = getStrideSize(_vertexAttributes.data(), _vertexAttributes.size());
     if (vertexStride != sizeof(V)) {
-        throw std::runtime_error{"Vertex type size does not match vertex stride size"};
+        throw std::runtime_error{"[Mesh::setAttributes] Vertex size doesn't match vertex stride"};
     }
 
     vertexAttributes = _vertexAttributes;
@@ -70,7 +70,7 @@ void Mesh<V>::setVertexBuffer(DataBuffer<V>* buffer) {
 
     if (vertexAttributes.empty()) {
 #ifdef DEBUG
-        throw std::runtime_error{"Cannot bind vertex buffer without attribute layout (setAttributes)"};
+        throw std::runtime_error{"[Mesh::setAttributes] Need attribute layout to set buffer"};
 #else
         return;
 #endif

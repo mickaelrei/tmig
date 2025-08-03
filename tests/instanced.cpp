@@ -43,6 +43,10 @@ int main() {
         std::cout << "Failed to load texture\n";
         return 1;
     }
+    texture.setWrapS(render::TextureWrap::MIRRORED_REPEAT);
+    texture.setWrapT(render::TextureWrap::MIRRORED_REPEAT);
+    texture.setMinFilter(render::TextureMinFilter::LINEAR_MIPMAP_LINEAR);
+    texture.setMagFilter(render::TextureMagFilter::LINEAR);
     texture.generateMipmaps();
     texture.bind(0);
     shader.setInt("tex", 0);

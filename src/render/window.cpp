@@ -38,7 +38,7 @@ void init(int width,int height, const std::string &title) {
 
     // Init GLFW
     if (glfwInit() == GLFW_FALSE) {
-        throw std::runtime_error{"Failed to initialize GLFW\n"};
+        throw std::runtime_error{"[render::window::init] Failed to initialize GLFW"};
     }
 
     // Set window hints
@@ -60,7 +60,7 @@ void init(int width,int height, const std::string &title) {
     glfwMakeContextCurrent(glfwWindow.get());
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
-        throw std::runtime_error{"Failed to initialize GLAD\n"};
+        throw std::runtime_error{"[render::window::init] Failed to initialize GLAD"};
     }
 }
 
