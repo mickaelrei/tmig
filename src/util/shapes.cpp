@@ -4,8 +4,8 @@ namespace tmig::util {
 
 void generateSphereMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution
 ) {
     const float step = 1.0f / (float)resolution;
 
@@ -59,8 +59,8 @@ void generateSphereMesh(
 
 void generateCylinderMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution
 ) {
     // Add top and bottom vertex
     vertexCallback(GeneralVertex{
@@ -143,8 +143,8 @@ void generateCylinderMesh(
 
 void generateConeMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution
 ) {
     // Add top and bottom vertex
     vertexCallback(GeneralVertex{
@@ -203,8 +203,8 @@ void generateConeMesh(
 
 void generateTorusMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution
 ) {
     // Add vertices
     float step = 1.0f / (float)resolution;
@@ -267,7 +267,7 @@ void generateTorusMesh(
     }
 }
 
-void generateBoxMesh(const VertexGenerateCallback& vertexCallback, std::vector<unsigned int>& indices) {
+void generateBoxMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices) {
     std::vector<GeneralVertex> vertices = {
         // Front
         GeneralVertex{.position = glm::vec3{-0.5f, -0.5f,  0.5f}, .normal = glm::vec3{0.0f, 0.0f,  1.0f}, .uv = glm::vec2{0.0f, 0.0f}},
@@ -337,7 +337,7 @@ void generateBoxMesh(const VertexGenerateCallback& vertexCallback, std::vector<u
     };
 }
 
-void generateWedgeMesh(const VertexGenerateCallback& vertexCallback, std::vector<unsigned int>& indices) {
+void generateWedgeMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices) {
     std::vector<GeneralVertex> vertices = {
         // Back
         GeneralVertex{.position = glm::vec3{ 0.5f, -0.5f, -0.5f}, .normal = glm::vec3{0.0f, 0.0f, -1.0f}, .uv = glm::vec2{0.0f, 0.0f}},

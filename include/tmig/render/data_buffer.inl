@@ -8,12 +8,12 @@ namespace tmig::render {
 template<typename T>
 DataBuffer<T>::DataBuffer() {
     glCreateBuffers(1, &_id); glCheckError();
-    util::debugPrint("Created VBO %ld\n", _id);
+    util::debugPrint("Created VBO: %u\n", _id);
 }
 
 template<typename T>
 DataBuffer<T>::~DataBuffer() {
-    util::debugPrint("Deleting VBO %ld\n", _id);
+    util::debugPrint("Deleting VBO: %u\n", _id);
     glDeleteBuffers(1, &_id); glCheckError();
 }
 

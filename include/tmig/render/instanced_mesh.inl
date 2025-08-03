@@ -39,12 +39,10 @@ void InstancedMesh<V, I>::setAttributes(
 
     // Ensure stride size matches template types size
     size_t vertexStride = getStrideSize(_vertexAttributes.data(), _vertexAttributes.size());
-    util::debugPrint("vertex stride: %ld | sizeof(V): %ld\n", vertexStride, sizeof(V));
     if (vertexStride != sizeof(V)) {
         throw std::runtime_error{"Vertex type size does not match vertex stride size"};
     }
     size_t instanceStride = getStrideSize(_instanceAttributes.data(), _instanceAttributes.size());
-    util::debugPrint("instance stride: %ld | sizeof(I): %ld\n", instanceStride, sizeof(I));
     if (instanceStride != sizeof(I)) {
         throw std::runtime_error{"Instance type size does not match instance stride size"};
     }

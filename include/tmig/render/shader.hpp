@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <cstdint>
 
 #include <glm/glm.hpp>
 
@@ -53,7 +54,7 @@ public:
 
 private:
     /// @brief OpenGL identifier
-    unsigned int _id = 0;
+    uint32_t _id = 0;
 };
 
 } // namespace tmig::render

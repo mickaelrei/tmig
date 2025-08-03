@@ -43,7 +43,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
     const char* fShaderCode = fragmentCode.c_str();
 
     // Compile shaders
-    unsigned int vertex, fragment;
+    uint32_t vertex, fragment;
     int success;
     char infoLog[512];
 
@@ -73,7 +73,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
 
     // Shader Program
     _id = glCreateProgram(); glCheckError();
-    util::debugPrint("Created shader: %d\n", _id);
+    util::debugPrint("Created shader: %u\n", _id);
 
     glAttachShader(_id, vertex); glCheckError();
     glAttachShader(_id, fragment); glCheckError();
@@ -92,7 +92,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
 }
 
 Shader::~Shader() {
-    util::debugPrint("Deleting shader: %d\n", _id);
+    util::debugPrint("Deleting shader: %u\n", _id);
     glDeleteProgram(_id); glCheckError();
 }
 

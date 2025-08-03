@@ -12,14 +12,13 @@ namespace tmig::render {
 template<typename V>
 Mesh<V>::Mesh() {
     glCreateVertexArrays(1, &vao); glCheckError();
-    util::debugPrint("Created VAO %ld\n", vao);
+    util::debugPrint("Created VAO: %u\n", vao);
 }
 
 template<typename V>
 Mesh<V>::~Mesh() {
-    auto _vao = vao;
+    util::debugPrint("Deleting VAO: %u\n", vao);
     glDeleteVertexArrays(1, &vao); glCheckError();
-    util::debugPrint("Deleted VAO %ld\n", _vao);
 }
 
 template<typename V>
@@ -57,7 +56,6 @@ void Mesh<V>::setAttributes(const std::vector<VertexAttributeType>& _vertexAttri
 
     // Ensure stride size matches template type size
     size_t vertexStride = getStrideSize(_vertexAttributes.data(), _vertexAttributes.size());
-    util::debugPrint("vertex stride: %ld | sizeof(V): %ld\n", vertexStride, sizeof(V));
     if (vertexStride != sizeof(V)) {
         throw std::runtime_error{"Vertex type size does not match vertex stride size"};
     }

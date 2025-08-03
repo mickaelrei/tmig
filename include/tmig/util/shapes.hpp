@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <vector>
+#include <cstdint>
 
 #include <glm/glm.hpp>
 
@@ -27,38 +28,38 @@ typedef std::function<void(const GeneralVertex& vertex)> VertexGenerateCallback;
 /// @param resolution Number of vertex rows/columns (mesh quality)
 void generateSphereMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution = 50
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution = 50
 );
 
 /// @brief Generates a cylinder mesh by passing vertices to callback and filling indices vector
 /// @param resolution Number of vertex rows/columns (mesh quality)
 void generateCylinderMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution = 20
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution = 20
 );
 
 /// @brief Generates a cone mesh by passing vertices to callback and filling indices vector
 /// @param resolution Number of vertex rows/columns (mesh quality)
 void generateConeMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution = 20
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution = 20
 );
 
 /// @brief Generates a torus mesh by passing vertices to callback and filling indices vector
 /// @param resolution Number of vertex rows/columns (mesh quality)
 void generateTorusMesh(
     const VertexGenerateCallback& vertexCallback,
-    std::vector<unsigned int>& indices,
-    const unsigned int resolution = 50
+    std::vector<uint32_t>& indices,
+    const uint32_t resolution = 50
 );
 
 /// @brief Generates a box mesh by passing vertices to callback and filling indices vector
-void generateBoxMesh(const VertexGenerateCallback& vertexCallback, std::vector<unsigned int>& indices);
+void generateBoxMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices);
 
 /// @brief Generates a wedge mesh by passing vertices to callback and filling indices vector
-void generateWedgeMesh(const VertexGenerateCallback& vertexCallback, std::vector<unsigned int>& indices);
+void generateWedgeMesh(const VertexGenerateCallback& vertexCallback, std::vector<uint32_t>& indices);
 
 } // namespace tmig::util
