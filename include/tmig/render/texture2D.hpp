@@ -3,6 +3,8 @@
 #include <string>
 #include <cstdint>
 
+#include <glm/glm.hpp>
+
 #include "tmig/core/non_copyable.hpp"
 
 namespace tmig::render {
@@ -88,6 +90,9 @@ enum class TextureWrap {
 
     /// @brief Clamp the texture coordinates to the edge of the texture
     CLAMP_TO_EDGE,
+
+    /// @brief Clamp the texture coordinates to a specified border color
+    CLAMP_TO_BORDER,
 };
 
 /// @brief Represents the supported texture filtering modes for when the texture is minified.
@@ -174,6 +179,11 @@ public:
     /// @note If using mipmap filters (e.g., `LINEAR_MIPMAP_NEAREST`), `generateMipmaps` must be called first.
     ///       Otherwise it throws an assertion
     void setFilter(TextureMinFilter minFilter, TextureMagFilter magFilter);
+
+    /// @brief Set the border color when using CLAMP_TO_BORDER wrap mode
+    /// @param color The RGBA border color to use
+    /// @note This changes the wrap in both axes (S and T) to be CLAMP_TO_BORDER
+    void setBorderColor(const glm::vec4& color);
 
     /// @brief Generate texture mipmap levels
     /// @note This must be called manually to generate mipmaps. Mipmap generation is not automatic

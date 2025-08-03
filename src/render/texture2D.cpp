@@ -151,6 +151,7 @@ static GLenum toGL(TextureWrap wrap) {
         case TextureWrap::REPEAT:          return GL_REPEAT;
         case TextureWrap::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
         case TextureWrap::CLAMP_TO_EDGE:   return GL_CLAMP_TO_EDGE;
+        case TextureWrap::CLAMP_TO_BORDER: return GL_CLAMP_TO_BORDER;
         default:                           return GL_REPEAT;
     }
 }
@@ -284,6 +285,15 @@ void Texture2D::setFilter(TextureMinFilter minFilter, TextureMagFilter magFilter
     glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, toGL(minFilter));
     glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, toGL(magFilter));
 }
+
+void Texture2D::setBorderColor(const glm::vec4& color) {
+    // Ensure we're only using this method with CLAMP_TO_BORDER wrap mode
+    setWrap(TextureWrap::CLAMP_TO_BORDER, TextureWrap::CLAMP_TO_BORDER);
+
+    GLfloat borderColor[4] = {color.r, color.g, color.b, color.a};
+    glTextureParameterfv(_id, GL_TEXTURE_BORDER_COLOR, borderColor); glCheckError();
+}
+
 
 void Texture2D::generateMipmaps() {
     if (_hasMipmaps) return;
