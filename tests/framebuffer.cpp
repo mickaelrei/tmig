@@ -184,6 +184,7 @@ int main() {
     float lastTime = render::window::getRuntime();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
     bool pressingE = false;
+    bool pressingF = false;
     int effect = 0;
     while (!render::window::shouldClose()) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -230,7 +231,7 @@ int main() {
             model = glm::scale(model, scale);
             instances[i].model = model;
         }
-        // instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
+        instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
@@ -274,7 +275,7 @@ int main() {
         auto end = std::chrono::high_resolution_clock::now();
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         (void)drawDuration;
-        printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
+        // printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
 
     delete vertexBuffer;

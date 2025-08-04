@@ -26,17 +26,22 @@ Mesh<V>::Mesh(Mesh&& other) noexcept
     : vao{other.vao},
       vertexBuffer{other.vertexBuffer},
       indexBuffer{other.indexBuffer},
-      vertexAttributes{std::move(other.vertexAttributes)}
+      vertexAttributes{std::move(other.vertexAttributes)},
+      previousAttribCount{other.previousAttribCount}
 {
     other.vao = 0;
     other.vertexBuffer = nullptr;
     other.indexBuffer = nullptr;
+    other.vertexAttributes.clear();
+    other.previousAttribCount = 0;
 }
 
 template<typename V>
 Mesh<V>& Mesh<V>::operator=(Mesh&& other) noexcept {
     if (this != &other) {
-        glDeleteVertexArrays(1, &vao); glCheckError();
+        if (vao != 0) {
+            glDeleteVertexArrays(1, &vao); glCheckError();
+        }
 
         vao = other.vao;
         vertexBuffer = other.vertexBuffer;

@@ -35,7 +35,6 @@ public:
 
 private:
     uint32_t _id = 0;
-    uint32_t binding = 0;
 };
 
 } // namespace tmig::render

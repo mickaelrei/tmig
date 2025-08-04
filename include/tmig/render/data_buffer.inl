@@ -29,7 +29,9 @@ DataBuffer<T>::DataBuffer(DataBuffer&& other) noexcept
 template<typename T>
 DataBuffer<T>& DataBuffer<T>::operator=(DataBuffer&& other) noexcept {
     if (this != &other) {
-        glDeleteBuffers(1, &_id); glCheckError();
+        if (_id != 0) {
+            glDeleteBuffers(1, &_id); glCheckError();
+        }
 
         _id = other._id;
         _count = other._count;

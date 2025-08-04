@@ -27,13 +27,12 @@ UniformBuffer<T>::UniformBuffer(UniformBuffer&& other) noexcept
 template<typename T>
 UniformBuffer<T>& UniformBuffer<T>::operator=(UniformBuffer&& other) noexcept {
     if (this != &other) {
-        glDeleteBuffers(1, &_id); glCheckError();
+        if (_id != 0) {
+            glDeleteBuffers(1, &_id); glCheckError();
+        }
 
         _id = other._id;
-        binding = other.binding;
-
         other._id = 0;
-        other.binding = 0;
     }
     return *this;
 }
@@ -44,8 +43,7 @@ void UniformBuffer<T>::setData(const T& data) {
 }
 
 template<typename T>
-void UniformBuffer<T>::bindTo(uint32_t _binding) {
-    binding = _binding;
+void UniformBuffer<T>::bindTo(uint32_t binding) {
     glBindBufferBase(GL_UNIFORM_BUFFER, binding, _id); glCheckError();
 }
 

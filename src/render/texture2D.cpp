@@ -220,25 +220,33 @@ Texture2D::Texture2D(Texture2D&& other) noexcept
     : _id{other._id},
       _width{other._width},
       _height{other._height},
+      _hasMipmaps{other._hasMipmaps},
       _internalFormat{other._internalFormat}
 {
     other._id = 0;
     other._width = 0;
     other._height = 0;
+    other._hasMipmaps = false;
+    other._internalFormat = TextureFormat::UNDEFINED;
 }
 
 Texture2D& Texture2D::operator=(Texture2D&& other) noexcept {
     if (this != &other) {
-        glDeleteTextures(1, &_id);
+        if (_id != 0) {
+            glDeleteTextures(1, &_id);
+        }
 
         _id = other._id;
         _width = other._width;
         _height = other._height;
+        _hasMipmaps = other._hasMipmaps;
         _internalFormat = other._internalFormat;
 
         other._id = 0;
         other._width = 0;
         other._height = 0;
+        other._hasMipmaps = false;
+        other._internalFormat = TextureFormat::UNDEFINED;
     }
     return *this;
 }

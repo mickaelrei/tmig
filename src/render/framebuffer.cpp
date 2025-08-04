@@ -60,6 +60,37 @@ Framebuffer::~Framebuffer() {
     }
 }
 
+Framebuffer::Framebuffer(Framebuffer&& other) noexcept
+    : _id{other._id},
+      _width{other._width},
+      _height{other._height},
+      _colorAttachments{std::move(other._colorAttachments)},
+      _depthAttachment{std::move(other._depthAttachment)}
+{
+    other._id = 0;
+    other._width = 0;
+    other._height = 0;
+}
+
+Framebuffer& Framebuffer::operator=(Framebuffer&& other) noexcept {
+    if (this != &other) {
+        if (_id != 0) {
+            glDeleteFramebuffers(1, &_id);
+        }
+
+        _id = other._id;
+        _width = other._width;
+        _height = other._height;
+        _colorAttachments = std::move(other._colorAttachments);
+        _depthAttachment = std::move(other._depthAttachment);
+
+        other._id = 0;
+        other._width = 0;
+        other._height = 0;
+    }
+    return *this;
+}
+
 Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
     if (config.colorAttachments.empty()) {
         return Status::MISSING_ATTACHMENT;
@@ -156,6 +187,7 @@ void Framebuffer::bindDefault(uint32_t width, uint32_t height, const Framebuffer
 }
 
 void Framebuffer::resize(uint32_t width, uint32_t height) {
+    util::debugPrint("resizing fb to (%u, %u)\n", width, height);
     _width = width;
     _height = height;
 

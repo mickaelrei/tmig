@@ -104,7 +104,9 @@ Shader::Shader(Shader&& other) noexcept
 
 Shader& Shader::operator=(Shader&& other) noexcept {
     if (this != &other) {
-        glDeleteProgram(_id);
+        if (_id != 0) {
+            glDeleteProgram(_id);
+        }
 
         _id = other._id;
         other._id = 0;

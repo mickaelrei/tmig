@@ -11,6 +11,7 @@
 // Flag for initialized
 static bool initialized = false;
 
+#ifdef DEBUG
 static void debugMessageCallback(
     GLenum source,
     GLenum type,
@@ -60,6 +61,7 @@ static void debugMessageCallback(
 
     printf("\033[0;93m[(%d) %s | %s - %s]\033[0m %s\n", id, src_str, type_str, severity_str, message);
 }
+#endif
 
 namespace tmig::render {
 
@@ -75,9 +77,11 @@ void init() {
     glEnable(GL_CULL_FACE); glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glCheckError();
     glEnable(GL_BLEND); glCheckError();
+    //glfwSwapInterval(0); glCheckError(); // Disable VSync
+#ifdef DEBUG
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(debugMessageCallback, nullptr);
-    //glfwSwapInterval(0); glCheckError(); // Disable VSync
+#endif
 }
 
 bool isInitialized() {

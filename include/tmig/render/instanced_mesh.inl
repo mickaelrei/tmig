@@ -13,9 +13,12 @@ template<typename V, typename I>
 InstancedMesh<V, I>::InstancedMesh(InstancedMesh&& other) noexcept
     : Mesh<V>{std::move(other)},
       instanceBuffer{other.instanceBuffer},
-      instanceAttributes{std::move(other.instanceAttributes)}
+      instanceAttributes{std::move(other.instanceAttributes)},
+      previousInstanceAttribCount{other.previousInstanceAttribCount}
 {
     other.instanceBuffer = nullptr;
+    other.instanceAttributes.clear();
+    other.previousInstanceAttribCount = 0;
 }
 
 template<typename V, typename I>
@@ -24,8 +27,10 @@ InstancedMesh<V, I>& InstancedMesh<V, I>::operator=(InstancedMesh&& other) noexc
         Mesh<V>::operator=(std::move(other));
         instanceBuffer = other.instanceBuffer;
         instanceAttributes = std::move(other.instanceAttributes);
+        previousInstanceAttribCount = other.previousInstanceAttribCount;
 
         other.instanceBuffer = nullptr;
+        other.previousInstanceAttribCount = 0;
     }
     return *this;
 }

@@ -101,7 +101,9 @@ struct FramebufferBindOptions {
 /// A framebuffer allows off-screen rendering to textures for post-processing, shadow mapping,
 /// deferred shading, and more. Attachments (color, depth, and stencil) are provided externally
 /// and are not owned or deleted by the framebuffer.
-class Framebuffer {
+///
+/// @note - This is a non-copyable class, meaning you cannot create a copy of it
+class Framebuffer : protected core::NonCopyable {
 public:
     /// @brief Construct an empty framebuffer.
     /// The framebuffer must be explicitly set up using `setup()` before use.
@@ -110,6 +112,12 @@ public:
     /// @brief Destroy the framebuffer object.
     /// Note that attached textures are not deleted.
     ~Framebuffer();
+
+    /// @brief Move constructor
+    Framebuffer(Framebuffer&& other) noexcept;
+
+    /// @brief Move assignment operator
+    Framebuffer& operator=(Framebuffer&& other) noexcept;
 
     /// @brief Possible status values returned by a call to `setup`
     ///
