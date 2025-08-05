@@ -5,7 +5,7 @@
 #include "glad/glad.h"
 
 #include "tmig/render/instanced_mesh.hpp"
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 namespace tmig::render {
 

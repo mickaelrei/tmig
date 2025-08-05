@@ -32,10 +32,14 @@ int main() {
     camera.maxDist = 10000.0f;
     camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
 
-    auto shader = render::Shader{
+    render::ShaderProgram shader;
+    if (!shader.compileFromFiles(
         util::getResourcePath("shaders/instanced.vert"),
         util::getResourcePath("shaders/instanced.frag")
-    };
+    )) {
+        std::cout << "Failed loading instanced shader\n";
+        return 1;
+    }
 
     // Creating texture, binding at unit and setting in shader uniform
     render::Texture2D texture;
@@ -159,7 +163,7 @@ int main() {
             model = glm::scale(model, scale);
             instances[i].model = model;
         }
-        // instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
+        instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
 
         util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
@@ -187,7 +191,8 @@ int main() {
         // Display time durations
         auto end = std::chrono::high_resolution_clock::now();
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-        printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
+        (void)drawDuration;
+        // printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
 
     delete vertexBuffer;

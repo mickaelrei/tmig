@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <memory>
 #include <cstdint>
 #include <unordered_map>
 
@@ -12,26 +11,33 @@
 
 namespace tmig::render {
 
-/// @brief OpenGL shader wrapper class
+/// @brief OpenGL shader program wrapper class
 /// @note - This is a non-copyable class, meaning you cannot create a copy of it.
-class Shader : protected core::NonCopyable {
+class ShaderProgram : protected core::NonCopyable {
 public:
-    /// @brief Constructor with file paths
-    /// @param vertexPath Path to vertex shader file
-    /// @param fragmentPath Path to frament shader file
-    Shader(const std::string& vertexPath, const std::string& fragmentPath);
+    /// @brief Constructor
+    /// @note Does nothing on its own; you need to call `compileFromFiles` to make the program valid
+    ShaderProgram() = default;
 
     /// @brief Destructor
-    virtual ~Shader();
+    virtual ~ShaderProgram();
 
     /// @brief Move constructor
-    Shader(Shader&& other) noexcept;
+    ShaderProgram(ShaderProgram&& other) noexcept;
 
     /// @brief Move assignment
-    Shader& operator=(Shader&& other) noexcept;
+    ShaderProgram& operator=(ShaderProgram&& other) noexcept;
+
+    /// @brief Attempts to compile from the given vertex and fragment shader files
+    /// @return Whether compilation and linking succeeded
+    bool compileFromFiles(const std::string& vertexPath, const std::string& fragmentPath);
 
     /// @brief Use/activate shader
+    /// @note Will return early if not valid. Check with `isValid()`
     void use() const;
+
+    /// @brief Whether this shader is valid for usage; a successful call to `compileFromFiles` assures that
+    bool isValid() const { return _linked; }
 
     /// @brief Set uniform bool in shader
     void setBool(const std::string& name, bool value);
@@ -61,11 +67,18 @@ private:
     /// @brief OpenGL identifier
     uint32_t _id = 0;
 
+    /// @brief Whether shader program is linked
+    bool _linked = false;
+
     /// @brief Uniform location cache
     std::unordered_map<std::string, int> uniformLocationCache;
 
     /// @brief Get cached uniform location, or query and store if not cached yet
     int getUniformLocation(const std::string& name);
+
+    /// @brief Compile a specified shader stage
+    /// @return Whether compilation succeeded
+    bool compileShaderStage(uint32_t shader, const char* typeName);
 };
 
 } // namespace tmig::render

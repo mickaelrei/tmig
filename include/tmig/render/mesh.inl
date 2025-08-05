@@ -5,19 +5,27 @@
 #include "glad/glad.h"
 
 #include "tmig/render/mesh.hpp"
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 namespace tmig::render {
 
 template<typename V>
 Mesh<V>::Mesh() {
     glCreateVertexArrays(1, &vao); glCheckError();
-    util::debugPrint("Created VAO: %u\n", vao);
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Created VAO: %u\n", vao
+    );
 }
 
 template<typename V>
 Mesh<V>::~Mesh() {
-    util::debugPrint("Deleting VAO: %u\n", vao);
+    if (vao == 0) return;
+
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Deleting VAO: %u\n", vao
+    );
     glDeleteVertexArrays(1, &vao); glCheckError();
 }
 

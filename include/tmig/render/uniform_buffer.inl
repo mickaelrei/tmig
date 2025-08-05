@@ -8,12 +8,20 @@ template<typename T>
 UniformBuffer<T>::UniformBuffer() {
     glCreateBuffers(1, &_id); glCheckError();
     glNamedBufferStorage(_id, sizeof(T), nullptr, GL_DYNAMIC_STORAGE_BIT); glCheckError();
-    util::debugPrint("Created UBO: %u\n", _id);
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Created UBO: %u\n", _id
+    );
 }
 
 template<typename T>
 UniformBuffer<T>::~UniformBuffer() {
-    util::debugPrint("Deleting UBO: %u\n", _id);
+    if (_id == 0) return;
+
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Deleting UBO: %u\n", _id
+    );
     glDeleteBuffers(1, &_id); glCheckError();
 }
 

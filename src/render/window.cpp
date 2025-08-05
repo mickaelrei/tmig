@@ -6,7 +6,7 @@
 
 #include "tmig/render/window.hpp"
 #include "tmig/core/callback_manager.hpp"
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 // Default callback for framebuffer resize
 void defaultFramebufferSizeCallback(GLFWwindow* window, int width, int height) {

@@ -5,7 +5,7 @@
 #include "glad/glad.h"
 
 #include "tmig/render/texture2D.hpp"
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 namespace tmig::render {
 
@@ -208,11 +208,19 @@ static GLenum toGL(TextureMagFilter filter) {
 
 Texture2D::Texture2D() {
     glCreateTextures(GL_TEXTURE_2D, 1, &_id); glCheckError();
-    util::debugPrint("Created Texture2D: %u\n", _id);
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Created Texture2D: %u\n", _id
+    );
 }
 
 Texture2D::~Texture2D() {
-    util::debugPrint("Deleting Texture2D: %u\n", _id);
+    if (_id == 0) return;
+
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Deleting Texture2D: %u\n", _id
+    );
     glDeleteTextures(1, &_id); glCheckError();
 }
 

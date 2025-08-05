@@ -1,19 +1,27 @@
 #include "glad/glad.h"
 
 #include "tmig/render/data_buffer.hpp"
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 namespace tmig::render {
 
 template<typename T>
 DataBuffer<T>::DataBuffer() {
     glCreateBuffers(1, &_id); glCheckError();
-    util::debugPrint("Created VBO: %u\n", _id);
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Created VBO: %u\n", _id
+    );
 }
 
 template<typename T>
 DataBuffer<T>::~DataBuffer() {
-    util::debugPrint("Deleting VBO: %u\n", _id);
+    if (_id == 0) return;
+
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Deleting VBO: %u\n", _id
+    );
     glDeleteBuffers(1, &_id); glCheckError();
 }
 
@@ -57,7 +65,11 @@ template<typename T>
 void DataBuffer<T>::setSubset(size_t offset, size_t count, const T* data) {
 #ifdef DEBUG
     if (offset >= _count || offset + count > _count) {
-        util::debugPrint("DataBuffer::setSubset called with invalid bounds. Current count is %ld, got [offset=%ld, count=%ld]\n", _count, offset, count);
+        util::logMessage(
+            util::LogCategory::ENGINE, util::LogSeverity::INFO,
+            "DataBuffer::setSubset called with invalid bounds. Current count is %ld, got [offset=%ld, count=%ld]\n",
+            _count, offset, count
+        );
         return;
     }
 #endif

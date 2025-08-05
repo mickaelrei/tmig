@@ -4,7 +4,7 @@
 #include "glad/glad.h"
 
 #include "tmig/render/framebuffer.hpp"
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 namespace tmig::render {
 
@@ -50,14 +50,20 @@ static Framebuffer::Status enumToStatus(GLenum e) {
 
 Framebuffer::Framebuffer() {
     glCreateFramebuffers(1, &_id);
-    util::debugPrint("Created FBO: %u\n", _id);
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Created FBO: %u\n", _id
+    );
 }
 
 Framebuffer::~Framebuffer() {
-    if (_id != 0) {
-        util::debugPrint("Deleting FBO: %u\n", _id);
-        glDeleteFramebuffers(1, &_id);
-    }
+    if (_id == 0) return;
+
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "Deleting FBO: %u\n", _id
+    );
+    glDeleteFramebuffers(1, &_id);
 }
 
 Framebuffer::Framebuffer(Framebuffer&& other) noexcept
@@ -140,7 +146,7 @@ Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
         if (usedTextures.count(attachment.texture)) return Status::DUPLICATE_ATTACHMENT;
         usedTextures.insert(attachment.texture);
 
-        // Attach the 
+        // Attach to framebuffer
         GLenum attachPoint = depthFormatToAttachmentPoint(attachment.format);
         attachment.texture->resize(_width, _height, depthFormatToTextureFormat(attachment.format));
         glNamedFramebufferTexture(_id, attachPoint, attachment.texture->id(), 0);
@@ -187,7 +193,10 @@ void Framebuffer::bindDefault(uint32_t width, uint32_t height, const Framebuffer
 }
 
 void Framebuffer::resize(uint32_t width, uint32_t height) {
-    util::debugPrint("resizing fb to (%u, %u)\n", width, height);
+    util::logMessage(
+        util::LogCategory::ENGINE, util::LogSeverity::INFO,
+        "resizing fb to (%u, %u)\n", width, height
+    );
     _width = width;
     _height = height;
 

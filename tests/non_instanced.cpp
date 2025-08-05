@@ -31,10 +31,14 @@ int main() {
     camera.maxDist = 10000.0f;
     camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
 
-    auto shader = render::Shader{
+    render::ShaderProgram shader;
+    if (!shader.compileFromFiles(
         util::getResourcePath("shaders/non_instanced.vert"),
         util::getResourcePath("shaders/non_instanced.frag")
-    };
+    )) {
+        std::cout << "Failed loading non_instanced shader\n";
+        return 1;
+    }
 
     struct myVertex {
         glm::vec3 pos;
@@ -215,7 +219,8 @@ int main() {
 
         // Display time durations
         auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-        printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
+        (void)drawDuration;
+        // printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
 
     delete highResBuffer;

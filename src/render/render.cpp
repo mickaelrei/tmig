@@ -6,7 +6,7 @@
 #include "tmig/render/render.hpp"
 #include "tmig/render/window.hpp"
 
-#include "tmig/util/debug.hpp"
+#include "tmig/util/log.hpp"
 
 // Flag for initialized
 static bool initialized = false;
@@ -14,52 +14,33 @@ static bool initialized = false;
 #ifdef DEBUG
 static void debugMessageCallback(
     GLenum source,
-    GLenum type,
-    GLuint id,
+    GLenum,
+    GLuint,
     GLenum severity,
-    GLsizei length,
+    GLsizei,
     const GLchar* message,
-    const void* userParam
+    const void*
 ) {
-    (void)length;
-    (void)userParam;
+	using namespace tmig::util;
 
-	auto const src_str = [source]() {
-		switch (source) {
-		case GL_DEBUG_SOURCE_API:             return "API";
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   return "WINDOW SYSTEM";
-		case GL_DEBUG_SOURCE_SHADER_COMPILER: return "SHADER COMPILER";
-		case GL_DEBUG_SOURCE_THIRD_PARTY:     return "THIRD PARTY";
-		case GL_DEBUG_SOURCE_APPLICATION:     return "APPLICATION";
-		case GL_DEBUG_SOURCE_OTHER:           return "OTHER";
-		}
-        return "UNKNOWN";
-	}();
+    // Filter out notifications
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
 
-	auto const type_str = [type]() {
-		switch (type) {
-		case GL_DEBUG_TYPE_ERROR:               return "ERROR";
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "DEPRECATED_BEHAVIOR";
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  return "UNDEFINED_BEHAVIOR";
-		case GL_DEBUG_TYPE_PORTABILITY:         return "PORTABILITY";
-		case GL_DEBUG_TYPE_PERFORMANCE:         return "PERFORMANCE";
-		case GL_DEBUG_TYPE_MARKER:              return "MARKER";
-		case GL_DEBUG_TYPE_OTHER:               return "OTHER";
-		}
-        return "UNKNOWN";
-	}();
+    LogCategory category = LogCategory::OPENGL;
+    if (source == GL_DEBUG_SOURCE_SHADER_COMPILER) {
+        category = LogCategory::SHADER;
+    }
 
-	auto const severity_str = [severity]() {
-		switch (severity) {
-		case GL_DEBUG_SEVERITY_NOTIFICATION: return "NOTIFICATION";
-		case GL_DEBUG_SEVERITY_LOW:          return "LOW";
-		case GL_DEBUG_SEVERITY_MEDIUM:       return "MEDIUM";
-		case GL_DEBUG_SEVERITY_HIGH:         return "HIGH";
-		}
-        return "UNKNOWN";
-	}();
+    LogSeverity sev = LogSeverity::INFO;
+    if (severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM) {
+        sev = LogSeverity::WARNING;
+    } else if (severity == GL_DEBUG_SEVERITY_HIGH) {
+        sev = LogSeverity::ERROR;
+    }
 
-    printf("\033[0;93m[(%d) %s | %s - %s]\033[0m %s\n", id, src_str, type_str, severity_str, message);
+    logMessage(category, sev, "%s\n", message);
 }
 #endif
 

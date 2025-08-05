@@ -34,15 +34,23 @@ int main() {
     camera.maxDist = 10000.0f;
     camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
 
-    auto shader = render::Shader{
+    render::ShaderProgram shader;
+    if (!shader.compileFromFiles(
         util::getResourcePath("shaders/instanced.vert"),
         util::getResourcePath("shaders/instanced.frag")
-    };
+    )) {
+        std::cout << "Failed loading instanced shader\n";
+        return 1;
+    }
 
-    auto postProcessingShader = render::Shader{
+    render::ShaderProgram postProcessingShader;
+    if (!postProcessingShader.compileFromFiles(
         util::getResourcePath("shaders/screen_quad.vert"),
         util::getResourcePath("shaders/post_processing.frag")
-    };
+    )) {
+        std::cout << "Failed loading post_processing shader\n";
+        return 1;
+    }
 
     // Creating texture, binding at unit and setting in shader uniform
     render::Texture2D texture;
@@ -184,7 +192,6 @@ int main() {
     float lastTime = render::window::getRuntime();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
     bool pressingE = false;
-    bool pressingF = false;
     int effect = 0;
     while (!render::window::shouldClose()) {
         auto start = std::chrono::high_resolution_clock::now();

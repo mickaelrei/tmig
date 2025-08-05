@@ -52,7 +52,7 @@ set(
 
     # Utility module
     ${SOURCE_DIR}/util/camera.cpp
-    ${SOURCE_DIR}/util/debug.cpp
+    ${SOURCE_DIR}/util/file.cpp
     ${SOURCE_DIR}/util/resources.cpp
     ${SOURCE_DIR}/util/shapes.cpp
 

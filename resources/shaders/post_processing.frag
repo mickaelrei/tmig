@@ -43,7 +43,7 @@ const float embossKernel[9] = float[](
 float blurKernel[9] = float[](
     1.0 / 16.0f, 2.0 / 16.0f, 1.0 / 16.0f,
     2.0 / 16.0f, 4.0 / 16.0f, 2.0 / 16.0f,
-    1.0 / 16.0f, 2.0 / 16.0f, 1.0 / 16.0f  
+    1.0 / 16.0f, 2.0 / 16.0f, 1.0 / 16.0f
 );
 
 void main() {
@@ -56,7 +56,7 @@ void main() {
         vec2( offset,  0.0f),   // center-right
         vec2(-offset, -offset), // bottom-left
         vec2( 0.0f,   -offset), // bottom-center
-        vec2( offset, -offset)  // bottom-right    
+        vec2( offset, -offset)  // bottom-right
     );
 
     float kernel[9];
@@ -65,11 +65,11 @@ void main() {
     else if (effect == 2) kernel = outlineKernel;
     else if (effect == 3) kernel = embossKernel;
     else                  kernel = blurKernel;
-    
+
     vec3 col = vec3(0.0);
     for (int i = 0; i < 9; i++) {
         col += vec3(texture(scene, uv + offsets[i])) * kernel[i];
     }
-    
+
     FragColor = vec4(col, 1.0);
 }  
