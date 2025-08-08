@@ -192,3 +192,38 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/external/include
 )
+
+#######################################################
+#######################################################
+# Bloom test
+
+# Source files
+set(
+    BLOOM_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/bloom.cpp
+)
+
+# Adding executables for testing
+add_executable(bloom ${BLOOM_TEST_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    bloom
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    bloom
+    PRIVATE
+    ${TMIG}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    bloom
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
+)

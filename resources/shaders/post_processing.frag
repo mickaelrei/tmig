@@ -1,7 +1,6 @@
 #version 440
 out vec4 FragColor;
 
-in vec3 pos;
 in vec2 uv;
 
 // Scene texture
@@ -68,7 +67,7 @@ void main() {
 
     vec3 col = vec3(0.0);
     for (int i = 0; i < 9; i++) {
-        col += vec3(texture(scene, uv + offsets[i])) * kernel[i];
+        col += texture(scene, uv + offsets[i]).rgb * kernel[i];
     }
 
     FragColor = vec4(col, 1.0);
