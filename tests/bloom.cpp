@@ -216,31 +216,24 @@ int main() {
     }
 
     // Ping-pong framebuffers for blurring
-    render::Texture2D blurTexture0;
-    render::Texture2D blurTexture1;
-    render::Framebuffer blurFb0;
-    blurFb0.setup({
-        .width = 600,
-        .height = 600,
-        .colorAttachments = {
-            {0, render::FramebufferAttachment{
-                .texture = &blurTexture0,
-                .format = render::TextureFormat::RGBA32F,
-            }},
-        },
-    });
-
-    render::Framebuffer blurFb1;
-    blurFb1.setup({
-        .width = 600,
-        .height = 600,
-        .colorAttachments = {
-            {0, render::FramebufferAttachment{
-                .texture = &blurTexture1,
-                .format = render::TextureFormat::RGBA32F,
-            }},
-        },
-    });
+    render::Texture2D blurTextures[2];
+    render::Framebuffer blurFramebuffers[2];
+    for (int i = 0; i < 2; ++i) {
+        auto blurStatus = blurFramebuffers[i].setup({
+            .width = 600,
+            .height = 600,
+            .colorAttachments = {
+                {0, render::FramebufferAttachment{
+                    .texture = &blurTextures[i],
+                    .format = render::TextureFormat::RGBA32F,
+                }},
+            },
+        });
+        if (blurStatus != render::Framebuffer::Status::COMPLETE) {
+            std::cout << "Error setting up blur fb: " << blurStatus << "\n";
+            return 1;
+        }
+    }
 
     float lastTime = render::window::getRuntime();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
@@ -353,14 +346,14 @@ int main() {
         if (applyBloom) {
             bool horizontal = true;
             for (int i = 0; i < 10; i++) {
-                (horizontal ? blurFb0 : blurFb1).bind({
+                blurFramebuffers[horizontal].bind({
                     .clearColor = false,
                     .clearStencil = false,
                     .clearDepth = false,
                 });
                 blurShader.use();
                 blurShader.setInt("horizontal", horizontal);
-                blurShader.setTexture("image", i == 0 ? brightPassTexture : (horizontal ? blurTexture1 : blurTexture0), 0);
+                blurShader.setTexture("image", i == 0 ? brightPassTexture : blurTextures[!horizontal], 0);
                 screenQuadMesh.render();
                 horizontal = !horizontal;
             }
@@ -373,7 +366,7 @@ int main() {
         finalBloomShader.use();
         finalBloomShader.setBool("applyBloom", applyBloom);
         finalBloomShader.setTexture("scene", sceneOutputTexture, 0);
-        finalBloomShader.setTexture("bloomBlur", blurTexture1, 1);
+        finalBloomShader.setTexture("bloomBlur", blurTextures[1], 1);
         
         glDisable(GL_DEPTH_TEST);
         screenQuadMesh.render();
