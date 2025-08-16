@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "glad/glad.h"
+#include <GLFW/glfw3.h>
 
 #include "tmig/render/render.hpp"
 #include "tmig/render/window.hpp"

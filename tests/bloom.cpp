@@ -43,15 +43,6 @@ int main() {
         return 1;
     }
 
-    render::ShaderProgram brightPassShader;
-    if (!brightPassShader.compileFromFiles(
-        util::getResourcePath("shaders/screen_quad.vert"),
-        util::getResourcePath("shaders/bright_pass.frag")
-    )) {
-        std::cout << "Failed loading bright_pass shader\n";
-        return 1;
-    }
-
     render::ShaderProgram blurShader;
     if (!blurShader.compileFromFiles(
         util::getResourcePath("shaders/screen_quad.vert"),
@@ -174,10 +165,13 @@ int main() {
     screenQuadMesh.setIndexBuffer(screenQuadIndexBuffer);
     screenQuadMesh.setVertexBuffer(screenQuadVertexBuffer);
 
-    // Framebuffer to render the main scene to a texture
+    // Framebuffer to render the main scene to a texture, and the bright excess to another texture
     render::Framebuffer sceneFramebuffer;
-    render::Texture2D sceneOutputTexture;
     render::Texture2D sceneDepthTexture;
+    render::Texture2D sceneOutputTexture;
+    render::Texture2D brightPassTexture;
+    brightPassTexture.setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
+    brightPassTexture.setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
     sceneOutputTexture.setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
     sceneOutputTexture.setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
     auto status = sceneFramebuffer.setup({
@@ -186,6 +180,10 @@ int main() {
         .colorAttachments = {
             {0, render::FramebufferAttachment{
                 .texture = &sceneOutputTexture,
+                .format = render::TextureFormat::RGBA32F,
+            }},
+            {1, render::FramebufferAttachment{
+                .texture = &brightPassTexture,
                 .format = render::TextureFormat::RGBA32F,
             }},
         },
@@ -198,27 +196,12 @@ int main() {
         std::cerr << "Framebuffer failed; status: " << status << "\n";
     }
 
-    // Framebuffer for the bright pass
-    render::Framebuffer brightPassFramebuffer;
-    render::Texture2D brightPassTexture;
-    auto brightStatus = brightPassFramebuffer.setup({
-        .width = 1200,
-        .height = 1200,
-        .colorAttachments = {
-            {0, {
-                .texture = &brightPassTexture,
-                .format = render::TextureFormat::RGBA32F,
-            }},
-        },
-    });
-    if (brightStatus != render::Framebuffer::Status::COMPLETE) {
-        std::cerr << "Bright Pass Framebuffer failed: " << toString(brightStatus) << "\n";
-    }
-
     // Ping-pong framebuffers for blurring
     render::Texture2D blurTextures[2];
     render::Framebuffer blurFramebuffers[2];
     for (int i = 0; i < 2; ++i) {
+        blurTextures[i].setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
+        blurTextures[i].setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
         auto blurStatus = blurFramebuffers[i].setup({
             .width = 600,
             .height = 600,
@@ -328,17 +311,6 @@ int main() {
         meshShader.setTexture("tex", meshTexture, 0);
         meshShader.use();
         mesh.render();
-
-        // ------------------------------------------
-        // ------------------------------------------
-        // Bright pass
-        brightPassFramebuffer.bind();
-        brightPassShader.use();
-        brightPassShader.setTexture("scene", sceneOutputTexture, 0);
-        brightPassShader.setFloat("threshold", 1.0f);
-        glDisable(GL_DEPTH_TEST);
-        screenQuadMesh.render();
-        glEnable(GL_DEPTH_TEST);
 
         // ------------------------------------------
         // ------------------------------------------

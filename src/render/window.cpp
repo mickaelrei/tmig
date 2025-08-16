@@ -53,6 +53,10 @@ void init(int width,int height, const std::string &title) {
         WindowDeleter{}
     };
 
+    if (glfwWindow == nullptr) {
+        throw std::runtime_error{"[render::init] Failed to create window"};
+    }
+
     // Set window callbacks
     glfwSetFramebufferSizeCallback(glfwWindow.get(), defaultFramebufferSizeCallback);
 

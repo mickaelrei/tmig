@@ -1,5 +1,6 @@
 #version 440 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 // Vertex info
 in vec3 fragNormal;
@@ -17,6 +18,7 @@ layout(std140, binding = 0) uniform Scene {
 // Renderable info
 uniform bool applyTexture;
 uniform sampler2D tex;
+uniform float threshold = 1.0f;
 
 // Directional light info
 const float lightIntensity = 2.0f;
@@ -53,4 +55,11 @@ void main() {
 
     FragColor = color * vec4(calculateLighting(), 1.0f);
     // FragColor = vec4(fragNormal * 0.5f + 0.5f, 1.0f);
+
+    float brightness = dot(FragColor.rgb, vec3(0.2126f, 0.7152f, 0.0722f));
+    if(brightness > threshold) {
+        BrightColor = color;
+    } else {
+        BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
 }

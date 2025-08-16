@@ -1,5 +1,6 @@
 #include <vector>
 #include <unordered_set>
+#include <map>
 
 #include "glad/glad.h"
 
@@ -111,8 +112,16 @@ Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
     // Keep track of used textures to avoid duplicates
     std::unordered_set<Texture2D*> usedTextures;
 
+    // Find the highest attachment index to determine the size of draw buffers array
+    uint32_t maxIndex = 0;
+    for (auto const& [index, _] : config.colorAttachments) {
+        if (index > maxIndex) {
+            maxIndex = index;
+        }
+    }
+    std::vector<GLenum> drawBuffers(maxIndex + 1, GL_NONE);
+
     // Attach draw buffers
-    std::vector<GLenum> drawBuffers;
     for (auto& [index, attachment] : config.colorAttachments) {
         // Ensure valid texture and not duplicate
         if (!attachment.texture) return Status::NULL_ATTACHMENT;
@@ -125,15 +134,27 @@ Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
 
         // Attach to framebuffer
         GLenum attachPoint = GL_COLOR_ATTACHMENT0 + index;
+        util::logMessage(
+            util::LogCategory::ENGINE, util::LogSeverity::INFO,
+            "glNamedFramebufferTexture(%u, GL_COLOR_ATTACHMENT%u, %u, 0)\n", _id, index, attachment.texture->id()
+        );
         glNamedFramebufferTexture(_id, attachPoint, attachment.texture->id(), 0);
-        drawBuffers.push_back(attachPoint);
+        drawBuffers[index] = attachPoint;
         _colorAttachments[index] = attachment;
     }
 
     // Tell which draw buffers we will be using on this framebuffer
     if (!drawBuffers.empty()) {
+        util::logMessage(
+            util::LogCategory::ENGINE, util::LogSeverity::INFO,
+            "glNamedFramebufferDrawBuffers(%u, %zu, %p)\n", _id, drawBuffers.size(), drawBuffers.data()
+        );
         glNamedFramebufferDrawBuffers(_id, static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
     } else {
+        util::logMessage(
+            util::LogCategory::ENGINE, util::LogSeverity::INFO,
+            "glNamedFramebufferDrawBuffer(%u, GL_NONE)\n", _id
+        );
         glNamedFramebufferDrawBuffer(_id, GL_NONE);
     }
 
@@ -146,9 +167,11 @@ Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
         if (usedTextures.count(attachment.texture)) return Status::DUPLICATE_ATTACHMENT;
         usedTextures.insert(attachment.texture);
 
+        // Resize and apply format
+        attachment.texture->resize(_width, _height, depthFormatToTextureFormat(attachment.format));
+
         // Attach to framebuffer
         GLenum attachPoint = depthFormatToAttachmentPoint(attachment.format);
-        attachment.texture->resize(_width, _height, depthFormatToTextureFormat(attachment.format));
         glNamedFramebufferTexture(_id, attachPoint, attachment.texture->id(), 0);
         _depthAttachment = attachment;
     }
