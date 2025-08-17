@@ -18,6 +18,7 @@
 #include "tmig/util/camera.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
+#include "tmig/util/postprocessing.hpp"
 
 using namespace tmig;
 
@@ -42,14 +43,6 @@ int main() {
     )) {
         std::cout << "Failed loading instanced shader\n";
         return 1;
-    }
-
-    render::ShaderProgram screenQuadShader;
-    if (!screenQuadShader.compileFromFiles(
-        util::getResourcePath("engine/shaders/screen_quad.vert"),
-        util::getResourcePath("engine/shaders/screen_quad.frag")
-    )) {
-        std::cerr << "Failed loading screen quad shader\n";
     }
 
     render::Texture2D meshTexture;
@@ -137,32 +130,6 @@ int main() {
     render::UniformBuffer<sceneData> ubo;
     ubo.bindTo(0);
 
-    // Create screen quad for post-processing render
-    struct quadVert {
-        glm::vec3 pos;
-        glm::vec2 uv;
-    };
-    std::vector<quadVert> quadVertices;
-    std::vector<uint32_t> quadIndices;
-    util::generateScreenQuadMesh([&](auto v) { quadVertices.push_back(quadVert{
-        .pos = v.position,
-        .uv = v.uv
-    }); }, quadIndices);
-
-    auto screenQuadVertexBuffer = new render::DataBuffer<quadVert>;
-    screenQuadVertexBuffer->setData(quadVertices);
-
-    auto screenQuadIndexBuffer = new render::DataBuffer<uint32_t>;
-    screenQuadIndexBuffer->setData(quadIndices);
-
-    render::Mesh<quadVert> screenQuadMesh;
-    screenQuadMesh.setAttributes({
-        render::VertexAttributeType::Float3, // position
-        render::VertexAttributeType::Float2, // uv
-    });
-    screenQuadMesh.setIndexBuffer(screenQuadIndexBuffer);
-    screenQuadMesh.setVertexBuffer(screenQuadVertexBuffer);
-
     // Framebuffer to render the main scene to a texture
     render::Framebuffer sceneFramebuffer;
     render::Texture2D sceneDepthTexture;
@@ -190,7 +157,8 @@ int main() {
     // Create instance of bloom effect
     render::postprocessing::BloomEffect bloomEffect;
     bloomEffect.setThreshold(1.5f);
-    bloomEffect.setOffsetScale(1.0f);
+    bloomEffect.setOffsetScale(1.5f);
+    bloomEffect.setStrength(0.75f);
 
     float lastTime = render::window::getRuntime();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
@@ -287,18 +255,13 @@ int main() {
         if (applyBloom) {
             // Apply bloom effect
             const auto& bloomTexture = bloomEffect.apply(sceneOutputTexture);
-            screenQuadShader.use();
-            screenQuadShader.setTexture("scene", bloomTexture, 0);
+            render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
+            util::renderScreenQuadTexture(bloomTexture);
         } else {
             // Skip bloom
-            screenQuadShader.use();
-            screenQuadShader.setTexture("scene", sceneOutputTexture, 0);
+            render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
+            util::renderScreenQuadTexture(sceneOutputTexture);
         }
-        
-        render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
-        glDisable(GL_DEPTH_TEST);
-        screenQuadMesh.render();
-        glEnable(GL_DEPTH_TEST);
 
         render::window::swapBuffers();
         render::window::pollEvents();
@@ -312,8 +275,6 @@ int main() {
     delete vertexBuffer;
     delete instanceBuffer;
     delete indexBuffer;
-    delete screenQuadVertexBuffer;
-    delete screenQuadIndexBuffer;
 
     return 0;
 }
