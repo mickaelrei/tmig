@@ -1,6 +1,5 @@
 #version 440 core
-layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 BrightColor;
+out vec4 FragColor;
 
 // Vertex info
 in vec3 fragNormal;
@@ -21,7 +20,7 @@ uniform sampler2D tex;
 uniform float threshold = 1.0f;
 
 // Directional light info
-const float lightIntensity = 2.0f;
+const float lightIntensity = 1.0f;
 const float specularStrength = 0.15f;
 const float ambientLightStrength = 0.15f;
 const vec3 lightDirection = vec3(1.0f, -0.5f, -0.25f);
@@ -55,11 +54,4 @@ void main() {
 
     FragColor = color * vec4(calculateLighting(), 1.0f);
     // FragColor = vec4(fragNormal * 0.5f + 0.5f, 1.0f);
-
-    float brightness = dot(FragColor.rgb, vec3(0.2126f, 0.7152f, 0.0722f));
-    if(brightness > threshold) {
-        BrightColor = color;
-    } else {
-        BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    }
 }

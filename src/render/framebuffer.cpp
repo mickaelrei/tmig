@@ -177,11 +177,22 @@ Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
     }
 
     // Check status
-    GLenum status = glCheckNamedFramebufferStatus(_id, GL_FRAMEBUFFER);
-    return enumToStatus(status);
+    GLenum statusGL = glCheckNamedFramebufferStatus(_id, GL_FRAMEBUFFER);
+    auto status = enumToStatus(statusGL);
+    if (status == Status::COMPLETE) {
+        setupCalled = true;
+    }
+
+    return status;
 }
 
 void Framebuffer::bind(const FramebufferBindOptions& options) const {
+#ifdef DEBUG
+    if (!setupCalled) {
+        throw std::runtime_error{"[render::Framebuffer::bind] Tried to bind framebuffer not set up"};
+    }
+#endif
+
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
     if (options.setViewport) {

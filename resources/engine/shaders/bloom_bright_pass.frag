@@ -12,6 +12,6 @@ void main() {
     if(brightness > threshold) {
         FragColor = color;
     } else {
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        FragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 }

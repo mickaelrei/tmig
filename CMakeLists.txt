@@ -49,6 +49,7 @@ set(
     ${SOURCE_DIR}/render/texture2D.cpp
     ${SOURCE_DIR}/render/vertex_attribute.cpp
     ${SOURCE_DIR}/render/window.cpp
+    ${SOURCE_DIR}/render/postprocessing/bloom.cpp
 
     # Utility module
     ${SOURCE_DIR}/util/camera.cpp

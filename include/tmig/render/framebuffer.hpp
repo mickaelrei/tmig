@@ -175,6 +175,9 @@ private:
     /// @brief Height in pixels
     uint32_t _height = 0;
 
+    /// @brief Whether setup was already called
+    bool setupCalled = false;
+
     /// @brief Active color attachments of the framebuffer
     std::unordered_map<uint32_t, FramebufferAttachment> _colorAttachments;
 

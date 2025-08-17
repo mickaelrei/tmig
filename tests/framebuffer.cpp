@@ -45,7 +45,7 @@ int main() {
 
     render::ShaderProgram postProcessingShader;
     if (!postProcessingShader.compileFromFiles(
-        util::getResourcePath("shaders/screen_quad.vert"),
+        util::getResourcePath("engine/shaders/screen_quad.vert"),
         util::getResourcePath("shaders/post_processing.frag")
     )) {
         std::cout << "Failed loading post_processing shader\n";

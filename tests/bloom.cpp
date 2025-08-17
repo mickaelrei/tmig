@@ -14,6 +14,7 @@
 #include "tmig/render/window.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
+#include "tmig/render/postprocessing/bloom.hpp"
 #include "tmig/util/camera.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
@@ -43,29 +44,19 @@ int main() {
         return 1;
     }
 
-    render::ShaderProgram blurShader;
-    if (!blurShader.compileFromFiles(
-        util::getResourcePath("shaders/screen_quad.vert"),
-        util::getResourcePath("shaders/blur.frag")
+    render::ShaderProgram screenQuadShader;
+    if (!screenQuadShader.compileFromFiles(
+        util::getResourcePath("engine/shaders/screen_quad.vert"),
+        util::getResourcePath("engine/shaders/screen_quad.frag")
     )) {
-        std::cout << "Failed loading blur shader\n";
-        return 1;
-    }
-
-    render::ShaderProgram finalBloomShader;
-    if (!finalBloomShader.compileFromFiles(
-        util::getResourcePath("shaders/screen_quad.vert"),
-        util::getResourcePath("shaders/bloom.frag")
-    )) {
-        std::cout << "Failed loading bloom shader\n";
-        return 1;
+        std::cerr << "Failed loading screen quad shader\n";
     }
 
     render::Texture2D meshTexture;
     if (!meshTexture.loadFromFile(util::getResourcePath("images/awesomeface.png"))) {
-        std::cout << "Failed to load texture\n";
-        return 1;
+        std::cerr << "Failed to load texture\n";
     }
+
     meshTexture.setWrapS(render::TextureWrapMode::MIRRORED_REPEAT);
     meshTexture.setWrapT(render::TextureWrapMode::MIRRORED_REPEAT);
     meshTexture.setMinFilter(render::TextureMinFilter::LINEAR_MIPMAP_LINEAR);
@@ -84,6 +75,13 @@ int main() {
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
         float b = (float)(rand() % 1000) / 1000.0f;
+
+        // Small chance of being a glowing instance
+        if (rand() % 10 == 1) {
+            r *= 15.0f;
+            g *= 15.0f;
+            b *= 15.0f;
+        }
         glm::vec4 color = {r, g, b, 1.0f};
 
         // pos
@@ -165,25 +163,18 @@ int main() {
     screenQuadMesh.setIndexBuffer(screenQuadIndexBuffer);
     screenQuadMesh.setVertexBuffer(screenQuadVertexBuffer);
 
-    // Framebuffer to render the main scene to a texture, and the bright excess to another texture
+    // Framebuffer to render the main scene to a texture
     render::Framebuffer sceneFramebuffer;
     render::Texture2D sceneDepthTexture;
     render::Texture2D sceneOutputTexture;
-    render::Texture2D brightPassTexture;
-    brightPassTexture.setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
-    brightPassTexture.setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
     sceneOutputTexture.setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
     sceneOutputTexture.setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
     auto status = sceneFramebuffer.setup({
-        .width = 1200,
-        .height = 1200,
+        .width = 2000,
+        .height = 2000,
         .colorAttachments = {
             {0, render::FramebufferAttachment{
                 .texture = &sceneOutputTexture,
-                .format = render::TextureFormat::RGBA32F,
-            }},
-            {1, render::FramebufferAttachment{
-                .texture = &brightPassTexture,
                 .format = render::TextureFormat::RGBA32F,
             }},
         },
@@ -196,27 +187,10 @@ int main() {
         std::cerr << "Framebuffer failed; status: " << status << "\n";
     }
 
-    // Ping-pong framebuffers for blurring
-    render::Texture2D blurTextures[2];
-    render::Framebuffer blurFramebuffers[2];
-    for (int i = 0; i < 2; ++i) {
-        blurTextures[i].setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
-        blurTextures[i].setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
-        auto blurStatus = blurFramebuffers[i].setup({
-            .width = 600,
-            .height = 600,
-            .colorAttachments = {
-                {0, render::FramebufferAttachment{
-                    .texture = &blurTextures[i],
-                    .format = render::TextureFormat::RGBA32F,
-                }},
-            },
-        });
-        if (blurStatus != render::Framebuffer::Status::COMPLETE) {
-            std::cout << "Error setting up blur fb: " << blurStatus << "\n";
-            return 1;
-        }
-    }
+    // Create instance of bloom effect
+    render::postprocessing::BloomEffect bloomEffect;
+    bloomEffect.setThreshold(1.5f);
+    bloomEffect.setOffsetScale(1.0f);
 
     float lastTime = render::window::getRuntime();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
@@ -263,9 +237,7 @@ int main() {
             pressingT = false;
         }
 
-        // ------------------------------------------
-        // ------------------------------------------
-        // Render scene
+        // Update scene
         if (randomizeMesh) {
             for (size_t i = 0; i < instances.size(); ++i) {
                 glm::vec3 pos = glm::vec3(instances[i].model[3]);
@@ -312,34 +284,18 @@ int main() {
         meshShader.use();
         mesh.render();
 
-        // ------------------------------------------
-        // ------------------------------------------
-        // Blur bright areas with ping-pong framebuffers
         if (applyBloom) {
-            bool horizontal = true;
-            for (int i = 0; i < 10; i++) {
-                blurFramebuffers[horizontal].bind({
-                    .clearColor = false,
-                    .clearStencil = false,
-                    .clearDepth = false,
-                });
-                blurShader.use();
-                blurShader.setInt("horizontal", horizontal);
-                blurShader.setTexture("image", i == 0 ? brightPassTexture : blurTextures[!horizontal], 0);
-                screenQuadMesh.render();
-                horizontal = !horizontal;
-            }
+            // Apply bloom effect
+            const auto& bloomTexture = bloomEffect.apply(sceneOutputTexture);
+            screenQuadShader.use();
+            screenQuadShader.setTexture("scene", bloomTexture, 0);
+        } else {
+            // Skip bloom
+            screenQuadShader.use();
+            screenQuadShader.setTexture("scene", sceneOutputTexture, 0);
         }
-
-        // ------------------------------------------
-        // ------------------------------------------
-        // Final output
-        render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
-        finalBloomShader.use();
-        finalBloomShader.setBool("applyBloom", applyBloom);
-        finalBloomShader.setTexture("scene", sceneOutputTexture, 0);
-        finalBloomShader.setTexture("bloomBlur", blurTextures[1], 1);
         
+        render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
         glDisable(GL_DEPTH_TEST);
         screenQuadMesh.render();
         glEnable(GL_DEPTH_TEST);
