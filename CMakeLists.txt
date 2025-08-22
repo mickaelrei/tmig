@@ -38,37 +38,25 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
 
-    # Physics objects
-    ${SOURCE_DIR}/physics/collision/collision_test.cpp
-    ${SOURCE_DIR}/physics/collision/mesh_collider.cpp
-    ${SOURCE_DIR}/physics/collision/sphere_collider.cpp
-    ${SOURCE_DIR}/physics/rigid_body.cpp
+    # Core module
+    ${SOURCE_DIR}/core/callback_manager.cpp
 
-    # Render GL resources
-    ${SOURCE_DIR}/render/gl/ebo.cpp
-    ${SOURCE_DIR}/render/gl/shader.cpp
-    ${SOURCE_DIR}/render/gl/texture_cube.cpp
-    ${SOURCE_DIR}/render/gl/texture.cpp
-    ${SOURCE_DIR}/render/gl/vao.cpp
-    ${SOURCE_DIR}/render/gl/vbo.cpp
-
-    # Render utils
-    ${SOURCE_DIR}/render/utils/primitives_mesh.cpp
-    ${SOURCE_DIR}/render/utils/primitives_gmesh.cpp
-    ${SOURCE_DIR}/render/utils/shaders.cpp
-    ${SOURCE_DIR}/render/utils/skybox.cpp
-
-    # Render objects
+    # Render module
     ${SOURCE_DIR}/render/camera.cpp
-    ${SOURCE_DIR}/render/entity.cpp
-    ${SOURCE_DIR}/render/gmesh.cpp
-    ${SOURCE_DIR}/render/light.cpp
-    ${SOURCE_DIR}/render/scene.cpp
+    ${SOURCE_DIR}/render/framebuffer.cpp
+    ${SOURCE_DIR}/render/render.cpp
+    ${SOURCE_DIR}/render/shader.cpp
+    ${SOURCE_DIR}/render/texture2D.cpp
+    ${SOURCE_DIR}/render/vertex_attribute.cpp
     ${SOURCE_DIR}/render/window.cpp
+    ${SOURCE_DIR}/render/postprocessing/bloom.cpp
 
-    # Engine commons
-    ${SOURCE_DIR}/init.cpp
-    ${SOURCE_DIR}/mesh.cpp
+    # Utility module
+    ${SOURCE_DIR}/util/camera.cpp
+    ${SOURCE_DIR}/util/file.cpp
+    ${SOURCE_DIR}/util/postprocessing.cpp
+    ${SOURCE_DIR}/util/resources.cpp
+    ${SOURCE_DIR}/util/shapes.cpp
 
     # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
@@ -77,6 +65,7 @@ set(
 
 # Adding engine shared library
 add_library(${TMIG} SHARED ${ENGINE_SOURCE_FILES})
+target_compile_definitions(${TMIG} PUBLIC PROJECT_ROOT_FOLDER="${CMAKE_SOURCE_DIR}")
 
 # Libraries
 target_link_directories(
@@ -103,25 +92,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 
 #######################################################
 #######################################################
-# Main scene test
+# Instanced test
 
 # Source files
 set(
-    SCENE_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/scene_test.cpp
+    INSTANCED_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/instanced.cpp
 )
 
 # Adding executables for testing
-add_executable(scene_test ${SCENE_TEST_SOURCE_FILES})
+add_executable(instanced ${INSTANCED_TEST_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    scene_test
+    instanced
     PRIVATE
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 target_link_libraries(
-    scene_test
+    instanced
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
@@ -129,33 +118,34 @@ target_link_libraries(
 
 # Header files
 target_include_directories(
-    scene_test
+    instanced
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
 )
 
 #######################################################
 #######################################################
-# Rigid Body Simulation
+# Non-instanced test
 
 # Source files
 set(
-    RIGIDBODY_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/rigid_body.cpp
+    NON_INSTANCED_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/non_instanced.cpp
 )
 
 # Adding executables for testing
-add_executable(rigid_body ${RIGIDBODY_SOURCE_FILES})
+add_executable(non_instanced ${NON_INSTANCED_TEST_SOURCE_FILES})
 
 # Libraries
 target_link_directories(
-    rigid_body
+    non_instanced
     PRIVATE
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 target_link_libraries(
-    rigid_body
+    non_instanced
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
@@ -163,8 +153,79 @@ target_link_libraries(
 
 # Header files
 target_include_directories(
-    rigid_body
+    non_instanced
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
+)
+
+#######################################################
+#######################################################
+# Framebuffer test
+
+# Source files
+set(
+    FRAMEBUFFER_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/framebuffer.cpp
+)
+
+# Adding executables for testing
+add_executable(framebuffer ${FRAMEBUFFER_TEST_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    framebuffer
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    framebuffer
+    PRIVATE
+    ${TMIG}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    framebuffer
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
+)
+
+#######################################################
+#######################################################
+# Bloom test
+
+# Source files
+set(
+    BLOOM_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/bloom.cpp
+)
+
+# Adding executables for testing
+add_executable(bloom ${BLOOM_TEST_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    bloom
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    bloom
+    PRIVATE
+    ${TMIG}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    bloom
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
 )
