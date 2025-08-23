@@ -20,7 +20,7 @@ uniform sampler2D tex;
 uniform float threshold = 1.0f;
 
 // Directional light info
-const float lightIntensity = 1.0f;
+const float lightIntensity = 0.1f;
 const float specularStrength = 0.15f;
 const float ambientLightStrength = 0.15f;
 const vec3 lightDirection = vec3(1.0f, -0.5f, -0.25f);

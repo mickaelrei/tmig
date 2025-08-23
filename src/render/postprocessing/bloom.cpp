@@ -78,8 +78,7 @@ BloomEffect::BloomEffect(const BloomConfig& config) {
         });
         if (status != render::Framebuffer::Status::COMPLETE) {
             std::stringstream ss;
-            ss << "[render::postprocessing::BloomEffect] Failed setting up bright_pass framebuffer: ";
-            ss << status << "\n";
+            ss << "[render::postprocessing::BloomEffect] Failed setting up bright_pass framebuffer: " << status;
             throw std::runtime_error{ss.str()};
         }
     }
@@ -95,14 +94,13 @@ BloomEffect::BloomEffect(const BloomConfig& config) {
                 .colorAttachments = {
                     {0, render::FramebufferAttachment{
                         .texture = &blurTextures[i],
-                        .format = render::TextureFormat::RGBA32F,
+                        .format = render::TextureFormat::RGBA16F,
                     }},
                 },
             });
             if (status != render::Framebuffer::Status::COMPLETE) {
                 std::stringstream ss;
-                ss << "[render::postprocessing::BloomEffect] Failed setting up blur framebuffer: ";
-                ss << status << "\n";
+                ss << "[render::postprocessing::BloomEffect] Failed setting up blur framebuffer: " << status;
                 throw std::runtime_error{ss.str()};
             }
         }
@@ -122,11 +120,14 @@ BloomEffect::BloomEffect(const BloomConfig& config) {
         });
         if (status != render::Framebuffer::Status::COMPLETE) {
             std::stringstream ss;
-            ss << "[render::postprocessing::BloomEffect] Failed setting up output framebuffer: ";
-            ss << status << "\n";
+            ss << "[render::postprocessing::BloomEffect] Failed setting up output framebuffer: " << status;
             throw std::runtime_error{ss.str()};
         }
     }
+
+    setThreshold(threshold);
+    setOffsetScale(offsetScale);
+    setStrength(strength);
 }
 
 BloomEffect::~BloomEffect() {

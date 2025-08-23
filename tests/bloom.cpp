@@ -14,11 +14,11 @@
 #include "tmig/render/window.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
-#include "tmig/render/postprocessing/bloom.hpp"
 #include "tmig/util/camera.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/postprocessing.hpp"
+#include "tmig/render/postprocessing/bloom.hpp"
 
 using namespace tmig;
 
@@ -71,9 +71,9 @@ int main() {
 
         // Small chance of being a glowing instance
         if (rand() % 10 == 1) {
-            r *= 15.0f;
-            g *= 15.0f;
-            b *= 15.0f;
+            r *= 25.0f;
+            g *= 25.0f;
+            b *= 25.0f;
         }
         glm::vec4 color = {r, g, b, 1.0f};
 
@@ -156,9 +156,6 @@ int main() {
 
     // Create instance of bloom effect
     render::postprocessing::BloomEffect bloomEffect;
-    bloomEffect.setThreshold(1.5f);
-    bloomEffect.setOffsetScale(1.5f);
-    bloomEffect.setStrength(0.75f);
 
     float lastTime = render::window::getRuntime();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});

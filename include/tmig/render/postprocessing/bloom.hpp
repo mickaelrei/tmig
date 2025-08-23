@@ -46,21 +46,21 @@ public:
     
     /// @brief Set bright excess threshold. Fragments with brightness above this value
     /// will contribute to the bloom effect
-    /// @note By default it is 1.0f
+    /// @note By default it is 1.5f
     void setThreshold(float threshold);
     
     /// @brief Get current bright excess threshold
     float getThreshold() const { return threshold; }
 
     /// @brief Set the scale for sampling offsets from the texture on the blur pass
-    /// @note By default it is 1.0f
+    /// @note By default it is 1.5f
     void setOffsetScale(float offsetScale);
     
     /// @brief Get current offset scale
     float getOffsetScale() const { return offsetScale; }
 
     /// @brief Set the strength of the bloom when applied on the final output
-    /// @note By default it is 1.0f
+    /// @note By default it is 0.5f
     void setStrength(float strength);
     
     /// @brief Get current offset scale
@@ -72,9 +72,9 @@ public:
     uint32_t blurIterations = 5;
 
 protected:
-    float threshold = 1.0f;            // Brightness threshold
-    float offsetScale = 1.0f;          // Blur texture sample offset scale
-    float strength = 1.0f;             // Bloom strength
+    float threshold = 1.5f;            // Brightness threshold
+    float offsetScale = 1.5f;          // Blur texture sample offset scale
+    float strength = 0.5f;             // Bloom strength
 
     Framebuffer brightPassFramebuffer; // Bright excess pass framebuffer
     Framebuffer blurFramebuffers[2];   // Ping-pong blur framebuffers
