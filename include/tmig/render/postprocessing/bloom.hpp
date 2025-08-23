@@ -2,6 +2,7 @@
 #include "tmig/render/framebuffer.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/mesh.hpp"
+#include "tmig/render/postprocessing/blur.hpp"
 
 namespace tmig::render::postprocessing {
 
@@ -11,19 +12,19 @@ struct BloomConfig {
     uint32_t brightPassWidth = 1920;
 
     /// @brief Height of the bright pass framebuffer. Should be the window size or larger
-    uint32_t brightPassheight = 1080;
+    uint32_t brightPassHeight = 1080;
 
     /// @brief Width of the blur framebuffer. Quite expensive so should be smaller
     uint32_t blurWidth = 800;
 
     /// @brief Height of the blur framebuffer. Quite expensive so should be smaller
-    uint32_t blurheight = 800;
+    uint32_t blurHeight = 800;
 
     /// @brief Width of the output framebuffer. Very fast so could be very big
     uint32_t outputWidth = 2160;
 
     /// @brief Height of the output framebuffer. Very fast so could be very big
-    uint32_t outputheight = 1440;
+    uint32_t outputHeight = 1440;
 };
 
 /// @brief Class representing a bloom effect for post-processing in a rendering pipeline.
@@ -57,7 +58,7 @@ public:
     void setOffsetScale(float offsetScale);
     
     /// @brief Get current offset scale
-    float getOffsetScale() const { return offsetScale; }
+    float getOffsetScale() const { return blurEffect.getOffsetScale(); }
 
     /// @brief Set the strength of the bloom when applied on the final output
     /// @note By default it is 0.5f
@@ -72,30 +73,34 @@ public:
     uint32_t blurIterations = 5;
 
 protected:
-    float threshold = 1.5f;            // Brightness threshold
-    float offsetScale = 1.5f;          // Blur texture sample offset scale
-    float strength = 0.5f;             // Bloom strength
+    // Parameters
+    float threshold = 1.5f;
+    float strength = 0.5f;
 
-    Framebuffer brightPassFramebuffer; // Bright excess pass framebuffer
-    Framebuffer blurFramebuffers[2];   // Ping-pong blur framebuffers
-    Framebuffer outputFramebuffer;     // Output framebuffer
+    // Blur effect used on bright areas
+    BlurEffect blurEffect;
 
-    ShaderProgram brightPassShader;    // Bright excess pass shader
-    ShaderProgram blurShader;          // Blur shader
-    ShaderProgram outputShader;        // Output shader
+    // Framebuffers
+    Framebuffer brightPassFramebuffer;
+    Framebuffer outputFramebuffer;
 
-    Texture2D brightPassTexture;       // Bright excess pass texture
-    Texture2D blurTextures[2];         // Blur textures
-    Texture2D outputTexture;           // Output texture
+    // Shaders
+    ShaderProgram brightPassShader;
+    ShaderProgram outputShader;
 
-    struct quadVert {                  // Vertex type for screen quad
+    // Textures
+    Texture2D brightPassTexture;
+    Texture2D outputTexture;
+
+    // Data for the screen quad for intermediate renders
+    struct quadVert {
         glm::vec3 pos;
         glm::vec2 uv;
     };
 
-    DataBuffer<quadVert>* vertBuffer;  // screen quad vertex buffer
-    DataBuffer<uint32_t>* indexBuffer; // screen quad index buffer
-    Mesh<quadVert> screenQuad;         // screen quad mesh
+    DataBuffer<quadVert>* vertBuffer;
+    DataBuffer<uint32_t>* indexBuffer;
+    Mesh<quadVert> screenQuad;
 };
 
 } // namespace tmig::render::postprocessing
