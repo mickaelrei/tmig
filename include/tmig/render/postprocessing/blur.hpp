@@ -33,8 +33,7 @@ public:
     /// @brief Get current offset scale
     float getOffsetScale() const { return offsetScale; }
 
-    /// @brief Applies the blur effect to the input texture
-    virtual const Texture2D& apply(const Texture2D& input) override;
+    virtual const Texture2D& apply(const Texture2D& input, const PostProcessContext& ctx = {}) override;
 
     /// @brief Number of blur iterations. More iterations create a smoother, heavier blur but cost more performance
     uint32_t blurIterations = 5;

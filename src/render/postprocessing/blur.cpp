@@ -79,7 +79,9 @@ void BlurEffect::setOffsetScale(float _offsetScale) {
     blurShader.setFloat("offsetScale", offsetScale);
 }
 
-const Texture2D& BlurEffect::apply(const Texture2D& input) {
+const Texture2D& BlurEffect::apply(const Texture2D& input, const PostProcessContext& ctx) {
+    (void)ctx;
+
     bool horizontal = true;
     blurShader.use();
 

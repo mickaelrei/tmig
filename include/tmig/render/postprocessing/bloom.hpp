@@ -67,7 +67,7 @@ public:
     /// @brief Get current offset scale
     float getStrength() const { return strength; }
     
-    virtual const Texture2D& apply(const Texture2D& input) override;
+    virtual const Texture2D& apply(const Texture2D& input, const PostProcessContext& ctx = {}) override;
 
     /// @brief Number of iterations on each axis when applying horizontal-vertical blur
     uint32_t blurIterations = 5;

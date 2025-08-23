@@ -116,7 +116,9 @@ void BloomEffect::setStrength(float _strength) {
     outputShader.setFloat("strength", strength);
 }
 
-const Texture2D& BloomEffect::apply(const Texture2D& input) {
+const Texture2D& BloomEffect::apply(const Texture2D& input, const PostProcessContext& ctx) {
+    (void)ctx;
+
     // Bright pass (get excess light in a separate texture)
     brightPassFramebuffer.bind();
     brightPassShader.use();

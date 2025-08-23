@@ -33,8 +33,11 @@ public:
     bool compileFromFiles(const std::string& vertexPath, const std::string& fragmentPath);
 
     /// @brief Use/activate shader
-    /// @note Will return early if not valid. Check with `isValid()`
+    /// @note Will throw an `std::runtime_error` if not valid. Check with `isValid()`
     void use() const;
+
+    /// @brief Returns shader id
+    uint32_t id() const { return _id; }
 
     /// @brief Whether this shader is valid for usage; a successful call to `compileFromFiles` assures that
     bool isValid() const { return _linked; }
