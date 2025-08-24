@@ -61,6 +61,7 @@ set(
     ${SOURCE_DIR}/util/postprocessing.cpp
     ${SOURCE_DIR}/util/resources.cpp
     ${SOURCE_DIR}/util/shapes.cpp
+    ${SOURCE_DIR}/util/time_step.cpp
 
     # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c

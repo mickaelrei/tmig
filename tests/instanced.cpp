@@ -1,4 +1,3 @@
-#include <chrono>
 #include <iostream>
 
 #include "glad/glad.h"
@@ -15,6 +14,7 @@
 #include "tmig/util/camera.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
+#include "tmig/util/time_step.hpp"
 
 using namespace tmig;
 
@@ -26,7 +26,6 @@ int main() {
     srand(3);
 
     render::init();
-    render::window::setTitle("Vertex attribute test | Instancing ON");
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
@@ -129,12 +128,13 @@ int main() {
     render::UniformBuffer<sceneData> ubo;
     ubo.bindTo(0);
 
-    float lastTime = render::window::getRuntime();
+    util::TimeStep timeStep;
     while (!render::window::shouldClose()) {
-        // Calculate dt
         float runtime = render::window::getRuntime();
-        float dt = runtime - lastTime;
-        lastTime = runtime;
+        if (timeStep.update(runtime)) {
+            std::string newTitle = "Vertex attribute test | Instancing ON | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
+            render::window::setTitle(newTitle);
+        }
 
         // Close window if ESC was pressed
         if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -165,9 +165,7 @@ int main() {
         }
         instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
 
-        util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
-
-        auto start = std::chrono::high_resolution_clock::now();
+        util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
         // Set scene UBO data
         auto windowSize = render::window::getSize();
@@ -187,12 +185,6 @@ int main() {
 
         render::window::swapBuffers();
         render::window::pollEvents();
-
-        // Display time durations
-        auto end = std::chrono::high_resolution_clock::now();
-        auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-        (void)drawDuration;
-        // printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
 
     delete vertexBuffer;

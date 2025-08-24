@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <chrono>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -14,11 +13,12 @@
 #include "tmig/render/window.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
+#include "tmig/render/postprocessing/bloom.hpp"
 #include "tmig/util/camera.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/postprocessing.hpp"
-#include "tmig/render/postprocessing/bloom.hpp"
+#include "tmig/util/time_step.hpp"
 
 using namespace tmig;
 
@@ -157,7 +157,7 @@ int main() {
     // Create instance of bloom effect
     render::postprocessing::BloomEffect bloomEffect;
 
-    float lastTime = render::window::getRuntime();
+    util::TimeStep timeStep;
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
     bool randomizeMesh = true;
     bool applyBloom = true;
@@ -166,12 +166,11 @@ int main() {
     bool pressingF = false;
     bool pressingT = false;
     while (!render::window::shouldClose()) {
-        auto start = std::chrono::high_resolution_clock::now();
-
-        // Calculate dt
         float runtime = render::window::getRuntime();
-        float dt = runtime - lastTime;
-        lastTime = runtime;
+        if (timeStep.update(runtime)) {
+            std::string newTitle = "Bloom effect | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
+            render::window::setTitle(newTitle);
+        }
 
         // Close window if ESC was pressed
         if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -229,7 +228,7 @@ int main() {
             instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
         }
 
-        util::firstPersonCameraMovement(camera, dt, firstSinceLast, cameraSpeed, cameraRotationSpeed);
+        util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
         // Set scene UBO data
         auto windowSize = render::window::getSize();
@@ -262,11 +261,6 @@ int main() {
 
         render::window::swapBuffers();
         render::window::pollEvents();
-
-        // Display time durations
-        auto end = std::chrono::high_resolution_clock::now();
-        auto drawDuration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-        printf("FPS: %4.0f | Draw: %6ld\n", 1.0f / dt, drawDuration);
     }
 
     delete vertexBuffer;
