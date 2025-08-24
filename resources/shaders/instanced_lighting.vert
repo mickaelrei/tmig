@@ -5,7 +5,8 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 
 // Per-instance attributes
-layout (location = 2) in mat4 model;
+layout (location = 2) in vec3 color;
+layout (location = 3) in mat4 model;
 
 // General info UBO
 layout(std140, binding = 0) uniform Scene {
@@ -17,11 +18,13 @@ layout(std140, binding = 0) uniform Scene {
 // Outputs to fragment shader
 out vec3 fragNormal;
 out vec3 fragPos;
+out vec3 objectColor;
 
 void main() {
     // Transform normal and position to world space
     fragNormal = transpose(inverse(mat3(model))) * aNormal;
     fragPos = vec3(model * vec4(aPos, 1.0f));
+    objectColor = color;
 
     // Final vertex position
     gl_Position = projection * view * vec4(fragPos, 1.0f);

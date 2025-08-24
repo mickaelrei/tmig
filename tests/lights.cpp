@@ -11,11 +11,15 @@
 #include "tmig/render/instanced_mesh.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/uniform_buffer.hpp"
+#include "tmig/render/framebuffer.hpp"
 #include "tmig/render/window.hpp"
+#include "tmig/render/postprocessing/bloom.hpp"
 #include "tmig/util/camera.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/time_step.hpp"
+#include "tmig/util/postprocessing.hpp"
+#include "tmig/util/color.hpp"
 #include "tmig/core/light_manager.hpp"
 
 using namespace tmig;
@@ -33,6 +37,7 @@ struct Vertex {
 
 // Instance data for the walls
 struct InstanceData {
+    glm::vec3 color;
     glm::mat4 model;
 };
 
@@ -58,7 +63,7 @@ int main() {
     render::ShaderProgram instancedShader; // For the walls
     if (!instancedShader.compileFromFiles(
         util::getResourcePath("shaders/instanced_lighting.vert"),
-        util::getResourcePath("shaders/lighting.frag")
+        util::getResourcePath("shaders/instanced_lighting.frag")
     )) {
         std::cerr << "Failed to compile instanced lighting shader\n";
         return 1;
@@ -77,14 +82,20 @@ int main() {
         .intensity = 0.15f,
     });
 
-    auto pointLightHandle = lightManager.addPointLight({
-        .position = {0.0f, 0.0f, 0.0f},
-        .color = {1.0f, 0.5f, 0.7f},
-        .intensity = 1.75f,
-        .constant = 1.0f,
-        .linear = 0.09f,
-        .quadratic = 0.032f
-    });
+    const uint32_t numMovingLights = 10;
+    std::vector<core::PointLightHandle> movingLights;
+    for (uint32_t i = 0; i < numMovingLights; ++i) {
+        float h = (float)i / (float)numMovingLights;
+
+        movingLights.push_back(lightManager.addPointLight({
+            .position = {0.0f, 0.0f, 0.0f},
+            .color = util::HSVtoRGB(h, 1.0f, 0.5f),
+            .intensity = 1.75f,
+            .constant = 1.0f,
+            .linear = 0.09f,
+            .quadratic = 0.032f
+        }));
+    }
 
     auto spotLightHandle = lightManager.addSpotLight({
         .position = camera.getPosition(),
@@ -117,30 +128,31 @@ int main() {
     torusMesh.setIndexBuffer(&torusIdxBuffer);
 
     // --- Room Wall Setup (Instanced) ---
-    render::InstancedMesh<Vertex, InstanceData> wallMesh;
-    wallMesh.setAttributes(
+    render::InstancedMesh<Vertex, InstanceData> boxMesh;
+    boxMesh.setAttributes(
         {
             render::VertexAttributeType::Float3, // position
             render::VertexAttributeType::Float3  // normal
         },
         {
+            render::VertexAttributeType::Float3, // color
             render::VertexAttributeType::Mat4x4  // model
         }
     );
 
-    std::vector<Vertex> planeVertices;
-    std::vector<uint32_t> planeIndices;
-    util::generateBoxMesh([&](auto v) { planeVertices.push_back({v.position, v.normal}); }, planeIndices);
+    std::vector<Vertex> boxVertices;
+    std::vector<uint32_t> boxIndices;
+    util::generateBoxMesh([&](auto v) { boxVertices.push_back({v.position, v.normal}); }, boxIndices);
     
-    render::DataBuffer<Vertex> wallVertBuffer;
-    render::DataBuffer<uint32_t> wallIdxBuffer;
-    wallVertBuffer.setData(planeVertices);
-    wallIdxBuffer.setData(planeIndices);
-    wallMesh.setVertexBuffer(&wallVertBuffer);
-    wallMesh.setIndexBuffer(&wallIdxBuffer);
+    render::DataBuffer<Vertex> boxVertBuffer;
+    render::DataBuffer<uint32_t> boxIdxBuffer;
+    boxVertBuffer.setData(boxVertices);
+    boxIdxBuffer.setData(boxIndices);
+    boxMesh.setVertexBuffer(&boxVertBuffer);
+    boxMesh.setIndexBuffer(&boxIdxBuffer);
 
     // Create 6 instances to form the room
-    std::vector<InstanceData> wallInstances;
+    std::vector<InstanceData> boxInstances;
     const float wallThickness = 1.0f;
     const float roomSize = 50.0f;
     float wallPos = roomSize * 0.5f + wallThickness * 0.5f;
@@ -150,45 +162,45 @@ int main() {
     model = glm::translate(model, {0.0f, -wallPos, 0.0f});
     model = glm::rotate(model, glm::radians(90.0f), {1.0f, 0.0f, 0.0f});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
-    wallInstances.push_back({model});
+    boxInstances.push_back({glm::vec3{1.0f}, model});
 
     // Ceiling
     model = glm::mat4(1.0f);
     model = glm::translate(model, {0.0f, wallPos, 0.0f});
     model = glm::rotate(model, glm::radians(-90.0f), {1.0f, 0.0f, 0.0f});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
-    wallInstances.push_back({model});
+    boxInstances.push_back({glm::vec3{1.0f}, model});
     
     // Back Wall
     model = glm::mat4(1.0f);
     model = glm::translate(model, {0.0f, 0.0f, -wallPos});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
-    wallInstances.push_back({model});
+    boxInstances.push_back({glm::vec3{1.0f}, model});
 
     // Front Wall
     model = glm::mat4(1.0f);
     model = glm::translate(model, {0.0f, 0.0f, wallPos});
     model = glm::rotate(model, glm::radians(180.0f), {0.0f, 1.0f, 0.0f});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
-    wallInstances.push_back({model});
+    boxInstances.push_back({glm::vec3{1.0f}, model});
 
     // Left Wall
     model = glm::mat4(1.0f);
     model = glm::translate(model, {-wallPos, 0.0f, 0.0f});
     model = glm::rotate(model, glm::radians(90.0f), {0.0f, 1.0f, 0.0f});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
-    wallInstances.push_back({model});
+    boxInstances.push_back({glm::vec3{1.0f}, model});
 
     // Right Wall
     model = glm::mat4(1.0f);
     model = glm::translate(model, {wallPos, 0.0f, 0.0f});
     model = glm::rotate(model, glm::radians(-90.0f), {0.0f, 1.0f, 0.0f});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
-    wallInstances.push_back({model});
+    boxInstances.push_back({glm::vec3{1.0f}, model});
 
     render::DataBuffer<InstanceData> wallInstanceBuffer;
-    wallInstanceBuffer.setData(wallInstances);
-    wallMesh.setInstanceBuffer(&wallInstanceBuffer);
+    wallInstanceBuffer.setData(boxInstances);
+    boxMesh.setInstanceBuffer(&wallInstanceBuffer);
 
     // --- Ground Spheres Setup (Instanced) ---
     render::InstancedMesh<Vertex, InstanceData> sphereMesh;
@@ -198,6 +210,7 @@ int main() {
             render::VertexAttributeType::Float3  // normal
         },
         {
+            render::VertexAttributeType::Float3, // color
             render::VertexAttributeType::Mat4x4  // model
         }
     );
@@ -213,8 +226,13 @@ int main() {
     sphereMesh.setVertexBuffer(&sphereVertBuffer);
     sphereMesh.setIndexBuffer(&sphereIdxBuffer);
 
-    // Create 6 instances to form the room
+    // Create instances that will follow the lights
     std::vector<InstanceData> sphereInstances;
+    for (uint32_t i = 0; i < numMovingLights; ++i) {
+        sphereInstances.push_back({});
+    }
+
+    // Create ground instances
     const uint32_t sphereCount = 10;
     const float sphereRadius = roomSize / sphereCount;
     for (uint32_t i = 0; i < sphereCount; ++i) {
@@ -225,7 +243,7 @@ int main() {
             glm::mat4 model{1.0f};
             model = glm::translate(model, glm::vec3{x, (sphereRadius - roomSize) * 0.5f, z});
             model = glm::scale(model, glm::vec3{sphereRadius});
-            sphereInstances.push_back({model});
+            sphereInstances.push_back({glm::vec3{1.0f}, model});
         }
     }
 
@@ -243,8 +261,41 @@ int main() {
     render::UniformBuffer<SceneData> ubo;
     ubo.bindTo(0);
 
+    // Framebuffer to render the main scene to a texture
+    render::Framebuffer sceneFramebuffer;
+    render::Texture2D sceneDepthTexture;
+    render::Texture2D sceneOutputTexture;
+    sceneOutputTexture.setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
+    sceneOutputTexture.setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
+    auto status = sceneFramebuffer.setup({
+        .width = 2000,
+        .height = 2000,
+        .colorAttachments = {
+            {0, render::FramebufferAttachment{
+                .texture = &sceneOutputTexture,
+                .format = render::TextureFormat::RGBA32F,
+            }},
+        },
+        .depthAttachment = render::FramebufferDepthAttachment{
+            .texture = &sceneDepthTexture,
+            .format = render::DepthAttachmentFormat::DEPTH24_STENCIL8,
+        },
+    });
+    if (status != render::Framebuffer::Status::COMPLETE) {
+        std::cerr << "Framebuffer failed; status: " << status << "\n";
+    }
+
+    // Create instance of bloom effect
+    render::postprocessing::BloomEffect bloomEffect{{.blurWidth = 600, .blurHeight = 600}};
+    bloomEffect.blurIterations = 1;
+    bloomEffect.setThreshold(1.0f);
+    bloomEffect.setOffsetScale(0.25f);
+    bloomEffect.setStrength(0.125f);
+
     // --- Main Loop ---
     util::TimeStep timeStep;
+    bool applyBloom = true;
+    bool pressingF = false;
     while (!render::window::shouldClose()) {
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -255,18 +306,41 @@ int main() {
         if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             render::window::setShouldClose(true);
         }
+        if (!pressingF && render::window::getKeyState(GLFW_KEY_F) == GLFW_PRESS) {
+            pressingF = true;
+            applyBloom = !applyBloom;
+        }
+        if (render::window::getKeyState(GLFW_KEY_F) == GLFW_RELEASE) {
+            pressingF = false;
+        }
 
         util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
 
         // --- Animate Lights ---
-        pointLightHandle.setPosition(glm::vec3{sin(runtime * 0.5f) * 12.0f, 0.0f, cos(runtime * 0.5f) * 12.0f});
-        pointLightHandle.setColor(glm::vec3{sin(runtime * 0.2f) * 0.5f + 0.5f, sin(runtime * 0.5f) * 0.5f + 0.5f, cos(runtime * 0.6f) * 0.5f + 0.5f});
+        const float t = runtime * 0.5f;
+        for (uint32_t i = 0; i < numMovingLights; ++i) {
+            float angle = t + M_PIf * 2.0f / numMovingLights * i;
+            float h = std::fmod((float)i / (float)numMovingLights + t * 0.125f, 1.0f);
+
+            auto pos = glm::vec3{sin(angle) * 8.0f, 0.0f, cos(angle) * 8.0f};
+            auto color = util::HSVtoRGB(h, 1.0f, 0.5f);
+
+            movingLights[i].setPosition(pos);
+            movingLights[i].setColor(color);
+
+            glm::mat4 model{1.0f};
+            model = glm::translate(model, pos);
+            model = glm::scale(model, glm::vec3{1.25f});
+            sphereInstances[i].model = model;
+            sphereInstances[i].color = color * 20.0f;
+        }
+        sphereInstanceBuffer.setSubset(0, numMovingLights, sphereInstances.data());
         spotLightHandle.setPosition(camera.getPosition());
         spotLightHandle.setDirection(camera.forward());
         lightManager.update();
 
         // --- Render Scene ---
-        render::clearBuffers();
+        sceneFramebuffer.bind();
 
         // Update Scene UBO
         auto windowSize = render::window::getSize();
@@ -277,11 +351,9 @@ int main() {
         
         // Draw the Room (Instanced)
         instancedShader.use();
-        instancedShader.setVec3("objectColor", glm::vec3{1.0f});
-        wallMesh.render();
+        boxMesh.render();
 
         // Draw the Spheres (Instanced)
-        instancedShader.setVec3("objectColor", glm::vec3{1.0f});
         sphereMesh.render();
         
         // Draw the Torus (Non-Instanced)
@@ -291,6 +363,17 @@ int main() {
         shader.setMat4("model", model);
         shader.setVec3("objectColor", glm::vec3{1.0f});
         torusMesh.render();
+
+        if (applyBloom) {
+            // Apply bloom effect
+            const auto& bloomTexture = bloomEffect.apply(sceneOutputTexture);
+            render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
+            util::renderScreenQuadTexture(bloomTexture);
+        } else {
+            // Skip bloom
+            render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
+            util::renderScreenQuadTexture(sceneOutputTexture);
+        }
 
         render::window::swapBuffers();
         render::window::pollEvents();
