@@ -1,5 +1,6 @@
 #include "glad/glad.h"
 
+#include "tmig/util/log.hpp"
 #include "tmig/render/uniform_buffer.hpp"
 
 namespace tmig::render {

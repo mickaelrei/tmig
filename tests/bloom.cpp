@@ -63,7 +63,7 @@ int main() {
     };
 
     std::vector<instanceData> instances;
-    for (int i = 0; i < 50000; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         // color
         float r = (float)(rand() % 1000) / 1000.0f;
         float g = (float)(rand() % 1000) / 1000.0f;
@@ -78,9 +78,9 @@ int main() {
         glm::vec4 color = {r, g, b, 1.0f};
 
         // pos
-        float x = (float)(rand() % 1000 - 500) * 2.0f;
-        float y = (float)(rand() % 1000 - 500) * 2.0f;
-        float z = (float)(rand() % 1000 - 500) * 2.0f;
+        float x = (float)(rand() % 1000 - 500);
+        float y = (float)(rand() % 1000 - 500);
+        float z = (float)(rand() % 1000 - 500);
 
         // size
         float sx = (float)(rand() % 900 + 100) / 10.0f;

@@ -1,7 +1,7 @@
-#include "tmig/core/callback_manager.hpp"
-
 #include <unordered_set>
 #include <mutex>
+
+#include "tmig/core/callback_manager.hpp"
 
 namespace tmig::core {
 

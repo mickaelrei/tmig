@@ -52,6 +52,9 @@ set(
     ${SOURCE_DIR}/render/postprocessing/bloom.cpp
     ${SOURCE_DIR}/render/postprocessing/blur.cpp
 
+    # Core module
+    ${SOURCE_DIR}/core/light_manager.cpp
+
     # Utility module
     ${SOURCE_DIR}/util/camera.cpp
     ${SOURCE_DIR}/util/file.cpp
@@ -225,6 +228,41 @@ target_link_libraries(
 # Header files
 target_include_directories(
     bloom
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/external/include
+)
+
+#######################################################
+#######################################################
+# Lights test
+
+# Source files
+set(
+    LIGHTS_TEST_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/tests/lights.cpp
+)
+
+# Adding executables for testing
+add_executable(lights ${LIGHTS_TEST_SOURCE_FILES})
+
+# Libraries
+target_link_directories(
+    lights
+    PRIVATE
+    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+)
+target_link_libraries(
+    lights
+    PRIVATE
+    ${TMIG}
+    ${OPENGL_LIBRARIES} glfw
+)
+
+# Header files
+target_include_directories(
+    lights
     PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include
