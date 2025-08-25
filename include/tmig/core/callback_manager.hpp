@@ -18,6 +18,6 @@ void unregisterWindowResizeListener(WindowResizeListener* listener);
 
 /// @brief Notify all registered listeners
 /// @note This is automatically called internally when the window gets resized. Should not be called manually
-void notifyWindowResize(int width, int height);
+void onWindowResize(int width, int height);
 
 } // namespace tmig::core

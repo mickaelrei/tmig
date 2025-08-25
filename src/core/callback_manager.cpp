@@ -29,7 +29,7 @@ void unregisterWindowResizeListener(WindowResizeListener* listener) {
     getListeners().erase(listener);
 }
 
-void notifyWindowResize(int width, int height) {
+void onWindowResize(int width, int height) {
     std::lock_guard<std::mutex> lock{getMutex()};
 
     for (auto& listener : getListeners()) {

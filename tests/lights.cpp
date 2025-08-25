@@ -2,10 +2,6 @@
 #include <vector>
 #include <cmath>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "tmig/render/render.hpp"
 #include "tmig/render/mesh.hpp"
 #include "tmig/render/instanced_mesh.hpp"
@@ -21,6 +17,7 @@
 #include "tmig/util/postprocessing.hpp"
 #include "tmig/util/color.hpp"
 #include "tmig/core/light_manager.hpp"
+#include "tmig/core/input.hpp"
 
 using namespace tmig;
 
@@ -291,23 +288,21 @@ int main() {
     util::TimeStep timeStep;
     util::OrbitalCameraController camController;
     bool applyBloom = true;
-    bool pressingF = false;
     while (!render::window::shouldClose()) {
+        core::input::update();
+
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
             std::string newTitle = "Lighting test | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
             render::window::setTitle(newTitle);
         }
 
-        if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (isKeyPressed(core::input::Key::Escape)) {
             render::window::setShouldClose(true);
         }
-        if (!pressingF && render::window::getKeyState(GLFW_KEY_F) == GLFW_PRESS) {
-            pressingF = true;
+
+        if (isKeyPressed(core::input::Key::F)) {
             applyBloom = !applyBloom;
-        }
-        if (render::window::getKeyState(GLFW_KEY_F) == GLFW_RELEASE) {
-            pressingF = false;
         }
 
         camController.update(camera, timeStep.dt());

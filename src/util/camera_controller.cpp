@@ -1,28 +1,26 @@
-#include <GLFW/glfw3.h>
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 
 #include "tmig/util/camera_controller.hpp"
-#include "tmig/render/window.hpp"
+#include "tmig/core/input.hpp"
 
 namespace tmig::util {
 
 void FirstPersonCameraController::update(render::Camera& camera, float dt) {
     // Movement
     glm::vec3 displacement{0.0f};
-    if (render::window::getKeyState(GLFW_KEY_W) == GLFW_PRESS)
+    if (isKeyDown(core::input::Key::W))
         displacement.z -= 1.0f;
-    if (render::window::getKeyState(GLFW_KEY_S) == GLFW_PRESS)
+    if (isKeyDown(core::input::Key::S))
         displacement.z += 1.0f;
-    if (render::window::getKeyState(GLFW_KEY_D) == GLFW_PRESS)
+    if (isKeyDown(core::input::Key::D))
         displacement.x += 1.0f;
-    if (render::window::getKeyState(GLFW_KEY_A) == GLFW_PRESS)
+    if (isKeyDown(core::input::Key::A))
         displacement.x -= 1.0f;
-    if (render::window::getKeyState(GLFW_KEY_SPACE) == GLFW_PRESS)
+    if (isKeyDown(core::input::Key::Space))
         displacement.y += 1.0f;
-    if (render::window::getKeyState(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    if (isKeyDown(core::input::Key::LeftShift))
         displacement.y -= 1.0f;
     
     if (glm::length2(displacement) > 0.0f) {
@@ -30,10 +28,10 @@ void FirstPersonCameraController::update(render::Camera& camera, float dt) {
     }
 
     // Rotation
-    if (render::window::getMouseButtonState(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        render::window::setCursorMode(GLFW_CURSOR_DISABLED);
+    if (isMouseButtonDown(core::input::MouseButton::Right)) {
+        setCursorMode(core::input::CursorMode::Disabled);
 
-        auto currentMousePos = render::window::getCursorPos();
+        auto currentMousePos = core::input::getCursorPos();
 
         if (firstMouse) {
             lastMousePos = currentMousePos;
@@ -59,17 +57,17 @@ void FirstPersonCameraController::update(render::Camera& camera, float dt) {
             camera.setRotation(yawQuat * pitchQuat);
         }
     } else {
-        render::window::setCursorMode(GLFW_CURSOR_NORMAL);
+        setCursorMode(core::input::CursorMode::Normal);
         firstMouse = true;
     }
 }
 
 void OrbitalCameraController::update(render::Camera& camera, float dt) {
     // Rotation
-    if (render::window::getMouseButtonState(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        render::window::setCursorMode(GLFW_CURSOR_DISABLED);
+    if (isMouseButtonDown(core::input::MouseButton::Right)) {
+        setCursorMode(core::input::CursorMode::Disabled);
 
-        auto currentMousePos = render::window::getCursorPos();
+        auto currentMousePos = core::input::getCursorPos();
 
         if (firstMouse) {
             lastMousePos = currentMousePos;
@@ -87,15 +85,15 @@ void OrbitalCameraController::update(render::Camera& camera, float dt) {
         // Clamp to prevent looking backwards
         elevation = glm::clamp(elevation, -1.55334f, 1.55334f);
     } else {
-        render::window::setCursorMode(GLFW_CURSOR_NORMAL);
+        setCursorMode(core::input::CursorMode::Normal);
         firstMouse = true;
     }
 
     // Zoom
-    if (render::window::getKeyState(GLFW_KEY_W) == GLFW_PRESS) {
+    if (isKeyDown(core::input::Key::W)) {
         radius -= dt * moveSpeed;
     }
-    if (render::window::getKeyState(GLFW_KEY_S) == GLFW_PRESS) {
+    if (isKeyDown(core::input::Key::S)) {
         radius += dt * moveSpeed;
     }
     radius = glm::max(radius, 1.0f);

@@ -1,11 +1,6 @@
 #include <iostream>
 #include <vector>
 
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "tmig/render/render.hpp"
 #include "tmig/render/instanced_mesh.hpp"
 #include "tmig/render/framebuffer.hpp"
@@ -19,6 +14,7 @@
 #include "tmig/util/resources.hpp"
 #include "tmig/util/postprocessing.hpp"
 #include "tmig/util/time_step.hpp"
+#include "tmig/core/input.hpp"
 
 using namespace tmig;
 
@@ -160,13 +156,13 @@ int main() {
     util::TimeStep timeStep;
     util::FirstPersonCameraController camController;
     camController.moveSpeed = 100.0f;
+
     bool randomizeMesh = true;
     bool applyBloom = true;
     bool applyTexture = true;
-    bool pressingE = false;
-    bool pressingF = false;
-    bool pressingT = false;
     while (!render::window::shouldClose()) {
+        core::input::update();
+
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
             std::string newTitle = "Bloom effect | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
@@ -174,32 +170,20 @@ int main() {
         }
 
         // Close window if ESC was pressed
-        if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (isKeyPressed(core::input::Key::Escape)) {
             render::window::setShouldClose(true);
         }
 
-        if (!pressingE && render::window::getKeyState(GLFW_KEY_E) == GLFW_PRESS) {
-            pressingE = true;
+        if (isKeyPressed(core::input::Key::E)) {
             randomizeMesh = !randomizeMesh;
         }
-        if (render::window::getKeyState(GLFW_KEY_E) == GLFW_RELEASE) {
-            pressingE = false;
-        }
 
-        if (!pressingF && render::window::getKeyState(GLFW_KEY_F) == GLFW_PRESS) {
-            pressingF = true;
+        if (isKeyPressed(core::input::Key::F)) {
             applyBloom = !applyBloom;
         }
-        if (render::window::getKeyState(GLFW_KEY_F) == GLFW_RELEASE) {
-            pressingF = false;
-        }
 
-        if (!pressingT && render::window::getKeyState(GLFW_KEY_T) == GLFW_PRESS) {
-            pressingT = true;
+        if (isKeyPressed(core::input::Key::T)) {
             applyTexture = !applyTexture;
-        }
-        if (render::window::getKeyState(GLFW_KEY_T) == GLFW_RELEASE) {
-            pressingT = false;
         }
 
         // Update scene

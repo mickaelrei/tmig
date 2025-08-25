@@ -38,9 +38,6 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
 
-    # Core module
-    ${SOURCE_DIR}/core/callback_manager.cpp
-
     # Render module
     ${SOURCE_DIR}/render/camera.cpp
     ${SOURCE_DIR}/render/framebuffer.cpp
@@ -53,6 +50,8 @@ set(
     ${SOURCE_DIR}/render/postprocessing/blur.cpp
 
     # Core module
+    ${SOURCE_DIR}/core/callback_manager.cpp
+    ${SOURCE_DIR}/core/input.cpp
     ${SOURCE_DIR}/core/light_manager.cpp
 
     # Utility module

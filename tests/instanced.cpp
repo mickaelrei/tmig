@@ -1,10 +1,5 @@
 #include <iostream>
 
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "tmig/render/instanced_mesh.hpp"
 #include "tmig/render/uniform_buffer.hpp"
 #include "tmig/render/render.hpp"
@@ -15,6 +10,7 @@
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/time_step.hpp"
+#include "tmig/core/input.hpp"
 
 using namespace tmig;
 
@@ -129,6 +125,8 @@ int main() {
     util::FirstPersonCameraController camController;
     camController.moveSpeed = 100.0f;
     while (!render::window::shouldClose()) {
+        core::input::update();
+
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
             std::string newTitle = "Vertex attribute test | Instancing ON | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
@@ -136,7 +134,7 @@ int main() {
         }
 
         // Close window if ESC was pressed
-        if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (isKeyPressed(core::input::Key::Escape)) {
             render::window::setShouldClose(true);
         }
 
@@ -182,7 +180,6 @@ int main() {
         mesh.render();
 
         render::window::swapBuffers();
-        render::window::pollEvents();
     }
 
     delete vertexBuffer;

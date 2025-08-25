@@ -1,11 +1,6 @@
 #include <iostream>
 #include <vector>
 
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "tmig/render/render.hpp"
 #include "tmig/render/instanced_mesh.hpp"
 #include "tmig/render/framebuffer.hpp"
@@ -17,6 +12,7 @@
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/time_step.hpp"
+#include "tmig/core/input.hpp"
 
 using namespace tmig;
 
@@ -188,9 +184,10 @@ int main() {
     util::TimeStep timeStep;
     util::FirstPersonCameraController camController;
     camController.moveSpeed = 100.0f;
-    bool pressingE = false;
     int effect = 0;
     while (!render::window::shouldClose()) {
+        core::input::update();
+
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
             std::string newTitle = "Framebuffer test | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
@@ -198,15 +195,12 @@ int main() {
         }
 
         // Close window if ESC was pressed
-        if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (isKeyPressed(core::input::Key::Escape)) {
             render::window::setShouldClose(true);
         }
-        if (!pressingE && render::window::getKeyState(GLFW_KEY_E) == GLFW_PRESS) {
-            pressingE = true;
+
+        if (isKeyPressed(core::input::Key::E)) {
             effect = (effect + 1) % 5;
-        }
-        if (render::window::getKeyState(GLFW_KEY_E) == GLFW_RELEASE) {
-            pressingE = false;
         }
 
         // ------------------------------------------

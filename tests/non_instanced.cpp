@@ -1,10 +1,5 @@
 #include <iostream>
 
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "tmig/render/mesh.hpp"
 #include "tmig/render/uniform_buffer.hpp"
 #include "tmig/render/render.hpp"
@@ -14,6 +9,7 @@
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/time_step.hpp"
+#include "tmig/core/input.hpp"
 
 using namespace tmig;
 
@@ -147,6 +143,8 @@ int main() {
     util::TimeStep timeStep;
     util::FirstPersonCameraController camController;
     while (!render::window::shouldClose()) {
+        core::input::update();
+
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
             std::string newTitle = "Vertex attribute test | Instancing OFF | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
@@ -154,15 +152,15 @@ int main() {
         }
 
         // Close window if ESC was pressed
-        if (render::window::getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (isKeyPressed(core::input::Key::Escape)) {
             render::window::setShouldClose(true);
         }
-        if (render::window::getKeyState(GLFW_KEY_E) == GLFW_PRESS) {
+        if (isKeyDown(core::input::Key::E)) {
             // Change to low-res data on E key
             mesh.setIndexBuffer(lowResIndexBuffer);
             mesh.setVertexBuffer(lowResBuffer);
         }
-        if (render::window::getKeyState(GLFW_KEY_F) == GLFW_PRESS) {
+        if (isKeyDown(core::input::Key::F)) {
             // Change to high-res data on F key
             mesh.setIndexBuffer(highResIndexBuffer);
             mesh.setVertexBuffer(highResBuffer);
@@ -211,7 +209,6 @@ int main() {
         }
 
         render::window::swapBuffers();
-        render::window::pollEvents();
     }
 
     delete highResBuffer;

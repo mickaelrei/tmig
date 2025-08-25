@@ -64,6 +64,9 @@ int getMouseButtonState(int button);
 /// @param mode GLFW cursor mode
 void setCursorMode(int mode);
 
+/// @brief Get cursor mode
+int getCursorMode();
+
 /// @brief Set cursor position in screen coordinates relative to top-left corner
 void setCursorPos(const glm::vec2& pos);
 

@@ -6,13 +6,14 @@
 
 #include "tmig/render/window.hpp"
 #include "tmig/core/callback_manager.hpp"
+#include "tmig/core/input.hpp"
 #include "tmig/util/log.hpp"
 
 // Default callback for framebuffer resize
-void defaultFramebufferSizeCallback(GLFWwindow* window, int width, int height) {
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     (void)window;
     glViewport(0, 0, width, height); glCheckError();
-    tmig::core::notifyWindowResize(width, height);
+    tmig::core::onWindowResize(width, height);
 }
 
 // Flag for initialized
@@ -42,8 +43,8 @@ void init(int width,int height, const std::string &title) {
     }
 
     // Set window hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4); // Enable 4x MSAA
 
@@ -58,7 +59,7 @@ void init(int width,int height, const std::string &title) {
     }
 
     // Set window callbacks
-    glfwSetFramebufferSizeCallback(glfwWindow.get(), defaultFramebufferSizeCallback);
+    glfwSetFramebufferSizeCallback(glfwWindow.get(), framebufferSizeCallback);
 
     // Load GLAD
     glfwMakeContextCurrent(glfwWindow.get());
@@ -155,6 +156,15 @@ void setCursorMode(int mode) {
     glfwSetInputMode(glfwWindow.get(), GLFW_CURSOR, mode);
 }
 
+int getCursorMode() {
+#ifdef DEBUG
+    if (!initialized) return -1;
+#endif
+
+    return glfwGetInputMode(glfwWindow.get(), GLFW_CURSOR);
+}
+
+
 void setCursorPos(const glm::vec2& pos) {
 #ifdef DEBUG
     if (!initialized) return;
@@ -164,11 +174,11 @@ void setCursorPos(const glm::vec2& pos) {
 }
 
 glm::vec2 getCursorPos() {
-    double x, y;
-
 #ifdef DEBUG
     if (!initialized) return glm::vec2{};
 #endif
+
+    double x, y;
 
     glfwGetCursorPos(glfwWindow.get(), &x, &y);
     return glm::vec2{x, y};
