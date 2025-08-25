@@ -11,21 +11,18 @@
 #include "tmig/render/shader.hpp"
 #include "tmig/render/window.hpp"
 #include "tmig/render/texture2D.hpp"
-#include "tmig/util/camera.hpp"
+#include "tmig/util/camera_controller.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/time_step.hpp"
 
 using namespace tmig;
 
-bool firstSinceLast = true;
-float cameraSpeed = 100.0f;
-float cameraRotationSpeed = 0.3f;
-
 int main() {
     srand(3);
 
     render::init();
+    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
@@ -129,6 +126,8 @@ int main() {
     ubo.bindTo(0);
 
     util::TimeStep timeStep;
+    util::FirstPersonCameraController camController;
+    camController.moveSpeed = 100.0f;
     while (!render::window::shouldClose()) {
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -165,7 +164,7 @@ int main() {
         }
         instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
 
-        util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
+        camController.update(camera, timeStep.dt());
 
         // Set scene UBO data
         auto windowSize = render::window::getSize();
@@ -178,7 +177,6 @@ int main() {
         );
         ubo.setData(sceneDataUBO);
 
-        render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 
         mesh.render();

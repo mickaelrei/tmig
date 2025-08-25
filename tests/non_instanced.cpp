@@ -10,7 +10,7 @@
 #include "tmig/render/render.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/window.hpp"
-#include "tmig/util/camera.hpp"
+#include "tmig/util/camera_controller.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/time_step.hpp"
@@ -25,6 +25,7 @@ int main() {
     srand(3);
 
     render::init();
+    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
@@ -144,6 +145,7 @@ int main() {
 
     shader.use();
     util::TimeStep timeStep;
+    util::FirstPersonCameraController camController;
     while (!render::window::shouldClose()) {
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -166,7 +168,7 @@ int main() {
             mesh.setVertexBuffer(highResBuffer);
         }
 
-        util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
+        camController.update(camera, timeStep.dt());
 
         // Set scene UBO data
         auto windowSize = render::window::getSize();
@@ -179,7 +181,6 @@ int main() {
         );
         ubo.setData(sceneDataUBO);
 
-        render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
         render::clearBuffers();
 
         for (size_t i = 0; i < instances.size(); ++i) {

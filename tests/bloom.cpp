@@ -14,7 +14,7 @@
 #include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
 #include "tmig/render/postprocessing/bloom.hpp"
-#include "tmig/util/camera.hpp"
+#include "tmig/util/camera_controller.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/postprocessing.hpp"
@@ -30,7 +30,7 @@ int main() {
     srand(3);
 
     render::init();
-    render::window::setTitle("Framebuffer test");
+    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
@@ -158,7 +158,8 @@ int main() {
     render::postprocessing::BloomEffect bloomEffect;
 
     util::TimeStep timeStep;
-    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
+    util::FirstPersonCameraController camController;
+    camController.moveSpeed = 100.0f;
     bool randomizeMesh = true;
     bool applyBloom = true;
     bool applyTexture = true;
@@ -228,7 +229,7 @@ int main() {
             instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
         }
 
-        util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
+        camController.update(camera, timeStep.dt());
 
         // Set scene UBO data
         auto windowSize = render::window::getSize();

@@ -56,7 +56,7 @@ set(
     ${SOURCE_DIR}/core/light_manager.cpp
 
     # Utility module
-    ${SOURCE_DIR}/util/camera.cpp
+    ${SOURCE_DIR}/util/camera_controller.cpp
     ${SOURCE_DIR}/util/file.cpp
     ${SOURCE_DIR}/util/postprocessing.cpp
     ${SOURCE_DIR}/util/resources.cpp

@@ -14,7 +14,7 @@
 #include "tmig/render/framebuffer.hpp"
 #include "tmig/render/window.hpp"
 #include "tmig/render/postprocessing/bloom.hpp"
-#include "tmig/util/camera.hpp"
+#include "tmig/util/camera_controller.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/time_step.hpp"
@@ -23,11 +23,6 @@
 #include "tmig/core/light_manager.hpp"
 
 using namespace tmig;
-
-// Camera controls
-bool firstSinceLast = true;
-float cameraSpeed = 10.0f;
-float cameraRotationSpeed = 0.3f;
 
 // Simple vertex struct for this demo
 struct Vertex {
@@ -43,7 +38,7 @@ struct InstanceData {
 
 int main() {
     render::init();
-    render::setClearColor({0.01f, 0.01f, 0.01f, 1.0f});
+    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     // Setup Camera
     render::Camera camera;
@@ -60,7 +55,7 @@ int main() {
         return 1;
     }
 
-    render::ShaderProgram instancedShader; // For the walls
+    render::ShaderProgram instancedShader;
     if (!instancedShader.compileFromFiles(
         util::getResourcePath("shaders/instanced_lighting.vert"),
         util::getResourcePath("shaders/instanced_lighting.frag")
@@ -99,7 +94,7 @@ int main() {
 
     auto spotLightHandle = lightManager.addSpotLight({
         .position = camera.getPosition(),
-        .direction = camera.forward(),
+        .direction = camera.getForward(),
         .color = glm::vec3{1.0f},
         .intensity = 2.0f,
         .cutOff = glm::cos(glm::radians(12.5f)),
@@ -294,6 +289,7 @@ int main() {
 
     // --- Main Loop ---
     util::TimeStep timeStep;
+    util::OrbitalCameraController camController;
     bool applyBloom = true;
     bool pressingF = false;
     while (!render::window::shouldClose()) {
@@ -314,13 +310,13 @@ int main() {
             pressingF = false;
         }
 
-        util::firstPersonCameraMovement(camera, timeStep.dt(), firstSinceLast, cameraSpeed, cameraRotationSpeed);
+        camController.update(camera, timeStep.dt());
 
         // --- Animate Lights ---
         const float t = runtime * 0.5f;
         for (uint32_t i = 0; i < numMovingLights; ++i) {
             float angle = t + M_PIf * 2.0f / numMovingLights * i;
-            float h = std::fmod((float)i / (float)numMovingLights + t * 0.125f, 1.0f);
+            float h = std::fmod((float)i / (float)numMovingLights + t, 1.0f);
 
             auto pos = glm::vec3{sin(angle) * 8.0f, 0.0f, cos(angle) * 8.0f};
             auto color = util::HSVtoRGB(h, 1.0f, 0.5f);
@@ -336,7 +332,7 @@ int main() {
         }
         sphereInstanceBuffer.setSubset(0, numMovingLights, sphereInstances.data());
         spotLightHandle.setPosition(camera.getPosition());
-        spotLightHandle.setDirection(camera.forward());
+        spotLightHandle.setDirection(camera.getForward());
         lightManager.update();
 
         // --- Render Scene ---
