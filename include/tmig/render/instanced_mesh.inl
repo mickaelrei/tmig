@@ -86,7 +86,7 @@ void InstancedMesh<V, I>::configureInstanceAttributes() {
     // Find the starting attribute index (after per-vertex attributes)
     uint32_t attribIndex = 0;
     for (auto attr : Mesh<V>::vertexAttributes) {
-        if (attr == VertexAttributeType::Mat4x4) {
+        if (attr == VertexAttributeType::MAT4x4) {
             attribIndex += 4;
         } else {
             ++attribIndex;
@@ -105,7 +105,7 @@ void InstancedMesh<V, I>::configureInstanceAttributes() {
 
     // Set instance attributes
     for (auto attr : instanceAttributes) {
-        if (attr == VertexAttributeType::Mat4x4) {
+        if (attr == VertexAttributeType::MAT4x4) {
             for (int i = 0; i < 4; ++i) {
                 glVertexArrayAttribFormat(Mesh<V>::vao, attribIndex, 4, GL_FLOAT, GL_FALSE, instanceOffset + sizeof(glm::vec4) * i); glCheckError();
                 glVertexArrayAttribBinding(Mesh<V>::vao, attribIndex, bindingIndex); glCheckError();

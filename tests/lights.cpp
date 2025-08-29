@@ -104,8 +104,8 @@ int main() {
     // --- Mesh Setup ---
     render::Mesh<Vertex> torusMesh;
     torusMesh.setAttributes({
-        render::VertexAttributeType::Float3, // position
-        render::VertexAttributeType::Float3, // normal
+        render::VertexAttributeType::FLOAT3, // position
+        render::VertexAttributeType::FLOAT3, // normal
     });
 
     // Generate Torus
@@ -123,12 +123,12 @@ int main() {
     render::InstancedMesh<Vertex, InstanceData> boxMesh;
     boxMesh.setAttributes(
         {
-            render::VertexAttributeType::Float3, // position
-            render::VertexAttributeType::Float3  // normal
+            render::VertexAttributeType::FLOAT3, // position
+            render::VertexAttributeType::FLOAT3  // normal
         },
         {
-            render::VertexAttributeType::Float3, // color
-            render::VertexAttributeType::Mat4x4  // model
+            render::VertexAttributeType::FLOAT3, // color
+            render::VertexAttributeType::MAT4x4  // model
         }
     );
 
@@ -198,12 +198,12 @@ int main() {
     render::InstancedMesh<Vertex, InstanceData> sphereMesh;
     sphereMesh.setAttributes(
         {
-            render::VertexAttributeType::Float3, // position
-            render::VertexAttributeType::Float3  // normal
+            render::VertexAttributeType::FLOAT3, // position
+            render::VertexAttributeType::FLOAT3  // normal
         },
         {
-            render::VertexAttributeType::Float3, // color
-            render::VertexAttributeType::Mat4x4  // model
+            render::VertexAttributeType::FLOAT3, // color
+            render::VertexAttributeType::MAT4x4  // model
         }
     );
 
@@ -286,7 +286,7 @@ int main() {
 
     // --- Main Loop ---
     util::TimeStep timeStep;
-    util::OrbitalCameraController camController;
+    util::SmoothOrbitalCameraController camController;
     bool applyBloom = true;
     while (!render::window::shouldClose()) {
         core::input::update();
@@ -297,7 +297,7 @@ int main() {
             render::window::setTitle(newTitle);
         }
 
-        if (isKeyPressed(core::input::Key::Escape)) {
+        if (isKeyPressed(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
 

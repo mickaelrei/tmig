@@ -25,8 +25,8 @@ BloomEffect::BloomEffect(const BloomConfig& config) : blurEffect{{.width = confi
         indexBuffer->setData(indices);
 
         screenQuad.setAttributes({
-            render::VertexAttributeType::Float3,
-            render::VertexAttributeType::Float2,
+            render::VertexAttributeType::FLOAT3,
+            render::VertexAttributeType::FLOAT2,
         });
         screenQuad.setIndexBuffer(indexBuffer);
         screenQuad.setVertexBuffer(vertBuffer);

@@ -45,8 +45,8 @@ struct ScreenQuadRenderer {
 
         // Configure the mesh
         mesh.setAttributes({
-            render::VertexAttributeType::Float3, // pos
-            render::VertexAttributeType::Float2, // uv
+            render::VertexAttributeType::FLOAT3, // pos
+            render::VertexAttributeType::FLOAT2, // uv
         });
         mesh.setVertexBuffer(vertexBuffer.get());
         mesh.setIndexBuffer(indexBuffer.get());

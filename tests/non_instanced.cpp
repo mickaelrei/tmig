@@ -121,8 +121,8 @@ int main() {
     // Set mesh attributes
     render::Mesh<myVertex> mesh;
     mesh.setAttributes({
-        render::VertexAttributeType::Float3, // position
-        render::VertexAttributeType::Float3, // normal
+        render::VertexAttributeType::FLOAT3, // position
+        render::VertexAttributeType::FLOAT3, // normal
     });
 
     // Start with high res
@@ -141,7 +141,7 @@ int main() {
 
     shader.use();
     util::TimeStep timeStep;
-    util::FirstPersonCameraController camController;
+    util::SmoothFirstPersonCameraController camController;
     while (!render::window::shouldClose()) {
         core::input::update();
 
@@ -152,7 +152,7 @@ int main() {
         }
 
         // Close window if ESC was pressed
-        if (isKeyPressed(core::input::Key::Escape)) {
+        if (isKeyPressed(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
         if (isKeyDown(core::input::Key::E)) {

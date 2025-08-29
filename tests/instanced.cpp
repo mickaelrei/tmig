@@ -100,12 +100,12 @@ int main() {
     // Set attributes and data
     render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
     mesh.setAttributes({
-        render::VertexAttributeType::Float3, // position
-        render::VertexAttributeType::Float3, // normal
-        render::VertexAttributeType::Float2, // uv
+        render::VertexAttributeType::FLOAT3, // position
+        render::VertexAttributeType::FLOAT3, // normal
+        render::VertexAttributeType::FLOAT2, // uv
     }, {
-        render::VertexAttributeType::Float4, // color
-        render::VertexAttributeType::Mat4x4, // model
+        render::VertexAttributeType::FLOAT4, // color
+        render::VertexAttributeType::MAT4x4, // model
     });
     mesh.setInstanceBuffer(instanceBuffer);
     mesh.setIndexBuffer(indexBuffer);
@@ -122,7 +122,7 @@ int main() {
     ubo.bindTo(0);
 
     util::TimeStep timeStep;
-    util::FirstPersonCameraController camController;
+    util::SmoothFirstPersonCameraController camController;
     camController.moveSpeed = 100.0f;
     while (!render::window::shouldClose()) {
         core::input::update();
@@ -134,7 +134,7 @@ int main() {
         }
 
         // Close window if ESC was pressed
-        if (isKeyPressed(core::input::Key::Escape)) {
+        if (isKeyPressed(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
 

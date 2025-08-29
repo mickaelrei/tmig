@@ -18,9 +18,9 @@ void FirstPersonCameraController::update(render::Camera& camera, float dt) {
         displacement.x += 1.0f;
     if (isKeyDown(core::input::Key::A))
         displacement.x -= 1.0f;
-    if (isKeyDown(core::input::Key::Space))
+    if (isKeyDown(core::input::Key::SPACE))
         displacement.y += 1.0f;
-    if (isKeyDown(core::input::Key::LeftShift))
+    if (isKeyDown(core::input::Key::LEFT_SHIFT))
         displacement.y -= 1.0f;
     
     if (glm::length2(displacement) > 0.0f) {
@@ -28,8 +28,8 @@ void FirstPersonCameraController::update(render::Camera& camera, float dt) {
     }
 
     // Rotation
-    if (isMouseButtonDown(core::input::MouseButton::Right)) {
-        setCursorMode(core::input::CursorMode::Disabled);
+    if (isMouseButtonDown(core::input::MouseButton::RIGHT)) {
+        setCursorMode(core::input::CursorMode::DISABLED);
 
         auto currentMousePos = core::input::getCursorPos();
 
@@ -57,15 +57,15 @@ void FirstPersonCameraController::update(render::Camera& camera, float dt) {
             camera.setRotation(yawQuat * pitchQuat);
         }
     } else {
-        setCursorMode(core::input::CursorMode::Normal);
+        setCursorMode(core::input::CursorMode::NORMAL);
         firstMouse = true;
     }
 }
 
 void OrbitalCameraController::update(render::Camera& camera, float dt) {
     // Rotation
-    if (isMouseButtonDown(core::input::MouseButton::Right)) {
-        setCursorMode(core::input::CursorMode::Disabled);
+    if (isMouseButtonDown(core::input::MouseButton::RIGHT)) {
+        setCursorMode(core::input::CursorMode::DISABLED);
 
         auto currentMousePos = core::input::getCursorPos();
 
@@ -85,7 +85,7 @@ void OrbitalCameraController::update(render::Camera& camera, float dt) {
         // Clamp to prevent looking backwards
         elevation = glm::clamp(elevation, -1.55334f, 1.55334f);
     } else {
-        setCursorMode(core::input::CursorMode::Normal);
+        setCursorMode(core::input::CursorMode::NORMAL);
         firstMouse = true;
     }
 
@@ -105,6 +105,121 @@ void OrbitalCameraController::update(render::Camera& camera, float dt) {
 
     camera.setPosition({x, y, z});
     camera.lookAt(target);
+}
+
+void SmoothFirstPersonCameraController::update(render::Camera& camera, float dt) {
+    auto currentMousePos = core::input::getCursorPos();
+
+    // Initialize target position and rotation on the first update
+    if (firstMouse) {
+        targetPosition = camera.getPosition();
+        targetRotation = camera.getRotation();
+        lastMousePos = currentMousePos;
+        firstMouse = false;
+    }
+
+    // Movement
+    glm::vec3 displacement{0.0f};
+    if (isKeyDown(core::input::Key::W))
+        displacement.z -= 1.0f;
+    if (isKeyDown(core::input::Key::S))
+        displacement.z += 1.0f;
+    if (isKeyDown(core::input::Key::D))
+        displacement.x += 1.0f;
+    if (isKeyDown(core::input::Key::A))
+        displacement.x -= 1.0f;
+    if (isKeyDown(core::input::Key::SPACE))
+        displacement.y += 1.0f;
+    if (isKeyDown(core::input::Key::LEFT_SHIFT))
+        displacement.y -= 1.0f;
+
+    if (glm::length2(displacement) > 0.0f) {
+        targetPosition += targetRotation * glm::normalize(displacement) * moveSpeed * dt;
+    }
+
+    // Rotation
+    if (isMouseButtonDown(core::input::MouseButton::RIGHT)) {
+        setCursorMode(core::input::CursorMode::DISABLED);
+
+        // Calculate the offset from the last frame
+        glm::vec2 offset = currentMousePos - lastMousePos;
+
+        if (offset.x != 0.0f || offset.y != 0.0f) {
+            // Update yaw and pitch angles based on mouse movement
+            yaw   -= offset.x * rotationSpeed * .001f;
+            pitch -= offset.y * rotationSpeed * .001f;
+
+            // Clamp the pitch to prevent looking backwards
+            pitch = glm::clamp(pitch, -1.55334f, 1.55334f);
+
+            // Construct the new orientation from yaw and the clamped pitch
+            glm::quat yawQuat = glm::angleAxis(yaw, glm::vec3{0.0f, 1.0f, 0.0f});
+            glm::quat pitchQuat = glm::angleAxis(pitch, glm::vec3{1.0f, 0.0f, 0.0f});
+
+            targetRotation = glm::normalize(yawQuat * pitchQuat);
+        }
+    } else {
+        setCursorMode(core::input::CursorMode::NORMAL);
+    }
+
+    lastMousePos = currentMousePos;
+
+    // Smoothly interpolate the camera's position and rotation
+    camera.setPosition(glm::mix(camera.getPosition(), targetPosition, smoothness));
+    camera.setRotation(glm::slerp(camera.getRotation(), targetRotation, smoothness));
+}
+
+void SmoothOrbitalCameraController::update(render::Camera& camera, float dt) {
+    auto currentMousePos = core::input::getCursorPos();
+
+    if (firstMouse) {
+        targetRadius = radius;
+        currentRadius = radius;
+        lastMousePos = currentMousePos;
+        firstMouse = false;
+    }
+
+    // Rotation
+    if (isMouseButtonDown(core::input::MouseButton::RIGHT)) {
+        setCursorMode(core::input::CursorMode::DISABLED);
+
+        // Calculate the offset from the last frame
+        glm::vec2 offset = currentMousePos - lastMousePos;
+
+        // Update angles based on mouse movement
+        targetAzimuth -= offset.x * rotationSpeed * 0.001f;
+        targetElevation += offset.y * rotationSpeed * 0.001f;
+
+        // Clamp to prevent looking backwards
+        targetElevation = glm::clamp(targetElevation, -1.55334f, 1.55334f);
+
+    } else {
+        setCursorMode(core::input::CursorMode::NORMAL);
+    }
+
+    // Zoom
+    if (isKeyDown(core::input::Key::W)) {
+        targetRadius -= dt * moveSpeed;
+    }
+    if (isKeyDown(core::input::Key::S)) {
+        targetRadius += dt * moveSpeed;
+    }
+    targetRadius = glm::max(targetRadius, 1.0f);
+
+    // Smoothly interpolate values
+    currentRadius = glm::mix(currentRadius, targetRadius, smoothness);
+    currentAzimuth = glm::mix(currentAzimuth, targetAzimuth, smoothness);
+    currentElevation = glm::mix(currentElevation, targetElevation, smoothness);
+
+    // Update camera position and orientation
+    float x = target.x + currentRadius * std::cos(currentElevation) * std::sin(currentAzimuth);
+    float y = target.y + currentRadius * std::sin(currentElevation);
+    float z = target.z + currentRadius * std::cos(currentElevation) * std::cos(currentAzimuth);
+
+    camera.setPosition({x, y, z});
+    camera.lookAt(target);
+
+    lastMousePos = currentMousePos;
 }
 
 } // namespace tmig::util

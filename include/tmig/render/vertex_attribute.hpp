@@ -7,19 +7,19 @@ namespace tmig::render {
 /// @brief Enum for supported vertex attribute types. Used in Meshes to send vertex data
 enum class VertexAttributeType {
     /// @brief Single float attribute
-    Float,
+    FLOAT,
 
     /// @brief Two floats attribute, used as vec2 in shader
-    Float2,
+    FLOAT2,
 
     /// @brief Three floats attribute, used as vec3 in shader
-    Float3,
+    FLOAT3,
 
     /// @brief Four floats attribute, used as vec4 in shader
-    Float4,
+    FLOAT4,
 
     /// @brief 4x4 matrix attribute, used as mat4 in shader
-    Mat4x4,
+    MAT4x4,
 };
 
 /// @brief Get byte count for a given attribute type

@@ -26,8 +26,8 @@ BlurEffect::BlurEffect(const BlurConfig& config) {
         _indexBuffer->setData(indices);
 
         _screenQuad.setAttributes({
-            render::VertexAttributeType::Float3,
-            render::VertexAttributeType::Float2,
+            render::VertexAttributeType::FLOAT3,
+            render::VertexAttributeType::FLOAT2,
         });
         _screenQuad.setIndexBuffer(_indexBuffer);
         _screenQuad.setVertexBuffer(_vertBuffer);

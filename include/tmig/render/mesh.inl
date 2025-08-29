@@ -128,7 +128,7 @@ void Mesh<V>::configureVertexAttributes() {
 
     // Set vertex attributes
     for (auto attr : vertexAttributes) {
-        if (attr == VertexAttributeType::Mat4x4) {
+        if (attr == VertexAttributeType::MAT4x4) {
             for (int i = 0; i < 4; ++i) {
                 glVertexArrayAttribFormat(vao, attribIndex, 4, GL_FLOAT, GL_FALSE, vertexOffset + sizeof(glm::vec4) * i); glCheckError();
                 glVertexArrayAttribBinding(vao, attribIndex, bindingIndex); glCheckError();
