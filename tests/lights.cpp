@@ -286,7 +286,7 @@ int main() {
 
     // --- Main Loop ---
     util::TimeStep timeStep;
-    util::SmoothOrbitalCameraController camController;
+    util::SmoothFreeFlyCameraController camController;
     bool applyBloom = true;
     while (!render::window::shouldClose()) {
         core::input::update();

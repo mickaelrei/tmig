@@ -72,15 +72,14 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 void Camera::lookAt(const glm::vec3& target, const glm::vec3& up) {
-    if (glm::length2(pos - target) > 0.0001f) {
-        glm::vec3 dir = glm::normalize(target - pos);
-        rotation = glm::quatLookAt(dir, up);
-    }
+    if (glm::length2(pos - target) < 0.0001f) return;
+
+    glm::vec3 dir = glm::normalize(target - pos);
+    rotation = glm::quatLookAt(dir, up);
     updateViewMatrix();
 }
 
 void Camera::updateViewMatrix() {
-    // viewMatrix = glm::lookAt(pos, pos + getForward(), getUp());
     viewMatrix = glm::translate(glm::mat4_cast(glm::conjugate(rotation)), -pos);
 }
 

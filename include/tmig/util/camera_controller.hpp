@@ -28,7 +28,7 @@ public:
 
     virtual void update(render::Camera& camera, float dt) override;
 
-private:
+protected:
     bool firstMouse = true;
     float yaw = 0.0f;
     float pitch = 0.0f;
@@ -57,7 +57,7 @@ public:
 
     virtual void update(render::Camera& camera, float dt) override;
 
-private:
+protected:
     bool firstMouse = true;
     float azimuth = 0.0f;
     float elevation = 0.0f;
@@ -82,7 +82,7 @@ public:
 
     virtual void update(render::Camera& camera, float dt) override;
 
-private:
+protected:
     bool firstMouse = true;
     glm::vec3 targetPosition;
     glm::quat targetRotation;
@@ -118,7 +118,7 @@ public:
 
     virtual void update(render::Camera& camera, float dt) override;
 
-private:
+protected:
     bool firstMouse = true;
     glm::vec2 lastMousePos;
     float targetRadius;
@@ -127,6 +127,38 @@ private:
     float currentRadius;
     float currentAzimuth = 0.0f;
     float currentElevation = 0.0f;
+};
+
+/// @brief A controller for a smooth "free fly" camera, allowing for roll rotation.
+class SmoothFreeFlyCameraController : public CameraController {
+public:
+    /// @brief Movement speed
+    /// @note A negative value will make the camera move in opposite directions
+    float moveSpeed = 10.0f;
+
+    /// @brief Rotation speed
+    /// @note A negative value will make the camera rotate in opposite directions
+    float rotationSpeed = 1.0f;
+
+    /// @brief Roll (Z-axis rotation) speed
+    /// @note A negative value will make the camera roll in the opposite direction
+    float rollSpeed = 1.0f;
+
+    /// @brief Smoothing factor for movement and rotation (lerp alpha)
+    /// @note Should be in the (0, 1) interval, where 0 means static
+    /// (won't move/rotate at all) and 1 is instant movement/rotation
+    float smoothness = 0.1f;
+
+    virtual void update(render::Camera& camera, float dt) override;
+
+protected:
+    bool firstMouse = true;
+    glm::vec3 targetPosition;
+    glm::quat targetRotation;
+    glm::vec2 lastMousePos;
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float roll = 0.0f;
 };
 
 } // namespace tmig::util
