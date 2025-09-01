@@ -5,11 +5,14 @@
 #include "tmig/render/render.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/window.hpp"
+#include "tmig/render/ui.hpp"
 #include "tmig/util/camera_controller.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/time_step.hpp"
 #include "tmig/core/input.hpp"
+
+#include "imgui.h"
 
 using namespace tmig;
 
@@ -21,6 +24,7 @@ int main() {
     srand(3);
 
     render::init();
+    render::ui::init();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
@@ -142,8 +146,11 @@ int main() {
     shader.use();
     util::TimeStep timeStep;
     util::SmoothFirstPersonCameraController camController;
+    camController.moveSpeed = 100.0f;
+    bool lowPoly;
     while (!render::window::shouldClose()) {
         core::input::update();
+        render::ui::beginFrame();
 
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -155,16 +162,20 @@ int main() {
         if (isKeyPressed(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
-        if (isKeyDown(core::input::Key::E)) {
-            // Change to low-res data on E key
-            mesh.setIndexBuffer(lowResIndexBuffer);
-            mesh.setVertexBuffer(lowResBuffer);
+
+        // UI
+        ImGui::SetNextWindowSize(ImVec2(100, 60));
+        ImGui::Begin("Controls", nullptr);
+        if (ImGui::Checkbox("Low-poly", &lowPoly)) {
+            if (lowPoly) {
+                mesh.setIndexBuffer(lowResIndexBuffer);
+                mesh.setVertexBuffer(lowResBuffer);
+            } else {
+                mesh.setIndexBuffer(highResIndexBuffer);
+                mesh.setVertexBuffer(highResBuffer);
+            }
         }
-        if (isKeyDown(core::input::Key::F)) {
-            // Change to high-res data on F key
-            mesh.setIndexBuffer(highResIndexBuffer);
-            mesh.setVertexBuffer(highResBuffer);
-        }
+        ImGui::End();
 
         camController.update(camera, timeStep.dt());
 
@@ -208,6 +219,7 @@ int main() {
             mesh.render();
         }
 
+        render::ui::endFrame();
         render::window::swapBuffers();
     }
 
@@ -215,6 +227,8 @@ int main() {
     delete highResIndexBuffer;
     delete lowResBuffer;
     delete lowResIndexBuffer;
+
+    render::ui::terminate();
 
     return 0;
 }

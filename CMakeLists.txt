@@ -39,15 +39,16 @@ set(
     ENGINE_SOURCE_FILES
 
     # Render module
+    ${SOURCE_DIR}/render/postprocessing/bloom.cpp
+    ${SOURCE_DIR}/render/postprocessing/blur.cpp
     ${SOURCE_DIR}/render/camera.cpp
     ${SOURCE_DIR}/render/framebuffer.cpp
     ${SOURCE_DIR}/render/render.cpp
     ${SOURCE_DIR}/render/shader.cpp
     ${SOURCE_DIR}/render/texture2D.cpp
+    ${SOURCE_DIR}/render/ui.cpp
     ${SOURCE_DIR}/render/vertex_attribute.cpp
     ${SOURCE_DIR}/render/window.cpp
-    ${SOURCE_DIR}/render/postprocessing/bloom.cpp
-    ${SOURCE_DIR}/render/postprocessing/blur.cpp
 
     # Core module
     ${SOURCE_DIR}/core/callback_manager.cpp
@@ -65,6 +66,12 @@ set(
     # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
     ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_glfw.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 # Adding engine shared library
@@ -86,9 +93,11 @@ target_link_libraries(
 # Header files
 target_include_directories(
     ${TMIG}
-    PRIVATE
+    PUBLIC
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/external/include
+    ${CMAKE_SOURCE_DIR}/external/imgui
+    ${CMAKE_SOURCE_DIR}/external/imgui/backends
 )
 
 # Tests
@@ -120,15 +129,6 @@ target_link_libraries(
     ${OPENGL_LIBRARIES} glfw
 )
 
-# Header files
-target_include_directories(
-    instanced
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/external/include
-)
-
 #######################################################
 #######################################################
 # Non-instanced test
@@ -153,15 +153,6 @@ target_link_libraries(
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
-)
-
-# Header files
-target_include_directories(
-    non_instanced
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/external/include
 )
 
 #######################################################
@@ -190,15 +181,6 @@ target_link_libraries(
     ${OPENGL_LIBRARIES} glfw
 )
 
-# Header files
-target_include_directories(
-    framebuffer
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/external/include
-)
-
 #######################################################
 #######################################################
 # Bloom test
@@ -225,15 +207,6 @@ target_link_libraries(
     ${OPENGL_LIBRARIES} glfw
 )
 
-# Header files
-target_include_directories(
-    bloom
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/external/include
-)
-
 #######################################################
 #######################################################
 # Lights test
@@ -258,13 +231,4 @@ target_link_libraries(
     PRIVATE
     ${TMIG}
     ${OPENGL_LIBRARIES} glfw
-)
-
-# Header files
-target_include_directories(
-    lights
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/external/include
 )

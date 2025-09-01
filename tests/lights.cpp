@@ -10,6 +10,7 @@
 #include "tmig/render/framebuffer.hpp"
 #include "tmig/render/window.hpp"
 #include "tmig/render/postprocessing/bloom.hpp"
+#include "tmig/render/ui.hpp"
 #include "tmig/util/camera_controller.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
@@ -18,6 +19,8 @@
 #include "tmig/util/color.hpp"
 #include "tmig/core/light_manager.hpp"
 #include "tmig/core/input.hpp"
+
+#include "imgui.h"
 
 using namespace tmig;
 
@@ -35,6 +38,7 @@ struct InstanceData {
 
 int main() {
     render::init();
+    render::ui::init();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     // Setup Camera
@@ -135,7 +139,7 @@ int main() {
     std::vector<Vertex> boxVertices;
     std::vector<uint32_t> boxIndices;
     util::generateBoxMesh([&](auto v) { boxVertices.push_back({v.position, v.normal}); }, boxIndices);
-    
+
     render::DataBuffer<Vertex> boxVertBuffer;
     render::DataBuffer<uint32_t> boxIdxBuffer;
     boxVertBuffer.setData(boxVertices);
@@ -162,7 +166,7 @@ int main() {
     model = glm::rotate(model, glm::radians(-90.0f), {1.0f, 0.0f, 0.0f});
     model = glm::scale(model, {roomSize, roomSize, wallThickness});
     boxInstances.push_back({glm::vec3{1.0f}, model});
-    
+
     // Back Wall
     model = glm::mat4(1.0f);
     model = glm::translate(model, {0.0f, 0.0f, -wallPos});
@@ -210,7 +214,7 @@ int main() {
     std::vector<Vertex> sphereVertices;
     std::vector<uint32_t> sphereIndices;
     util::generateSphereMesh([&](auto v) { sphereVertices.push_back({v.position, v.normal}); }, sphereIndices, 50);
-    
+
     render::DataBuffer<Vertex> sphereVertBuffer;
     render::DataBuffer<uint32_t> sphereIdxBuffer;
     sphereVertBuffer.setData(sphereVertices);
@@ -290,6 +294,7 @@ int main() {
     bool applyBloom = true;
     while (!render::window::shouldClose()) {
         core::input::update();
+        render::ui::beginFrame();
 
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -301,9 +306,15 @@ int main() {
             render::window::setShouldClose(true);
         }
 
-        if (isKeyPressed(core::input::Key::F)) {
-            applyBloom = !applyBloom;
-        }
+        // UI
+        const auto viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 10, viewport->WorkPos.y + 10));
+        ImGui::SetNextWindowSize(ImVec2(160, 55));
+
+        // Dropdown for all possible effects
+        ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Checkbox("Apply bloom", &applyBloom);
+        ImGui::End();
 
         camController.update(camera, timeStep.dt());
 
@@ -339,14 +350,14 @@ int main() {
         sceneDataUBO.view = camera.getViewMatrix();
         sceneDataUBO.viewPos = camera.getPosition();
         ubo.setData(sceneDataUBO);
-        
+
         // Draw the Room (Instanced)
         instancedShader.use();
         boxMesh.render();
 
         // Draw the Spheres (Instanced)
         sphereMesh.render();
-        
+
         // Draw the Torus (Non-Instanced)
         shader.use();
         model = glm::mat4(1.0f);
@@ -366,9 +377,11 @@ int main() {
             util::renderScreenQuadTexture(sceneOutputTexture);
         }
 
+        render::ui::endFrame();
         render::window::swapBuffers();
-        render::window::pollEvents();
     }
+
+    render::ui::terminate();
 
     return 0;
 }

@@ -9,12 +9,15 @@
 #include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
 #include "tmig/render/postprocessing/bloom.hpp"
+#include "tmig/render/ui.hpp"
 #include "tmig/util/camera_controller.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/postprocessing.hpp"
 #include "tmig/util/time_step.hpp"
 #include "tmig/core/input.hpp"
+
+#include "imgui.h"
 
 using namespace tmig;
 
@@ -26,6 +29,7 @@ int main() {
     srand(3);
 
     render::init();
+    render::ui::init();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
@@ -162,6 +166,7 @@ int main() {
     bool applyTexture = true;
     while (!render::window::shouldClose()) {
         core::input::update();
+        render::ui::beginFrame();
 
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -173,6 +178,18 @@ int main() {
         if (isKeyPressed(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
+
+        // UI
+        const auto viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 10, viewport->WorkPos.y + 10));
+        ImGui::SetNextWindowSize(ImVec2(160, 100));
+
+        // Dropdown for all possible effects
+        ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Checkbox("Move meshes", &randomizeMesh);
+        ImGui::Checkbox("Apply bloom", &applyBloom);
+        ImGui::Checkbox("Apply texture", &applyTexture);
+        ImGui::End();
 
         if (isKeyPressed(core::input::Key::E)) {
             randomizeMesh = !randomizeMesh;
@@ -244,13 +261,15 @@ int main() {
             util::renderScreenQuadTexture(sceneOutputTexture);
         }
 
+        render::ui::endFrame();
         render::window::swapBuffers();
-        render::window::pollEvents();
     }
 
     delete vertexBuffer;
     delete instanceBuffer;
     delete indexBuffer;
+
+    render::ui::terminate();
 
     return 0;
 }

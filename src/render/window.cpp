@@ -69,6 +69,14 @@ void init(int width,int height, const std::string &title) {
     }
 }
 
+GLFWwindow* getGlfwWindow() {
+    if (!initialized) {
+        return nullptr;
+    }
+
+    return glfwWindow.get();
+}
+
 double getRuntime() {
     return glfwGetTime();
 }

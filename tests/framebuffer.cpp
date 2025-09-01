@@ -8,11 +8,14 @@
 #include "tmig/render/window.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/texture2D.hpp"
+#include "tmig/render/ui.hpp"
 #include "tmig/util/camera_controller.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/time_step.hpp"
 #include "tmig/core/input.hpp"
+
+#include "imgui.h"
 
 using namespace tmig;
 
@@ -20,6 +23,7 @@ int main() {
     srand(3);
 
     render::init();
+    render::ui::init();
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
@@ -181,12 +185,16 @@ int main() {
         std::cerr << "Framebuffer failed; status: " << status << "\n";
     }
 
+    // Variables for ImGui effect selection
+    const char* effects[] = { "None", "Sharpen", "Outline", "Emboss", "Blur" };
+    int effect = 0;
+
     util::TimeStep timeStep;
     util::SmoothFirstPersonCameraController camController;
     camController.moveSpeed = 100.0f;
-    int effect = 0;
     while (!render::window::shouldClose()) {
         core::input::update();
+        render::ui::beginFrame();
 
         float runtime = render::window::getRuntime();
         if (timeStep.update(runtime)) {
@@ -199,9 +207,18 @@ int main() {
             render::window::setShouldClose(true);
         }
 
-        if (isKeyPressed(core::input::Key::E)) {
-            effect = (effect + 1) % 5;
-        }
+        // ------------------------------------------
+        // ------------------------------------------
+        // UI
+        const auto viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 10, viewport->WorkPos.y + 10));
+        ImGui::SetNextWindowSize(ImVec2(250, 80));
+
+        // Dropdown for all possible effects
+        ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Text("Select a post-processing effect:");
+        ImGui::Combo("Effect", &effect, effects, IM_ARRAYSIZE(effects));
+        ImGui::End();
 
         // ------------------------------------------
         // ------------------------------------------
@@ -265,8 +282,8 @@ int main() {
         screenQuadMesh.render();
         glEnable(GL_DEPTH_TEST);
 
+        render::ui::endFrame();
         render::window::swapBuffers();
-        render::window::pollEvents();
     }
 
     delete vertexBuffer;
@@ -276,6 +293,8 @@ int main() {
     delete screenQuadIndexBuffer;
     delete sceneOutputTexture;
     delete sceneDepthTexture;
+
+    render::ui::terminate();
 
     return 0;
 }
