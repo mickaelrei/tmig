@@ -22,7 +22,7 @@ void FirstPersonCameraController::update(render::Camera& camera, float dt) {
         displacement.y += 1.0f;
     if (isKeyDown(core::input::Key::LEFT_SHIFT))
         displacement.y -= 1.0f;
-    
+
     if (glm::length2(displacement) > 0.0f) {
         camera.moveRelative(glm::normalize(displacement) * moveSpeed * dt);
     }
@@ -278,9 +278,9 @@ void SmoothFreeFlyCameraController::update(render::Camera& camera, float dt) {
     // Roll
     float rollDeta = 0.0f;
     if (isKeyDown(core::input::Key::Q))
-        rollDeta += rollSpeed * dt;
-    if (isKeyDown(core::input::Key::E))
         rollDeta -= rollSpeed * dt;
+    if (isKeyDown(core::input::Key::E))
+        rollDeta += rollSpeed * dt;
 
     glm::vec3 forward = glm::normalize(targetRotation * glm::vec3(0.0f, 0.0f, -1.0f));
     glm::quat rollQuat = glm::angleAxis(rollDeta, forward);

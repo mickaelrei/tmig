@@ -28,7 +28,7 @@ struct BloomConfig {
 };
 
 /// @brief Class representing a bloom effect for post-processing in a rendering pipeline.
-/// 
+///
 /// The bloom effect simulates the phenomenon where bright light sources appear to bleed beyond
 /// their boundaries, creating a glow. The effect operates in the following steps:
 ///
@@ -44,29 +44,29 @@ public:
 
     /// @brief Destructor
     ~BloomEffect();
-    
+
     /// @brief Set bright excess threshold. Fragments with brightness above this value
     /// will contribute to the bloom effect
     /// @note By default it is 1.5f
     void setThreshold(float threshold);
-    
+
     /// @brief Get current bright excess threshold
     float getThreshold() const { return threshold; }
 
     /// @brief Set the scale for sampling offsets from the texture on the blur pass
     /// @note By default it is 1.5f
     void setOffsetScale(float offsetScale);
-    
+
     /// @brief Get current offset scale
     float getOffsetScale() const { return blurEffect.getOffsetScale(); }
 
     /// @brief Set the strength of the bloom when applied on the final output
     /// @note By default it is 0.5f
     void setStrength(float strength);
-    
+
     /// @brief Get current offset scale
     float getStrength() const { return strength; }
-    
+
     virtual const Texture2D& apply(const Texture2D& input, const PostProcessContext& ctx = {}) override;
 
     /// @brief Number of iterations on each axis when applying horizontal-vertical blur

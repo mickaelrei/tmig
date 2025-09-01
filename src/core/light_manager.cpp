@@ -17,7 +17,7 @@ PointLightHandle LightManager::addPointLight(const render::PointLight& light) {
     if (_lightsUBO.numPointLights >= MAX_POINT_LIGHTS) {
         return PointLightHandle(nullptr, 0);
     }
-    
+
     _lightsUBO.pointLights[_lightsUBO.numPointLights++] = light;
     update();
 

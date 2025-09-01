@@ -135,11 +135,11 @@ const Texture2D& BloomEffect::apply(const Texture2D& input, const PostProcessCon
     outputShader.use();
     outputShader.setTexture("scene", input, 0);
     outputShader.setTexture("bloomBlur", blurTexture, 1);
-    
+
     glDisable(GL_DEPTH_TEST);
     screenQuad.render();
     glEnable(GL_DEPTH_TEST);
-    
+
     return outputTexture;
 }
 

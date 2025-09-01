@@ -33,7 +33,7 @@ inline glm::vec3 HSVtoRGB(float h, float s, float v) {
     return glm::vec3{r, g, b};
 }
 
-/// @brief Receives RGB (red, green, blue) and returns it in  HSV (hue, saturation, value) 
+/// @brief Receives RGB (red, green, blue) and returns it in  HSV (hue, saturation, value)
 inline glm::vec3 RGBtoHSV(float r, float g, float b) {
     float maxc = std::max({r, g, b});
     float minc = std::min({r, g, b});

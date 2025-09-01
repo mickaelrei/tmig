@@ -25,11 +25,11 @@ public:
 
     /// @brief Destructor
     ~BlurEffect();
-    
+
     /// @brief Set the scale for sampling offsets from the texture. Larger values create a wider, more diffuse blur
     /// @note By default it is 1.0f
     void setOffsetScale(float offsetScale);
-    
+
     /// @brief Get current offset scale
     float getOffsetScale() const { return offsetScale; }
 

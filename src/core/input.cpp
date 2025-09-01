@@ -24,7 +24,7 @@ void update() {
     for (int button = 0; button < 8; ++button) {
         _currentMouseButtonStates[button] = (render::window::getMouseButtonState(button) == GLFW_PRESS);
     }
-    
+
     // 3. Process all pending window events for the next frame.
     render::window::pollEvents();
 }

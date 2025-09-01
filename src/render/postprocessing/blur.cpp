@@ -65,7 +65,7 @@ BlurEffect::BlurEffect(const BlurConfig& config) {
             }
         }
     }
-    
+
     setOffsetScale(offsetScale);
 }
 
@@ -103,7 +103,7 @@ const Texture2D& BlurEffect::apply(const Texture2D& input, const PostProcessCont
     }
 
     glEnable(GL_DEPTH_TEST);
-    
+
     // The final result is in the last texture that was rendered to.
     // Since `horizontal` is flipped at the end of the loop, the result is in `blurTextures[!horizontal]`.
     return blurTextures[!horizontal];

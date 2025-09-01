@@ -15,10 +15,10 @@ struct DirectionalLightHandle {
 public:
     /// @brief Sets the direction the light is pointing
     void setDirection(const glm::vec3& dir);
-    
+
     /// @brief Sets the color of the light
     void setColor(const glm::vec3& color);
-    
+
     /// @brief Sets the light intensity
     void setIntensity(float intensity);
 
@@ -39,19 +39,19 @@ struct PointLightHandle {
 public:
     /// @brief Sets the position of the light in world space
     void setPosition(const glm::vec3& pos);
-    
+
     /// @brief Sets the color of the light
     void setColor(const glm::vec3& color);
-    
+
     /// @brief Sets the light intensity
     void setIntensity(float intensity);
-    
+
     /// @brief Sets the constant term for the light's attenuation formula
     void setConstant(float constant);
-    
+
     /// @brief Sets the linear term for the light's attenuation formula
     void setLinear(float linear);
-    
+
     /// @brief Sets the quadratic term for the light's attenuation formula
     void setQuadratic(float quadratic);
 
@@ -72,34 +72,34 @@ struct SpotLightHandle {
 public:
     /// @brief Sets the position of the light in world space
     void setPosition(const glm::vec3& pos);
-    
+
     /// @brief Sets the direction the light is pointing
     void setDirection(const glm::vec3& dir);
-    
+
     /// @brief Sets the color of the light
     void setColor(const glm::vec3& color);
-    
+
     /// @brief Sets the light intensity
     void setIntensity(float intensity);
-    
+
     /// @brief Sets the inner cone angle (cosine value)
     void setCutOff(float cutOff);
-    
+
     /// @brief Sets the inner cone angle in radians
     void setCutOffAngle(float cutOffAngle);
-    
+
     /// @brief Sets the outer cone angle (cosine value) for a soft edge
     void setOuterCutOff(float outerCutOff);
-    
+
     /// @brief Sets the outer cone angle in radians for a soft edge
     void setOuterCutOffAngle(float outerCutOffAngle);
-    
+
     /// @brief Sets the constant term for the light's attenuation formula
     void setConstant(float constant);
-    
+
     /// @brief Sets the linear term for the light's attenuation formula
     void setLinear(float linear);
-    
+
     /// @brief Sets the quadratic term for the light's attenuation formula
     void setQuadratic(float quadratic);
 
@@ -136,7 +136,7 @@ struct LightsUBO {
 
     /// @brief Array to hold all spot lights in the scene
     tmig::render::SpotLight spotLights[MAX_SPOT_LIGHTS];
-    
+
     /// @brief The number of active directional lights currently in the array
     int numDirectionalLights;
 
