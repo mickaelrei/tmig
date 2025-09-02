@@ -24,16 +24,60 @@ else()
     message("DEBUG MODE OFF")
 endif()
 
+# Library output
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+
 # Find packages
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
-# Library output
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+#######################################################
+# IMGUI SETUP
+#######################################################
+# Check if the ImGui submodule source is present
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/external/imgui/imgui.h")
+    message(STATUS "ImGui source not found. Attempting to pull submodule...")
+    if(GIT_FOUND)
+        # Pull submodules recursively
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --progress
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            RESULT_VARIABLE GIT_SUBMODULE_RESULT
+        )
+        if(NOT GIT_SUBMODULE_RESULT EQUAL "0")
+            message(FATAL_ERROR "Git submodule update failed. Please run 'git submodule update --init --recursive' manually.")
+        endif()
+    else()
+        message(FATAL_ERROR "ImGui source not found and Git is not installed. Please run 'git submodule update --init --recursive' manually or install Git.")
+    endif()
+endif()
 
-# Engine source files
+# Create a dedicated library for ImGui
+set(IMGUI imgui)
+set(
+    IMGUI_SOURCE_FILES
+
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_glfw.cpp
+    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
+)
+
+add_library(${IMGUI} SHARED ${IMGUI_SOURCE_FILES})
+target_include_directories(
+    ${IMGUI}
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/external/imgui
+        ${CMAKE_SOURCE_DIR}/external/imgui/backends
+)
+
+#######################################################
+# ENGINE SETUP
+#######################################################
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
@@ -66,12 +110,6 @@ set(
     # External resources
     ${CMAKE_SOURCE_DIR}/external/glad/glad.c
     ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_widgets.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 # Adding engine shared library
@@ -79,156 +117,51 @@ add_library(${TMIG} SHARED ${ENGINE_SOURCE_FILES})
 target_compile_definitions(${TMIG} PUBLIC PROJECT_ROOT_FOLDER="${CMAKE_SOURCE_DIR}")
 
 # Libraries
-target_link_directories(
-    ${TMIG}
-    PRIVATE
-    ${OPENGL_INCLUDE_DIRS}
-)
 target_link_libraries(
     ${TMIG}
-    PRIVATE
-    ${OPENGL_LIBRARIES} glfw
+    PUBLIC
+        ${IMGUI}
+        ${OPENGL_LIBRARIES}
+        glfw
 )
 
 # Header files
 target_include_directories(
     ${TMIG}
     PUBLIC
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/external/include
-    ${CMAKE_SOURCE_DIR}/external/imgui
-    ${CMAKE_SOURCE_DIR}/external/imgui/backends
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/external/include
 )
 
-# Tests
+#######################################################
+# HELPER FUNCTION FOR CREATING TEST EXECUTABLES
+#######################################################
+function(add_engine_test TEST_NAME)
+    # This function creates an executable from a source file in the /tests directory
+    # It assumes the source file is named <TEST_NAME>.cpp
+
+    add_executable(
+        ${TEST_NAME}
+        ${CMAKE_SOURCE_DIR}/tests/${TEST_NAME}.cpp
+    )
+
+    # Link the executable ONLY to our engine library
+    # The engine library (tmig) will provide all other dependencies (GLFW, OpenGL, ImGui)
+    target_link_libraries(
+        ${TEST_NAME}
+        PRIVATE
+        ${TMIG}
+    )
+endfunction()
+
+#######################################################
+# TESTS
+#######################################################
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 
-#######################################################
-#######################################################
-# Instanced test
-
-# Source files
-set(
-    INSTANCED_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/instanced.cpp
-)
-
-# Adding executables for testing
-add_executable(instanced ${INSTANCED_TEST_SOURCE_FILES})
-
-# Libraries
-target_link_directories(
-    instanced
-    PRIVATE
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
-target_link_libraries(
-    instanced
-    PRIVATE
-    ${TMIG}
-    ${OPENGL_LIBRARIES} glfw
-)
-
-#######################################################
-#######################################################
-# Non-instanced test
-
-# Source files
-set(
-    NON_INSTANCED_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/non_instanced.cpp
-)
-
-# Adding executables for testing
-add_executable(non_instanced ${NON_INSTANCED_TEST_SOURCE_FILES})
-
-# Libraries
-target_link_directories(
-    non_instanced
-    PRIVATE
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
-target_link_libraries(
-    non_instanced
-    PRIVATE
-    ${TMIG}
-    ${OPENGL_LIBRARIES} glfw
-)
-
-#######################################################
-#######################################################
-# Framebuffer test
-
-# Source files
-set(
-    FRAMEBUFFER_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/framebuffer.cpp
-)
-
-# Adding executables for testing
-add_executable(framebuffer ${FRAMEBUFFER_TEST_SOURCE_FILES})
-
-# Libraries
-target_link_directories(
-    framebuffer
-    PRIVATE
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
-target_link_libraries(
-    framebuffer
-    PRIVATE
-    ${TMIG}
-    ${OPENGL_LIBRARIES} glfw
-)
-
-#######################################################
-#######################################################
-# Bloom test
-
-# Source files
-set(
-    BLOOM_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/bloom.cpp
-)
-
-# Adding executables for testing
-add_executable(bloom ${BLOOM_TEST_SOURCE_FILES})
-
-# Libraries
-target_link_directories(
-    bloom
-    PRIVATE
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
-target_link_libraries(
-    bloom
-    PRIVATE
-    ${TMIG}
-    ${OPENGL_LIBRARIES} glfw
-)
-
-#######################################################
-#######################################################
-# Lights test
-
-# Source files
-set(
-    LIGHTS_TEST_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/tests/lights.cpp
-)
-
-# Adding executables for testing
-add_executable(lights ${LIGHTS_TEST_SOURCE_FILES})
-
-# Libraries
-target_link_directories(
-    lights
-    PRIVATE
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-)
-target_link_libraries(
-    lights
-    PRIVATE
-    ${TMIG}
-    ${OPENGL_LIBRARIES} glfw
-)
+# Use our new function to create all the test executables
+add_engine_test(instanced)
+add_engine_test(non_instanced)
+add_engine_test(framebuffer)
+add_engine_test(bloom)
+add_engine_test(lights)
