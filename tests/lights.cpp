@@ -283,7 +283,6 @@ int main() {
 
     // Create instance of bloom effect
     render::postprocessing::BloomEffect bloomEffect{{.blurWidth = 600, .blurHeight = 600}};
-    bloomEffect.blurIterations = 1;
     bloomEffect.setThreshold(1.0f);
     bloomEffect.setOffsetScale(0.25f);
     bloomEffect.setStrength(0.125f);

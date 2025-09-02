@@ -191,18 +191,6 @@ int main() {
         ImGui::Checkbox("Apply texture", &applyTexture);
         ImGui::End();
 
-        if (isKeyPressed(core::input::Key::E)) {
-            randomizeMesh = !randomizeMesh;
-        }
-
-        if (isKeyPressed(core::input::Key::F)) {
-            applyBloom = !applyBloom;
-        }
-
-        if (isKeyPressed(core::input::Key::T)) {
-            applyTexture = !applyTexture;
-        }
-
         // Update scene
         if (randomizeMesh) {
             for (size_t i = 0; i < instances.size(); ++i) {

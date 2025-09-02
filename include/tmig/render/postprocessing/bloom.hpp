@@ -69,9 +69,6 @@ public:
 
     virtual const Texture2D& apply(const Texture2D& input, const PostProcessContext& ctx = {}) override;
 
-    /// @brief Number of iterations on each axis when applying horizontal-vertical blur
-    uint32_t blurIterations = 5;
-
 protected:
     // Parameters
     float threshold = 1.5f;
