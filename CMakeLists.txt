@@ -3,15 +3,8 @@ cmake_minimum_required(VERSION 2.8.5...3.27.5)
 set(TMIG tmig)
 project(${TMIG})
 
-# Use Release mode by default
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif ()
-
-# Build type
+set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -g3 -fsanitize=address,undefined")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 # Library output
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
@@ -21,6 +14,7 @@ set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(assimp QUIET)
 find_package(Git QUIET)
 
 #######################################################
@@ -76,6 +70,14 @@ target_include_directories(
         ${CMAKE_SOURCE_DIR}/external/include
 )
 
+#######################################################
+# ENGINE CONFIGURATION
+#######################################################
+
+# Base engine flags
+target_compile_definitions(${TMIG} PRIVATE PROJECT_ROOT_FOLDER="${CMAKE_SOURCE_DIR}")
+target_compile_options(${TMIG} PRIVATE -Wall -Wextra)
+
 # Debug option
 option(DEBUG "Enable debug mode" OFF)
 if (DEBUG)
@@ -85,10 +87,33 @@ else()
     message("DEBUG MODE OFF")
 endif()
 
+# Engine-only config (never reconfigures the whole project)
+set(ENGINE_CONFIG "Release" CACHE STRING "Engine-only build config")
+set_property(CACHE ENGINE_CONFIG PROPERTY STRINGS "Debug;RelWithDebInfo;Release")
+
+# Apply engine-only variants
+if (ENGINE_CONFIG STREQUAL "Debug")
+    # Debug flags
+    target_compile_definitions(${TMIG} PRIVATE DEBUG)
+    target_compile_options(${TMIG} PRIVATE -g3 -fno-omit-frame-pointer)
+    target_link_options(${TMIG} PRIVATE -fsanitize=address,undefined)
+    target_compile_options(${TMIG} PRIVATE -fsanitize=address,undefined)
+
+    # Propagate to test executables that link the engine
+    target_link_options(${TMIG} INTERFACE -fsanitize=address,undefined)
+elseif (ENGINE_CONFIG STREQUAL "RelWithDebInfo")
+    # Release with debug info flags
+    target_compile_definitions(${TMIG} PRIVATE NDEBUG)
+    target_compile_options(${TMIG} PRIVATE -O2 -g)
+else()
+    # Release flags
+    target_compile_definitions(${TMIG} PRIVATE NDEBUG)
+    target_compile_options(${TMIG} PRIVATE -O3)
+endif()
+
 #######################################################
 # ASSIMP SETUP
 #######################################################
-find_package(assimp QUIET)
 if (assimp_FOUND)
     # If find_package was successful, use the imported system library
     message(STATUS "Found system-installed Assimp. Using it.")
@@ -114,16 +139,20 @@ else()
         endif()
     endif()
 
-    # Store current engine build type before changing it to force Assimp to build in Release
+    # Lock Assimp build to Release regardless of ENGINE_CONFIG
     set(PROJECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 
-    set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "Disable warnings as errors for Assimp")
-    set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable unit tests for Assimp")
+    set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "Disable warnings as errors" FORCE)
+    set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable tests" FORCE)
+    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Disable tools" FORCE)
+    set(ASSIMP_INSTALL OFF CACHE BOOL "Don't install Assimp" FORCE)
+
     add_subdirectory(external/assimp)
 
-    # Restore your project's original build type
-    set(CMAKE_BUILD_TYPE ${PROJECT_BUILD_TYPE})
+    # Restore the original project build type
+    set(CMAKE_BUILD_TYPE ${PROJECT_BUILD_TYPE} CACHE STRING "" FORCE)
+
     set(ASSIMP_LIBRARY assimp)
 endif()
 
@@ -148,11 +177,7 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/external/imgui/imgui.h")
     endif()
 endif()
 
-message(STATUS "Compiling ImGui from source (forced Release mode)...")
-
-# Store your project's build type and force ImGui to be configured in Release mode
-set(PROJECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-set(CMAKE_BUILD_TYPE Release)
+message(STATUS "Compiling ImGui from source...")
 
 # Create a dedicated library for ImGui
 set(IMGUI imgui)
@@ -165,11 +190,10 @@ add_library(${IMGUI} STATIC
     ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
-# Restore previous build type
-set(CMAKE_BUILD_TYPE ${PROJECT_BUILD_TYPE})
-
 # Enable Position Independent Code for the static library
-set_target_properties(imgui PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_definitions(${IMGUI} PRIVATE NDEBUG)
+target_compile_options(${IMGUI} PRIVATE -O3)
+set_target_properties(${IMGUI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set the public include directories for the target
 target_include_directories(${IMGUI} PUBLIC
