@@ -2,6 +2,7 @@
 #include <stdexcept>
 #endif
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
@@ -9,6 +10,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include "tmig/render/internal.hpp"
+#include "tmig/util/log.hpp"
 
 namespace tmig::render::ui {
 
@@ -57,11 +59,13 @@ void terminate() {
 }
 
 void beginFrame() {
-#ifdef DEBUG
     if (!initialized) {
-        throw std::runtime_error{"[render::ui::beginFrame] UI is not initialized"};
+        util::logMessage(
+            util::LogCategory::ENGINE, util::LogSeverity::WARNING,
+            "render::ui::beginFrame called when render::ui is not initialized. Call render::ui::init() first"
+        );
+        return;
     }
-#endif
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -69,11 +73,13 @@ void beginFrame() {
 }
 
 void endFrame() {
-#ifdef DEBUG
     if (!initialized) {
-        throw std::runtime_error{"[render::ui::beginFrame] UI is not initialized"};
+        util::logMessage(
+            util::LogCategory::ENGINE, util::LogSeverity::WARNING,
+            "render::ui::endFrame called when render::ui is not initialized. Call render::ui::init() first"
+        );
+        return;
     }
-#endif
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Render();
