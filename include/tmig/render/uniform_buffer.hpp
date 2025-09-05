@@ -8,9 +8,9 @@ namespace tmig::render {
 
 /// @brief Class representing a GPU uniform buffer, used to store data used across multiple shaders
 /// @tparam T type of data stored
-/// @note - You MUST call `setBindingPoint` at some point, it won't be called automatically
+/// @note - You MUST call `bindTo` at some point, it won't be called automatically
 /// @note - This buffer is supposed to match with a std140 layout memory block in a shader. Make sure you
-///         understand std140 layout rules to correctly send data
+/// understand std140 layout rules to correctly send data
 /// @note - This is a non-copyable class, meaning you cannot create a copy of it
 template<typename T>
 class UniformBuffer : protected core::NonCopyable {

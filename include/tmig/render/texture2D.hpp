@@ -164,7 +164,7 @@ public:
     /// @param flipY whether should flip image vertically
     /// @note - This loads the texture data and sets the internal format based on the file format
     /// @note - Mipmap generation must be requested manually after loading the texture if desired.
-    ///         This method does not automatically generate mipmaps
+    /// This method does not automatically generate mipmaps
     bool loadFromFile(const std::string& path, bool flipY = true);
 
     /// @brief Set pixel data
@@ -175,7 +175,7 @@ public:
     /// @brief Resize texture
     /// @param internalFormat format for the internal storage of this texture
     /// @note - This will reallocate storage for the texture, including removing any existing mipmaps.
-    ///         If mipmaps are desired, `generateMipmaps` must be called manually after resizing
+    /// If mipmaps are desired, `generateMipmaps` must be called manually after resizing
     void resize(uint32_t width, uint32_t height, TextureFormat internalFormat);
 
     /// @brief Set texture wrap for the S axis (horizontal)
@@ -186,7 +186,7 @@ public:
 
     /// @brief Set minification filter (used when the texture is scaled down)
     /// @note If using mipmap filters (e.g., `LINEAR_MIPMAP_NEAREST`), `generateMipmaps` must be called first.
-    ///       Otherwise it throws a `runtime_error`
+    /// Otherwise it throws a `runtime_error`
     void setMinFilter(TextureMinFilter filter);
 
     /// @brief Set magnification filter (used when the texture is scaled up)

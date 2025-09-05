@@ -142,7 +142,7 @@ public:
 
     /// @brief Set up the framebuffer using the provided configuration. Must be called before usage
     /// @note This function should only be called once unless framebuffer reconfiguration is required.
-    ///       Repeated calls will override the current setup and may invalidate previously attached textures.
+    /// Repeated calls will override the current setup and may invalidate previously attached textures.
     Status setup(const FramebufferConfig& config);
 
     /// @brief Bind the framebuffer for rendering
