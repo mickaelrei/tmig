@@ -87,6 +87,14 @@ else()
     message("DEBUG MODE OFF")
 endif()
 
+# Build tests option
+option(TMIG_BUILD_TESTS "Build TMIG tests" OFF)
+if (TMIG_BUILD_TESTS)
+    message("TMIG_BUILD_TESTS ON")
+else()
+    message("TMIG_BUILD_TESTS OFF")
+endif()
+
 # Engine-only config (never reconfigures the whole project)
 set(ENGINE_CONFIG "Release" CACHE STRING "Engine-only build config")
 set_property(CACHE ENGINE_CONFIG PROPERTY STRINGS "Debug;RelWithDebInfo;Release")
@@ -229,12 +237,14 @@ endfunction()
 #######################################################
 # TESTS
 #######################################################
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
+if(TMIG_BUILD_TESTS)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
 
-# Use our new function to create all the test executables
-add_engine_test(instanced)
-add_engine_test(non_instanced)
-add_engine_test(framebuffer)
-add_engine_test(bloom)
-add_engine_test(lights)
-add_engine_test(assimp_test)
+    # Use our new function to create all the test executables
+    add_engine_test(instanced)
+    add_engine_test(non_instanced)
+    add_engine_test(framebuffer)
+    add_engine_test(bloom)
+    add_engine_test(lights)
+    add_engine_test(assimp_test)
+endif()
