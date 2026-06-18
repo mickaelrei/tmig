@@ -7,7 +7,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Library output
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # Find packages
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -20,7 +20,7 @@ find_package(Git QUIET)
 #######################################################
 # ENGINE SETUP
 #######################################################
-set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(
     ENGINE_SOURCE_FILES
 
@@ -50,13 +50,13 @@ set(
     ${SOURCE_DIR}/util/time_step.cpp
 
     # External resources
-    ${CMAKE_SOURCE_DIR}/external/glad/glad.c
-    ${CMAKE_SOURCE_DIR}/external/stb/stb_image.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/glad.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/stb/stb_image.c
 )
 
 # Adding engine shared library
 add_library(${TMIG} SHARED ${ENGINE_SOURCE_FILES})
-target_compile_definitions(${TMIG} PUBLIC PROJECT_ROOT_FOLDER="${CMAKE_SOURCE_DIR}")
+target_compile_definitions(${TMIG} PUBLIC PROJECT_ROOT_FOLDER="${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_options(${TMIG} PRIVATE
     -Wall
     -Wextra
@@ -66,8 +66,8 @@ target_compile_options(${TMIG} PRIVATE
 target_include_directories(
     ${TMIG}
     PUBLIC
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/external/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/include
 )
 
 #######################################################
@@ -75,7 +75,7 @@ target_include_directories(
 #######################################################
 
 # Base engine flags
-target_compile_definitions(${TMIG} PRIVATE PROJECT_ROOT_FOLDER="${CMAKE_SOURCE_DIR}")
+target_compile_definitions(${TMIG} PRIVATE PROJECT_ROOT_FOLDER="${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_options(${TMIG} PRIVATE -Wall -Wextra)
 
 # Debug option
@@ -130,13 +130,13 @@ else()
     message(STATUS "System-installed Assimp not found. Checking for source files...")
 
     # Check if the submodule source is present
-    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/external/assimp/CMakeLists.txt")
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/assimp/CMakeLists.txt")
         message(STATUS "Assimp source not found. Attempting to pull submodule...")
         if(GIT_FOUND)
             # Pull submodules recursively
             execute_process(
                 COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --progress external/assimp
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 RESULT_VARIABLE GIT_SUBMODULE_RESULT
             )
             if(NOT GIT_SUBMODULE_RESULT EQUAL "0")
@@ -156,7 +156,7 @@ else()
     set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Disable tools" FORCE)
     set(ASSIMP_INSTALL OFF CACHE BOOL "Don't install Assimp" FORCE)
 
-    add_subdirectory(external/assimp)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/assimp)
 
     # Restore the original project build type
     set(CMAKE_BUILD_TYPE ${PROJECT_BUILD_TYPE} CACHE STRING "" FORCE)
@@ -168,13 +168,13 @@ endif()
 # IMGUI SETUP
 #######################################################
 # Check if the ImGui submodule source is present
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/external/imgui/imgui.h")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/imgui.h")
     message(STATUS "ImGui source not found. Attempting to pull submodule...")
     if(GIT_FOUND)
         # Pull submodules recursively
         execute_process(
             COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --progress external/imgui
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             RESULT_VARIABLE GIT_SUBMODULE_RESULT
         )
         if(NOT GIT_SUBMODULE_RESULT EQUAL "0")
@@ -190,12 +190,12 @@ message(STATUS "Compiling ImGui from source...")
 # Create a dedicated library for ImGui
 set(IMGUI imgui)
 add_library(${IMGUI} STATIC
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/imgui_widgets.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/imgui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/imgui_draw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/imgui_tables.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/imgui_widgets.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends/imgui_impl_glfw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 # Enable Position Independent Code for the static library
@@ -205,8 +205,8 @@ set_target_properties(${IMGUI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set the public include directories for the target
 target_include_directories(${IMGUI} PUBLIC
-    ${CMAKE_SOURCE_DIR}/external/imgui
-    ${CMAKE_SOURCE_DIR}/external/imgui/backends
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends
 )
 
 ##########################
@@ -227,7 +227,7 @@ function(add_engine_test TEST_NAME)
     # This function creates an executable from a source file in the /tests directory
     # It assumes the source file is named <TEST_NAME>.cpp
 
-    add_executable(${TEST_NAME} ${CMAKE_SOURCE_DIR}/tests/${TEST_NAME}.cpp)
+    add_executable(${TEST_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${TEST_NAME}.cpp)
 
     # Link the executable ONLY to our engine library
     # The engine library (tmig) will provide all other dependencies (GLFW, OpenGL, ImGui)
@@ -238,7 +238,7 @@ endfunction()
 # TESTS
 #######################################################
 if(TMIG_BUILD_TESTS)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/bin)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/bin)
 
     # Use our new function to create all the test executables
     add_engine_test(instanced)
