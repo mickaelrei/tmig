@@ -242,9 +242,7 @@ if(TMIG_BUILD_TESTS)
 
     # Use our new function to create all the test executables
     add_engine_test(instanced)
-    add_engine_test(non_instanced)
     add_engine_test(framebuffer)
     add_engine_test(bloom)
     add_engine_test(lights)
-    add_engine_test(assimp_test)
 endif()

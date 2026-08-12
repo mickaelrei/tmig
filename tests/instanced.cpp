@@ -1,42 +1,82 @@
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <string>
+#include <chrono>
 
 #include "tmig/render/instanced_mesh.hpp"
+#include "tmig/render/mesh.hpp"
 #include "tmig/render/uniform_buffer.hpp"
 #include "tmig/render/render.hpp"
 #include "tmig/render/shader.hpp"
 #include "tmig/render/window.hpp"
 #include "tmig/render/texture2D.hpp"
+#include "tmig/render/ui.hpp"
 #include "tmig/util/camera_controller.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
 #include "tmig/util/time_step.hpp"
 #include "tmig/core/input.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "imgui.h"
+#include "glad/glad.h"
+
 using namespace tmig;
+
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 normal;
+    glm::vec2 uv;
+};
+
+struct InstanceData {
+    glm::vec4 color;
+    glm::vec4 posSeed;
+    glm::vec4 scale;
+};
+
+struct SceneData {
+    glm::mat4 projection;
+    glm::mat4 view;
+    glm::vec3 viewPos;
+};
 
 int main() {
     srand(3);
 
     render::init();
-    render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
+    render::ui::init();
+    render::setVSync(false);
+    render::window::setSize({1280, 720});
+    render::setClearColor(glm::vec4{0.02f, 0.02f, 0.03f, 1.0f});
 
     render::Camera camera;
     camera.maxDist = 10000.0f;
-    camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
+    camera.setPosition(glm::vec3{0.0f, 8.0f, 20.0f});
 
-    render::ShaderProgram shader;
-    if (!shader.compileFromFiles(
+    render::ShaderProgram instancedShader;
+    if (!instancedShader.compileFromFiles(
         util::getResourcePath("shaders/instanced.vert"),
         util::getResourcePath("shaders/instanced.frag")
     )) {
-        std::cout << "Failed loading instanced shader\n";
+        std::cerr << "Failed loading instanced shader\n";
         return 1;
     }
 
-    // Creating texture, binding at unit and setting in shader uniform
+    render::ShaderProgram nonInstancedShader;
+    if (!nonInstancedShader.compileFromFiles(
+        util::getResourcePath("shaders/non_instanced.vert"),
+        util::getResourcePath("shaders/non_instanced.frag")
+    )) {
+        std::cerr << "Failed loading non-instanced shader\n";
+        return 1;
+    }
+
     render::Texture2D texture;
     if (!texture.loadFromFile(util::getResourcePath("images/container.jpg"))) {
-        std::cout << "Failed to load texture\n";
+        std::cerr << "Failed to load texture\n";
         return 1;
     }
     texture.setWrapS(render::TextureWrapMode::MIRRORED_REPEAT);
@@ -45,146 +85,237 @@ int main() {
     texture.setMagFilter(render::TextureMagFilter::LINEAR);
     texture.generateMipmaps();
 
-    shader.use();
-    shader.setTexture("tex", texture, 0);
-
-    // Generate instancing data
-    struct instanceData {
-        glm::vec4 color;
-        glm::mat4 model;
-    };
-
-    std::vector<instanceData> instances;
-    for (int i = 0; i < 200000; ++i) {
-        // color
-        float r = (float)(rand() % 1000) / 1000.0f;
-        float g = (float)(rand() % 1000) / 1000.0f;
-        float b = (float)(rand() % 1000) / 1000.0f;
-        glm::vec4 color = {r, g, b, 1.0f};
-
-        // pos
-        float x = (float)(rand() % 1000 - 500) * 2.0f;
-        float y = (float)(rand() % 1000 - 500) * 2.0f;
-        float z = (float)(rand() % 1000 - 500) * 2.0f;
-
-        // size
-        float sx = (float)(rand() % 900 + 100) / 100.0f;
-        float sy = (float)(rand() % 900 + 100) / 100.0f;
-        float sz = (float)(rand() % 900 + 100) / 100.0f;
-
-        glm::mat4 m{1.0f};
-        m = glm::translate(m, glm::vec3{x, y, z});
-        m = glm::scale(m, glm::vec3{sx, sy, sz});
-
-        instances.push_back(instanceData{.color = color, .model = m});
+    constexpr int kMaxInstances = 200000;
+    std::vector<InstanceData> instances(kMaxInstances);
+    for (int i = 0; i < kMaxInstances; ++i) {
+        instances[i].color = {
+            (rand() % 1000) / 1000.0f,
+            (rand() % 1000) / 1000.0f,
+            (rand() % 1000) / 1000.0f,
+            1.0f
+        };
+        instances[i].posSeed = {
+            static_cast<float>(rand() % 1000 - 500) * 2.0f,
+            static_cast<float>(rand() % 1000 - 500) * 2.0f,
+            static_cast<float>(rand() % 1000 - 500) * 2.0f,
+            static_cast<float>(i) * 0.01f
+        };
+        instances[i].scale = {
+            (rand() % 900 + 100) / 100.0f,
+            (rand() % 900 + 100) / 100.0f,
+            (rand() % 900 + 100) / 100.0f,
+            0.0f
+        };
     }
 
-    // Generate mesh vertices
-    std::vector<util::GeneralVertex> vertices;
-    std::vector<uint32_t> indices;
-    util::generateBoxMesh([&](auto v) { vertices.push_back(v); }, indices);
-    printf("vertices: %ld | indices: %ld\n", vertices.size(), indices.size());
+    render::DataBuffer<Vertex> boxVbo, sphereLowVbo, sphereHighVbo;
+    render::DataBuffer<uint32_t> boxIbo, sphereLowIbo, sphereHighIbo;
 
-    // Create vertex data buffer
-    auto vertexBuffer = new render::DataBuffer<util::GeneralVertex>;
-    vertexBuffer->setData(vertices);
+    std::vector<Vertex> boxVerts;
+    std::vector<uint32_t> boxIdx;
+    util::generateBoxMesh([&](auto v) {
+        boxVerts.push_back(Vertex{v.position, v.normal, v.uv});
+    }, boxIdx);
+    boxVbo.setData(boxVerts);
+    boxIbo.setData(boxIdx);
 
-    // Create instance data buffer
-    auto instanceBuffer = new render::DataBuffer<instanceData>;
-    instanceBuffer->setData(instances);
+    auto [lowVerts, lowIdx] = [&] {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        util::generateSphereMesh([&](auto v) {
+            vertices.push_back(Vertex{v.position, v.normal, v.uv});
+        }, indices, 3);
+        sphereLowVbo.setData(vertices);
+        sphereLowIbo.setData(indices);
+        return std::pair<size_t, size_t>{vertices.size(), indices.size()};
+    }();
 
-    // Create index buffer
-    auto indexBuffer = new render::DataBuffer<uint32_t>;
-    indexBuffer->setData(indices);
+    auto [highVerts, highIdx] = [&] {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        util::generateSphereMesh([&](auto v) {
+            vertices.push_back(Vertex{v.position, v.normal, v.uv});
+        }, indices, 24);
+        sphereHighVbo.setData(vertices);
+        sphereHighIbo.setData(indices);
+        return std::pair<size_t, size_t>{vertices.size(), indices.size()};
+    }();
 
-    // Set attributes and data
-    render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
-    mesh.setAttributes({
-        render::VertexAttributeType::FLOAT3, // position
-        render::VertexAttributeType::FLOAT3, // normal
-        render::VertexAttributeType::FLOAT2, // uv
-    }, {
-        render::VertexAttributeType::FLOAT4, // color
-        render::VertexAttributeType::MAT4x4, // model
-    });
-    mesh.setInstanceBuffer(instanceBuffer);
-    mesh.setIndexBuffer(indexBuffer);
-    mesh.setVertexBuffer(vertexBuffer);
+    int instanceCount = 50000;
+    render::DataBuffer<InstanceData> instanceBuffer;
+    instanceBuffer.setData(instances.data(), static_cast<size_t>(instanceCount));
 
-    // Scene UBO
-    struct sceneData {
-        glm::mat4 projection;
-        glm::mat4 view;
-        glm::vec3 viewPos;
+    const std::vector<render::VertexAttributeType> vertexLayout{
+        render::VertexAttributeType::FLOAT3,
+        render::VertexAttributeType::FLOAT3,
+        render::VertexAttributeType::FLOAT2,
     };
-    sceneData sceneDataUBO;
-    render::UniformBuffer<sceneData> ubo;
+    const std::vector<render::VertexAttributeType> instanceLayout{
+        render::VertexAttributeType::FLOAT4,
+        render::VertexAttributeType::FLOAT4,
+        render::VertexAttributeType::FLOAT4,
+    };
+
+    render::InstancedMesh<Vertex, InstanceData> instancedMesh;
+    instancedMesh.setAttributes(vertexLayout, instanceLayout);
+    instancedMesh.setVertexBuffer(&boxVbo);
+    instancedMesh.setIndexBuffer(&boxIbo);
+    instancedMesh.setInstanceBuffer(&instanceBuffer);
+
+    render::Mesh<Vertex> mesh;
+    mesh.setAttributes(vertexLayout);
+    mesh.setVertexBuffer(&boxVbo);
+    mesh.setIndexBuffer(&boxIbo);
+
+    SceneData sceneDataUBO;
+    render::UniformBuffer<SceneData> ubo;
     ubo.bindTo(0);
+
+    bool useInstancing = true;
+    bool animate = true;
+    bool applyTexture = true;
+    bool wireframe = false;
+    bool vsync = false;
+    int meshKind = 0;
+    int lastCount = instanceCount;
+    int lastMeshKind = meshKind;
+    float submitMs = 0.0f;
 
     util::TimeStep timeStep;
     util::SmoothFirstPersonCameraController camController;
-    camController.moveSpeed = 100.0f;
+    camController.moveSpeed = 80.0f;
+
+    auto bindMeshKind = [&](int kind) {
+        render::DataBuffer<Vertex>* vbo = &boxVbo;
+        render::DataBuffer<uint32_t>* ibo = &boxIbo;
+        if (kind == 1) {
+            vbo = &sphereLowVbo;
+            ibo = &sphereLowIbo;
+        } else if (kind == 2) {
+            vbo = &sphereHighVbo;
+            ibo = &sphereHighIbo;
+        }
+        instancedMesh.setVertexBuffer(vbo);
+        instancedMesh.setIndexBuffer(ibo);
+        mesh.setVertexBuffer(vbo);
+        mesh.setIndexBuffer(ibo);
+    };
+
     while (!render::window::shouldClose()) {
         core::input::update();
+        render::ui::beginFrame();
 
-        float runtime = render::window::getRuntime();
+        float runtime = static_cast<float>(render::window::getRuntime());
         if (timeStep.update(runtime)) {
-            std::string newTitle = "Vertex attribute test | Instancing ON | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
-            render::window::setTitle(newTitle);
+            const char* mode = useInstancing ? "Instanced" : "Non-instanced";
+            render::window::setTitle(
+                std::string{"Instancing | "} + mode + " | " +
+                std::to_string(instanceCount) + " | FPS: " +
+                std::to_string(static_cast<int>(std::round(timeStep.fps())))
+            );
         }
 
-        // Close window if ESC was pressed
-        if (isKeyPressed(core::input::Key::ESCAPE)) {
+        if (isKeyDown(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
 
-        for (size_t i = 0; i < instances.size(); ++i) {
-            glm::vec3 pos = glm::vec3(instances[i].model[3]);
-            pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f} * .1f;
-
-            // Extract scale from model matrix
-            glm::vec3 scale = glm::vec3(
-                glm::length(glm::vec3(instances[i].model[0])),
-                glm::length(glm::vec3(instances[i].model[1])),
-                glm::length(glm::vec3(instances[i].model[2]))
-            );
-
-            float t = runtime * 2.0f + i * 0.01f;
-            scale.x = glm::sin(t) * 4.5f + 10.0f;
-            scale.y = glm::cos(t) * 4.5f + 10.0f;
-            scale.z = glm::sin(t + 1.0f) * 4.5f + 10.0f;
-
-            glm::mat4 model{1.0f};
-            model = glm::translate(model, pos);
-            model = glm::rotate(model, runtime + i * 0.01f, glm::vec3{0.3f, -0.7f, 0.4f});
-            model = glm::scale(model, scale);
-            instances[i].model = model;
+        const char* meshNames[] = { "Box (12 tris)", "Sphere low", "Sphere high" };
+        size_t meshIdxCount = boxIdx.size();
+        size_t meshVertCount = boxVerts.size();
+        if (meshKind == 1) {
+            meshIdxCount = lowIdx;
+            meshVertCount = lowVerts;
+        } else if (meshKind == 2) {
+            meshIdxCount = highIdx;
+            meshVertCount = highVerts;
         }
-        instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
+        const uint64_t triangles = static_cast<uint64_t>(instanceCount) * (meshIdxCount / 3);
+
+        const auto viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 10, viewport->WorkPos.y + 10));
+        ImGui::SetNextWindowSize(ImVec2(360, 320));
+        ImGui::Begin("Instancing", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+        ImGui::TextWrapped(
+            "Instancing is one draw call. Non-instanced is one call per mesh. "
+            "Animation runs on the GPU so CPU matrix updates don't hide the difference. "
+            "VSync off so FPS can exceed the monitor refresh."
+        );
+        ImGui::Separator();
+        ImGui::Checkbox("Instanced rendering", &useInstancing);
+        if (ImGui::Checkbox("VSync", &vsync)) {
+            render::setVSync(vsync);
+        }
+        ImGui::Checkbox("Animate (GPU)", &animate);
+        ImGui::Checkbox("Texture", &applyTexture);
+        ImGui::Checkbox("Wireframe", &wireframe);
+        ImGui::Combo("Mesh", &meshKind, meshNames, IM_ARRAYSIZE(meshNames));
+        ImGui::SliderInt("Count", &instanceCount, 1, kMaxInstances, "%d", ImGuiSliderFlags_Logarithmic);
+        ImGui::Separator();
+        ImGui::Text("Draw calls: %d", useInstancing ? 1 : instanceCount);
+        ImGui::Text("Mesh: %zu verts, %zu idx", meshVertCount, meshIdxCount);
+        ImGui::Text("Triangles: %llu", static_cast<unsigned long long>(triangles));
+        ImGui::Text("CPU submit: %.2f ms", submitMs);
+        ImGui::Text("FPS: %.0f", timeStep.fps());
+        if (!useInstancing && instanceCount > 20000) {
+            ImGui::TextWrapped("Non-instanced with this count is CPU-bound on draw calls. That's the point.");
+        }
+        if (meshKind == 2 && instanceCount > 8000) {
+            ImGui::TextWrapped("High-poly spheres are GPU vertex-bound; both paths will look similar.");
+        }
+        ImGui::End();
+
+        if (instanceCount != lastCount) {
+            instanceBuffer.setData(instances.data(), static_cast<size_t>(instanceCount));
+            lastCount = instanceCount;
+        }
+        if (meshKind != lastMeshKind) {
+            bindMeshKind(meshKind);
+            lastMeshKind = meshKind;
+        }
 
         camController.update(camera, timeStep.dt());
 
-        // Set scene UBO data
         auto windowSize = render::window::getSize();
         sceneDataUBO.viewPos = camera.getPosition();
         sceneDataUBO.view = camera.getViewMatrix();
         sceneDataUBO.projection = glm::perspective(
             glm::radians(camera.fov),
-            (float)windowSize.x / (float)windowSize.y,
+            windowSize.y > 0 ? (float)windowSize.x / (float)windowSize.y : 1.0f,
             camera.minDist, camera.maxDist
         );
         ubo.setData(sceneDataUBO);
 
         render::clearBuffers();
+        glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 
-        mesh.render();
+        const auto submitStart = std::chrono::steady_clock::now();
+        if (useInstancing) {
+            instancedShader.use();
+            instancedShader.setBool("applyTexture", applyTexture);
+            instancedShader.setBool("uAnimate", animate);
+            instancedShader.setFloat("uTime", runtime);
+            instancedShader.setTexture("tex", texture, 0);
+            instancedMesh.render();
+        } else {
+            nonInstancedShader.use();
+            nonInstancedShader.setBool("uAnimate", animate);
+            nonInstancedShader.setFloat("uTime", runtime);
+            for (int i = 0; i < instanceCount; ++i) {
+                nonInstancedShader.setVec4("color", instances[i].color);
+                nonInstancedShader.setVec4("posSeed", instances[i].posSeed);
+                nonInstancedShader.setVec4("scalePad", instances[i].scale);
+                mesh.render();
+            }
+        }
+        submitMs = std::chrono::duration<float, std::milli>(
+            std::chrono::steady_clock::now() - submitStart
+        ).count();
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        render::ui::endFrame();
         render::window::swapBuffers();
     }
 
-    delete vertexBuffer;
-    delete instanceBuffer;
-    delete indexBuffer;
-
+    render::ui::terminate();
     return 0;
 }

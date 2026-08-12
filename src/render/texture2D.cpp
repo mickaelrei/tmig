@@ -9,18 +9,6 @@
 
 namespace tmig::render {
 
-bool isMipmapFilter(TextureMinFilter filter) {
-    switch (filter) {
-    case TextureMinFilter::NEAREST_MIPMAP_NEAREST:
-    case TextureMinFilter::LINEAR_MIPMAP_NEAREST:
-    case TextureMinFilter::NEAREST_MIPMAP_LINEAR:
-    case TextureMinFilter::LINEAR_MIPMAP_LINEAR:
-        return true;
-    default:
-        return false;
-    }
-}
-
 /// @brief Convert a `TextureFormat` into a sized OpenGL internal format
 static GLenum toInternalFormat(TextureFormat format) {
     switch (format) {
@@ -208,6 +196,7 @@ static GLenum toGL(TextureMagFilter filter) {
 
 Texture2D::Texture2D() {
     glCreateTextures(GL_TEXTURE_2D, 1, &_id); glCheckError();
+    applySamplerState();
     util::logMessage(
         util::LogCategory::ENGINE, util::LogSeverity::INFO,
         "Created Texture2D: %u\n", _id
@@ -229,7 +218,12 @@ Texture2D::Texture2D(Texture2D&& other) noexcept
       _width{other._width},
       _height{other._height},
       _hasMipmaps{other._hasMipmaps},
-      _internalFormat{other._internalFormat}
+      _internalFormat{other._internalFormat},
+      _wrapS{other._wrapS},
+      _wrapT{other._wrapT},
+      _minFilter{other._minFilter},
+      _magFilter{other._magFilter},
+      _borderColor{other._borderColor}
 {
     other._id = 0;
     other._width = 0;
@@ -249,6 +243,11 @@ Texture2D& Texture2D::operator=(Texture2D&& other) noexcept {
         _height = other._height;
         _hasMipmaps = other._hasMipmaps;
         _internalFormat = other._internalFormat;
+        _wrapS = other._wrapS;
+        _wrapT = other._wrapT;
+        _minFilter = other._minFilter;
+        _magFilter = other._magFilter;
+        _borderColor = other._borderColor;
 
         other._id = 0;
         other._width = 0;
@@ -305,6 +304,24 @@ void Texture2D::setData(const void* data, TextureFormat sourceFormat) {
     glTextureSubImage2D(_id, 0, 0, 0, _width, _height, format, type, data); glCheckError();
 }
 
+void Texture2D::recreateTextureObject() {
+    if (_id != 0) {
+        glDeleteTextures(1, &_id); glCheckError();
+        _id = 0;
+    }
+    glCreateTextures(GL_TEXTURE_2D, 1, &_id); glCheckError();
+    applySamplerState();
+}
+
+void Texture2D::applySamplerState() const {
+    if (_id == 0) return;
+    glTextureParameteri(_id, GL_TEXTURE_WRAP_S, toGL(_wrapS)); glCheckError();
+    glTextureParameteri(_id, GL_TEXTURE_WRAP_T, toGL(_wrapT)); glCheckError();
+    glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, toGL(_minFilter)); glCheckError();
+    glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, toGL(_magFilter)); glCheckError();
+    glTextureParameterfv(_id, GL_TEXTURE_BORDER_COLOR, &_borderColor.x); glCheckError();
+}
+
 void Texture2D::resize(uint32_t width, uint32_t height, TextureFormat internalFormat) {
 #ifdef DEBUG
     if (internalFormat == TextureFormat::UNDEFINED) {
@@ -312,9 +329,11 @@ void Texture2D::resize(uint32_t width, uint32_t height, TextureFormat internalFo
     }
 #endif
 
+    // Immutable storage cannot be reallocated; recreate the texture object
+    recreateTextureObject();
+
     // Reset mipmaps flag because resizing removes the existing mipmaps
     _hasMipmaps = false;
-
     _width = width;
     _height = height;
     _internalFormat = internalFormat;
@@ -323,22 +342,27 @@ void Texture2D::resize(uint32_t width, uint32_t height, TextureFormat internalFo
 }
 
 void Texture2D::setWrapS(TextureWrapMode wrap) {
+    _wrapS = wrap;
     glTextureParameteri(_id, GL_TEXTURE_WRAP_S, toGL(wrap));
 }
 
 void Texture2D::setWrapT(TextureWrapMode wrap) {
+    _wrapT = wrap;
     glTextureParameteri(_id, GL_TEXTURE_WRAP_T, toGL(wrap));
 }
 
 void Texture2D::setMinFilter(TextureMinFilter filter) {
+    _minFilter = filter;
     glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, toGL(filter));
 }
 
 void Texture2D::setMagFilter(TextureMagFilter filter) {
+    _magFilter = filter;
     glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, toGL(filter));
 }
 
 void Texture2D::setBorderColor(const glm::vec4& color) {
+    _borderColor = color;
     glTextureParameterfv(_id, GL_TEXTURE_BORDER_COLOR, &color.x); glCheckError();
 }
 
@@ -401,6 +425,9 @@ bool Texture2D::isFormatCompatible(TextureFormat internal, TextureFormat source)
             return source == TextureFormat::RGBA32F;
 
         // ---------- Depth Formats ----------
+        case TextureFormat::DEPTH16:
+            return source == TextureFormat::DEPTH16;
+
         case TextureFormat::DEPTH24:
             return source == TextureFormat::DEPTH24;
 

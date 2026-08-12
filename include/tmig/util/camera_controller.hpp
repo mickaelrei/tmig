@@ -121,10 +121,10 @@ public:
 protected:
     bool firstMouse = true;
     glm::vec2 lastMousePos;
-    float targetRadius;
+    float targetRadius = 10.0f;
     float targetAzimuth = 0.0f;
     float targetElevation = 0.0f;
-    float currentRadius;
+    float currentRadius = 10.0f;
     float currentAzimuth = 0.0f;
     float currentElevation = 0.0f;
 };

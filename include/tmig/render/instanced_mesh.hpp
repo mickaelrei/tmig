@@ -52,7 +52,7 @@ public:
 
 protected:
     /// @brief Pointer to instance buffer
-    DataBuffer<I>* instanceBuffer;
+    DataBuffer<I>* instanceBuffer = nullptr;
 
     /// @brief Per-instance attributes
     std::vector<VertexAttributeType> instanceAttributes;

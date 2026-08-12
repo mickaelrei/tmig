@@ -23,7 +23,7 @@ double getRuntime();
 bool shouldClose();
 
 /// @brief Sets window `shouldClose` flag
-/// @param close Whether window shoud close
+/// @param close Whether window should close
 /// @note Depends on `render::init()`
 void setShouldClose(bool close);
 

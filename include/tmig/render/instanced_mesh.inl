@@ -78,7 +78,6 @@ void InstancedMesh<V, I>::render() {
 
     glBindVertexArray(Mesh<V>::vao); glCheckError();
     glDrawElementsInstanced(GL_TRIANGLES, Mesh<V>::indexBuffer->count(), GL_UNSIGNED_INT, 0, instanceBuffer->count()); glCheckError();
-    glBindVertexArray(0); glCheckError();
 }
 
 template<typename V, typename I>

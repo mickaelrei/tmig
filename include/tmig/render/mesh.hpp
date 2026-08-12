@@ -49,10 +49,10 @@ protected:
     uint32_t vao = 0;
 
     /// @brief Pointer to vertex buffer
-    DataBuffer<V>* vertexBuffer;
+    DataBuffer<V>* vertexBuffer = nullptr;
 
     /// @brief Pointer to index buffer
-    DataBuffer<uint32_t>* indexBuffer;
+    DataBuffer<uint32_t>* indexBuffer = nullptr;
 
     /// @brief Per-vertex attributes
     std::vector<VertexAttributeType> vertexAttributes;

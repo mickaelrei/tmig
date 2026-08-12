@@ -64,7 +64,7 @@ public:
     /// @note By default it is 0.5f
     void setStrength(float strength);
 
-    /// @brief Get current offset scale
+    /// @brief Get current bloom strength
     float getStrength() const { return strength; }
 
     virtual const Texture2D& apply(const Texture2D& input, const PostProcessContext& ctx = {}) override;

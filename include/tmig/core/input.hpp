@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace tmig::core::input {
 
 /// @brief Key codes for keyboard input
@@ -11,7 +13,7 @@ enum class Key {
     MINUS,
     PERIOD,
     SLASH,
-    NUM0, Num1, Num2, Num3, Num4, Num5, Num6, Num7, Num8, Num9,
+    NUM0, NUM1, NUM2, NUM3, NUM4, NUM5, NUM6, NUM7, NUM8, NUM9,
     SEMICOLON = 59,
     EQUAL = 61,
     A = 65, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,

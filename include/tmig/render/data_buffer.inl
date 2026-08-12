@@ -66,7 +66,7 @@ void DataBuffer<T>::setSubset(size_t offset, size_t count, const T* data) {
 #ifdef DEBUG
     if (offset >= _count || offset + count > _count) {
         util::logMessage(
-            util::LogCategory::ENGINE, util::LogSeverity::INFO,
+            util::LogCategory::ENGINE, util::LogSeverity::WARNING,
             "DataBuffer::setSubset called with invalid bounds. Current count is %ld, got [offset=%ld, count=%ld]\n",
             _count, offset, count
         );
@@ -74,7 +74,7 @@ void DataBuffer<T>::setSubset(size_t offset, size_t count, const T* data) {
     }
 #endif
 
-    glNamedBufferSubData(_id, offset, count * sizeof(T), data);
+    glNamedBufferSubData(_id, offset * sizeof(T), count * sizeof(T), data); glCheckError();
 }
 
 

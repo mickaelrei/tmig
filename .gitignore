@@ -1,6 +1,7 @@
 # Folders
 .vscode/
 tests/bin/
+imgui.ini
 
 # CMake files
 lib/

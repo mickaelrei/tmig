@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
+#include <string>
 
 #include "tmig/render/render.hpp"
 #include "tmig/render/instanced_mesh.hpp"
@@ -15,134 +17,183 @@
 #include "tmig/util/resources.hpp"
 #include "tmig/util/postprocessing.hpp"
 #include "tmig/util/time_step.hpp"
+#include "tmig/util/color.hpp"
 #include "tmig/core/input.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "imgui.h"
+#include "glad/glad.h"
 
 using namespace tmig;
 
-bool firstSinceLast = true;
-float cameraSpeed = 10.0f;
-float cameraRotationSpeed = 0.3f;
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 normal;
+    glm::vec2 uv;
+};
+
+struct InstanceData {
+    glm::vec4 color;
+    glm::mat4 model;
+};
+
+struct SceneData {
+    glm::mat4 projection;
+    glm::mat4 view;
+    glm::vec3 viewPos;
+};
+
+static glm::mat4 trs(const glm::vec3& pos, const glm::vec3& scale, float angle = 0.0f, glm::vec3 axis = {0.0f, 1.0f, 0.0f}) {
+    glm::mat4 m{1.0f};
+    m = glm::translate(m, pos);
+    if (angle != 0.0f) {
+        m = glm::rotate(m, angle, axis);
+    }
+    m = glm::scale(m, scale);
+    return m;
+}
 
 int main() {
-    srand(3);
-
     render::init();
     render::ui::init();
+    render::window::setSize({1280, 720});
     render::setClearColor(glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
 
     render::Camera camera;
-    camera.maxDist = 10000.0f;
-    camera.setPosition(glm::vec3{0.0f, 2.0f, 2.0f});
+    camera.maxDist = 500.0f;
+    camera.setPosition(glm::vec3{0.0f, 6.0f, 18.0f});
+    camera.lookAt({0.0f, 1.5f, 0.0f});
 
     render::ShaderProgram meshShader;
     if (!meshShader.compileFromFiles(
         util::getResourcePath("shaders/instanced.vert"),
         util::getResourcePath("shaders/instanced_bloom.frag")
     )) {
-        std::cout << "Failed loading instanced shader\n";
+        std::cerr << "Failed loading bloom instanced shader\n";
         return 1;
     }
 
-    render::Texture2D meshTexture;
-    if (!meshTexture.loadFromFile(util::getResourcePath("images/awesomeface.png"))) {
-        std::cerr << "Failed to load texture\n";
-    }
-
-    meshTexture.setWrapS(render::TextureWrapMode::MIRRORED_REPEAT);
-    meshTexture.setWrapT(render::TextureWrapMode::MIRRORED_REPEAT);
-    meshTexture.setMinFilter(render::TextureMinFilter::LINEAR_MIPMAP_LINEAR);
-    meshTexture.setMagFilter(render::TextureMagFilter::LINEAR);
-    meshTexture.generateMipmaps();
-
-    // Generate instancing data
-    struct instanceData {
-        glm::vec4 color;
-        glm::mat4 model;
-    };
-
-    std::vector<instanceData> instances;
-    for (int i = 0; i < 10000; ++i) {
-        // color
-        float r = (float)(rand() % 1000) / 1000.0f;
-        float g = (float)(rand() % 1000) / 1000.0f;
-        float b = (float)(rand() % 1000) / 1000.0f;
-
-        // Small chance of being a glowing instance
-        if (rand() % 10 == 1) {
-            r *= 25.0f;
-            g *= 25.0f;
-            b *= 25.0f;
+    // Dark non-emissive floor tiles + pillars, plus HDR neon orbs
+    std::vector<InstanceData> boxInstances;
+    constexpr int grid = 11;
+    constexpr float tile = 4.0f;
+    for (int z = 0; z < grid; ++z) {
+        for (int x = 0; x < grid; ++x) {
+            float wx = (x - grid * 0.5f + 0.5f) * tile;
+            float wz = (z - grid * 0.5f + 0.5f) * tile;
+            bool dark = ((x + z) % 2) == 0;
+            glm::vec3 color = dark ? glm::vec3{0.12f} : glm::vec3{0.22f};
+            boxInstances.push_back({
+                glm::vec4{color, 1.0f},
+                trs({wx, -1.5f, wz}, {tile * 0.95f, 0.4f, tile * 0.95f})
+            });
         }
-        glm::vec4 color = {r, g, b, 1.0f};
-
-        // pos
-        float x = (float)(rand() % 1000 - 500);
-        float y = (float)(rand() % 1000 - 500);
-        float z = (float)(rand() % 1000 - 500);
-
-        // size
-        float sx = (float)(rand() % 900 + 100) / 10.0f;
-        float sy = (float)(rand() % 900 + 100) / 10.0f;
-        float sz = (float)(rand() % 900 + 100) / 10.0f;
-
-        glm::mat4 m{1.0f};
-        m = glm::translate(m, glm::vec3{x, y, z});
-        m = glm::scale(m, glm::vec3{sx, sy, sz});
-
-        instances.push_back(instanceData{.color = color, .model = m});
     }
 
-    // Generate mesh vertices
-    std::vector<util::GeneralVertex> vertices;
-    std::vector<uint32_t> indices;
-    util::generateSphereMesh([&](auto v) { vertices.push_back(v); }, indices, 15);
+    // Dim pillars around the plaza so bloom can bleed onto them
+    for (int i = 0; i < 8; ++i) {
+        float a = i * (2.0f * 3.14159265f / 8.0f);
+        boxInstances.push_back({
+            glm::vec4{0.05f, 0.05f, 0.07f, 1.0f},
+            trs({std::cos(a) * 16.0f, 2.0f, std::sin(a) * 16.0f}, {1.2f, 8.0f, 1.2f})
+        });
+    }
 
-    auto vertexBuffer   = new render::DataBuffer<util::GeneralVertex>;
-    auto instanceBuffer = new render::DataBuffer<instanceData>;
-    auto indexBuffer    = new render::DataBuffer<uint32_t>;
-    vertexBuffer->setData(vertices);
-    indexBuffer->setData(indices);
-    instanceBuffer->setData(instances);
+    constexpr int kOrbs = 12;
+    std::vector<InstanceData> orbInstances(kOrbs);
 
-    // Set attributes and data
-    render::InstancedMesh<util::GeneralVertex, instanceData> mesh;
-    mesh.setAttributes({
-        render::VertexAttributeType::FLOAT3, // position
-        render::VertexAttributeType::FLOAT3, // normal
-        render::VertexAttributeType::FLOAT2, // uv
-    }, {
-        render::VertexAttributeType::FLOAT4, // color
-        render::VertexAttributeType::MAT4x4, // model
-    });
-    mesh.setInstanceBuffer(instanceBuffer);
-    mesh.setIndexBuffer(indexBuffer);
-    mesh.setVertexBuffer(vertexBuffer);
+    render::DataBuffer<Vertex> boxVbo;
+    render::DataBuffer<uint32_t> boxIbo;
+    {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        util::generateBoxMesh([&](auto v) {
+            vertices.push_back(Vertex{v.position, v.normal, v.uv});
+        }, indices);
+        boxVbo.setData(vertices);
+        boxIbo.setData(indices);
+    }
 
-    // Scene UBO
-    struct sceneData {
-        glm::mat4 projection;
-        glm::mat4 view;
-        glm::vec3 viewPos;
+    render::DataBuffer<Vertex> sphereVbo;
+    render::DataBuffer<uint32_t> sphereIbo;
+    {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        util::generateSphereMesh([&](auto v) {
+            vertices.push_back(Vertex{v.position, v.normal, v.uv});
+        }, indices, 24);
+        sphereVbo.setData(vertices);
+        sphereIbo.setData(indices);
+    }
+
+    render::DataBuffer<Vertex> torusVbo;
+    render::DataBuffer<uint32_t> torusIbo;
+    {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        util::generateTorusMesh([&](auto v) {
+            vertices.push_back(Vertex{v.position, v.normal, v.uv});
+        }, indices, 40);
+        torusVbo.setData(vertices);
+        torusIbo.setData(indices);
+    }
+
+    render::DataBuffer<InstanceData> boxInstanceBuffer;
+    boxInstanceBuffer.setData(boxInstances);
+
+    render::DataBuffer<InstanceData> orbInstanceBuffer;
+    orbInstanceBuffer.setData(orbInstances);
+
+    InstanceData torusInstance{
+        glm::vec4{1.2f, 6.0f, 16.0f, 1.0f},
+        trs({0.0f, 2.0f, 0.0f}, {4.0f, 4.0f, 4.0f})
     };
-    sceneData sceneDataUBO;
-    render::UniformBuffer<sceneData> ubo;
+    render::DataBuffer<InstanceData> torusInstanceBuffer;
+    torusInstanceBuffer.setData(&torusInstance, 1);
+
+    auto configure = [](render::InstancedMesh<Vertex, InstanceData>& mesh,
+                        render::DataBuffer<Vertex>* vbo,
+                        render::DataBuffer<uint32_t>* ibo,
+                        render::DataBuffer<InstanceData>* instances) {
+        mesh.setAttributes({
+            render::VertexAttributeType::FLOAT3,
+            render::VertexAttributeType::FLOAT3,
+            render::VertexAttributeType::FLOAT2,
+        }, {
+            render::VertexAttributeType::FLOAT4,
+            render::VertexAttributeType::MAT4x4,
+        });
+        mesh.setVertexBuffer(vbo);
+        mesh.setIndexBuffer(ibo);
+        mesh.setInstanceBuffer(instances);
+    };
+
+    render::InstancedMesh<Vertex, InstanceData> boxMesh;
+    render::InstancedMesh<Vertex, InstanceData> orbMesh;
+    render::InstancedMesh<Vertex, InstanceData> torusMesh;
+    configure(boxMesh, &boxVbo, &boxIbo, &boxInstanceBuffer);
+    configure(orbMesh, &sphereVbo, &sphereIbo, &orbInstanceBuffer);
+    configure(torusMesh, &torusVbo, &torusIbo, &torusInstanceBuffer);
+
+    SceneData sceneDataUBO;
+    render::UniformBuffer<SceneData> ubo;
     ubo.bindTo(0);
 
-    // Framebuffer to render the main scene to a texture
     render::Framebuffer sceneFramebuffer;
     render::Texture2D sceneDepthTexture;
     render::Texture2D sceneOutputTexture;
     sceneOutputTexture.setWrapS(render::TextureWrapMode::CLAMP_TO_EDGE);
     sceneOutputTexture.setWrapT(render::TextureWrapMode::CLAMP_TO_EDGE);
+    sceneOutputTexture.setMinFilter(render::TextureMinFilter::LINEAR);
+    sceneOutputTexture.setMagFilter(render::TextureMagFilter::LINEAR);
     auto status = sceneFramebuffer.setup({
-        .width = 2000,
-        .height = 2000,
+        .width = 1280,
+        .height = 720,
         .colorAttachments = {
             {0, render::FramebufferAttachment{
                 .texture = &sceneOutputTexture,
-                .format = render::TextureFormat::RGBA32F,
+                .format = render::TextureFormat::RGBA16F,
             }},
         },
         .depthAttachment = render::FramebufferDepthAttachment{
@@ -152,76 +203,93 @@ int main() {
     });
     if (status != render::Framebuffer::Status::COMPLETE) {
         std::cerr << "Framebuffer failed; status: " << status << "\n";
+        return 1;
     }
 
-    // Create instance of bloom effect
-    render::postprocessing::BloomEffect bloomEffect;
+    render::postprocessing::BloomEffect bloomEffect{{
+        .brightPassWidth = 1920,
+        .brightPassHeight = 1080,
+        .blurWidth = 1280,
+        .blurHeight = 720,
+        .outputWidth = 1920,
+        .outputHeight = 1080,
+    }};
+    bloomEffect.setThreshold(1.0f);
+    bloomEffect.setOffsetScale(1.2f);
+    bloomEffect.setStrength(1.1f);
+
+    bool applyBloom = true;
+    bool splitView = true;
+    bool animate = true;
+    float threshold = bloomEffect.getThreshold();
+    float strength = bloomEffect.getStrength();
+    float offsetScale = bloomEffect.getOffsetScale();
+    float emissiveGain = 8.0f;
+    glm::ivec2 lastSize{1280, 720};
 
     util::TimeStep timeStep;
     util::SmoothFirstPersonCameraController camController;
-    camController.moveSpeed = 100.0f;
+    camController.moveSpeed = 12.0f;
 
-    bool randomizeMesh = true;
-    bool applyBloom = true;
-    bool applyTexture = true;
     while (!render::window::shouldClose()) {
         core::input::update();
         render::ui::beginFrame();
 
-        float runtime = render::window::getRuntime();
+        float runtime = static_cast<float>(render::window::getRuntime());
         if (timeStep.update(runtime)) {
-            std::string newTitle = "Bloom effect | FPS: " + std::to_string(static_cast<int>(std::round(timeStep.fps())));
-            render::window::setTitle(newTitle);
+            render::window::setTitle(
+                std::string{"Bloom | FPS: "} +
+                std::to_string(static_cast<int>(std::round(timeStep.fps())))
+            );
         }
 
-        // Close window if ESC was pressed
-        if (isKeyPressed(core::input::Key::ESCAPE)) {
+        if (isKeyDown(core::input::Key::ESCAPE)) {
             render::window::setShouldClose(true);
         }
 
-        // UI
         const auto viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 10, viewport->WorkPos.y + 10));
-        ImGui::SetNextWindowSize(ImVec2(160, 100));
-
-        // Dropdown for all possible effects
-        ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Checkbox("Move meshes", &randomizeMesh);
+        ImGui::SetNextWindowSize(ImVec2(300, 250));
+        ImGui::Begin("Bloom", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+        ImGui::TextWrapped("HDR neon orbs over a dark plaza. Bloom extracts bright pixels, blurs them, then composites.");
+        ImGui::Separator();
         ImGui::Checkbox("Apply bloom", &applyBloom);
-        ImGui::Checkbox("Apply texture", &applyTexture);
+        ImGui::Checkbox("Split view (raw | bloom)", &splitView);
+        ImGui::Checkbox("Animate", &animate);
+        if (ImGui::SliderFloat("Threshold", &threshold, 0.2f, 4.0f)) {
+            bloomEffect.setThreshold(threshold);
+        }
+        if (ImGui::SliderFloat("Strength", &strength, 0.0f, 3.0f)) {
+            bloomEffect.setStrength(strength);
+        }
+        if (ImGui::SliderFloat("Blur width", &offsetScale, 0.2f, 4.0f)) {
+            bloomEffect.setOffsetScale(offsetScale);
+        }
+        ImGui::SliderFloat("Emissive gain", &emissiveGain, 1.0f, 40.0f);
         ImGui::End();
 
-        // Update scene
-        if (randomizeMesh) {
-            for (size_t i = 0; i < instances.size(); ++i) {
-                glm::vec3 pos = glm::vec3(instances[i].model[3]);
-                pos += glm::vec3{glm::sin(runtime + i * 0.01f), glm::cos(runtime - i * 0.1f), 0.0f} * .1f;
-
-                // Extract scale from model matrix
-                glm::vec3 scale = glm::vec3(
-                    glm::length(glm::vec3(instances[i].model[0])),
-                    glm::length(glm::vec3(instances[i].model[1])),
-                    glm::length(glm::vec3(instances[i].model[2]))
-                );
-
-                float t = runtime * 2.0f + i * 0.01f;
-                scale.x = glm::sin(t) * 4.5f + 10.0f;
-                scale.y = glm::cos(t) * 4.5f + 10.0f;
-                scale.z = glm::sin(t + 1.0f) * 4.5f + 10.0f;
-
-                glm::mat4 model{1.0f};
-                model = glm::translate(model, pos);
-                model = glm::rotate(model, runtime + i * 0.01f, glm::vec3{0.3f, -0.7f, 0.4f});
-                model = glm::scale(model, scale);
-                instances[i].model = model;
-            }
-            instanceBuffer->setSubset(0, instanceBuffer->count(), instances.data());
+        auto windowSize = render::window::getSize();
+        if (windowSize != lastSize && windowSize.x > 0 && windowSize.y > 0) {
+            sceneFramebuffer.resize(static_cast<uint32_t>(windowSize.x), static_cast<uint32_t>(windowSize.y));
+            lastSize = windowSize;
         }
+
+        float t = animate ? runtime : 0.0f;
+        for (int i = 0; i < kOrbs; ++i) {
+            float a = t * 0.4f + i * (2.0f * 3.14159265f / kOrbs);
+            glm::vec3 pos{std::cos(a) * 7.0f, 1.2f + std::sin(t * 1.5f + i) * 0.6f, std::sin(a) * 7.0f};
+            glm::vec3 rgb = util::HSVtoRGB(std::fmod(i / float(kOrbs) + t * 0.05f, 1.0f), 1.0f, 1.0f);
+            orbInstances[i].color = glm::vec4{rgb * emissiveGain, 1.0f};
+            orbInstances[i].model = trs(pos, glm::vec3{0.7f});
+        }
+        orbInstanceBuffer.setSubset(0, kOrbs, orbInstances.data());
+
+        torusInstance.color = glm::vec4{glm::vec3{0.6f, 3.0f, 8.0f} * (emissiveGain / 12.0f), 1.0f};
+        torusInstance.model = trs({0.0f, 2.0f, 0.0f}, glm::vec3{4.0f}, t * 0.35f, {0.2f, 1.0f, 0.1f});
+        torusInstanceBuffer.setSubset(0, 1, &torusInstance);
 
         camController.update(camera, timeStep.dt());
 
-        // Set scene UBO data
-        auto windowSize = render::window::getSize();
         sceneDataUBO.viewPos = camera.getPosition();
         sceneDataUBO.view = camera.getViewMatrix();
         sceneDataUBO.projection = glm::perspective(
@@ -231,21 +299,27 @@ int main() {
         );
         ubo.setData(sceneDataUBO);
 
-        // Render instanced mesh
         sceneFramebuffer.bind();
-        meshShader.setBool("applyTexture", applyTexture);
-        meshShader.setTexture("tex", meshTexture, 0);
         meshShader.use();
-        mesh.render();
+        meshShader.setBool("applyTexture", false);
+        boxMesh.render();
+        orbMesh.render();
+        torusMesh.render();
 
         if (applyBloom) {
-            // Apply bloom effect
             const auto& bloomTexture = bloomEffect.apply(sceneOutputTexture);
-            render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
-            util::renderScreenQuadTexture(bloomTexture);
+            render::Framebuffer::bindDefault(windowSize.x, windowSize.y, {
+                .clearColor = true, .clearStencil = false, .clearDepth = false
+            });
+            if (splitView) {
+                util::renderScreenQuadSplit(sceneOutputTexture, bloomTexture);
+            } else {
+                util::renderScreenQuadTexture(bloomTexture);
+            }
         } else {
-            // Skip bloom
-            render::Framebuffer::bindDefault(windowSize.x, windowSize.y);
+            render::Framebuffer::bindDefault(windowSize.x, windowSize.y, {
+                .clearColor = true, .clearStencil = false, .clearDepth = false
+            });
             util::renderScreenQuadTexture(sceneOutputTexture);
         }
 
@@ -253,11 +327,6 @@ int main() {
         render::window::swapBuffers();
     }
 
-    delete vertexBuffer;
-    delete instanceBuffer;
-    delete indexBuffer;
-
     render::ui::terminate();
-
     return 0;
 }

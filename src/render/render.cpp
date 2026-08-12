@@ -59,7 +59,7 @@ void init() {
     glEnable(GL_CULL_FACE); glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glCheckError();
     glEnable(GL_BLEND); glCheckError();
-    //glfwSwapInterval(0); glCheckError(); // Disable VSync
+    glfwSwapInterval(0);
 #ifdef DEBUG
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(debugMessageCallback, nullptr);
@@ -100,6 +100,14 @@ void setPointSize(float size) {
 #endif
 
     glPointSize(size); glCheckError();
+}
+
+void setVSync(bool enabled) {
+#ifdef DEBUG
+    if (!initialized) return;
+#endif
+
+    glfwSwapInterval(enabled ? 1 : 0);
 }
 
 } // namespace tmig::render

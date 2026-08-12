@@ -129,8 +129,8 @@ void SpotLightHandle::setOuterCutOffAngle(float outerCutOffAngle) {
 }
 
 void SpotLightHandle::setConstant(float constant) {
-    _manager->_lightsUBO.spotLights[_index].constant = constant;
     if (_manager == nullptr) return;
+    _manager->_lightsUBO.spotLights[_index].constant = constant;
 }
 
 void SpotLightHandle::setLinear(float linear) {

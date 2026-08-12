@@ -55,10 +55,12 @@ Mesh<V>& Mesh<V>::operator=(Mesh&& other) noexcept {
         vertexBuffer = other.vertexBuffer;
         indexBuffer = other.indexBuffer;
         vertexAttributes = std::move(other.vertexAttributes);
+        previousAttribCount = other.previousAttribCount;
 
         other.vao = 0;
         other.vertexBuffer = nullptr;
         other.indexBuffer = nullptr;
+        other.previousAttribCount = 0;
     }
     return *this;
 }
@@ -111,7 +113,6 @@ void Mesh<V>::render() {
 
     glBindVertexArray(vao); glCheckError();
     glDrawElements(GL_TRIANGLES, indexBuffer->count(), GL_UNSIGNED_INT, 0); glCheckError();
-    glBindVertexArray(0); glCheckError();
 }
 
 template<typename V>

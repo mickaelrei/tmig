@@ -1,3 +1,8 @@
+#include <memory>
+#include <stdexcept>
+
+#include "glad/glad.h"
+
 #include "tmig/util/postprocessing.hpp"
 #include "tmig/util/resources.hpp"
 #include "tmig/util/shapes.hpp"
@@ -56,9 +61,31 @@ struct ScreenQuadRenderer {
 void renderScreenQuadTexture(const render::Texture2D& texture) {
     static ScreenQuadRenderer renderer;
 
-    // Render mesh without depth test
     renderer.shader.use();
     renderer.shader.setTexture("scene", texture, 0);
+    glDisable(GL_DEPTH_TEST);
+    renderer.mesh.render();
+    glEnable(GL_DEPTH_TEST);
+}
+
+void renderScreenQuadSplit(const render::Texture2D& left, const render::Texture2D& right) {
+    static ScreenQuadRenderer renderer;
+    static render::ShaderProgram splitShader;
+    static bool splitReady = false;
+
+    if (!splitReady) {
+        if (!splitShader.compileFromFiles(
+            getResourcePath("engine/shaders/screen_quad.vert"),
+            getResourcePath("engine/shaders/screen_quad_split.frag")
+        )) {
+            throw std::runtime_error{"Failed to compile screen quad split shader"};
+        }
+        splitReady = true;
+    }
+
+    splitShader.use();
+    splitShader.setTexture("scene", left, 0);
+    splitShader.setTexture("processed", right, 1);
     glDisable(GL_DEPTH_TEST);
     renderer.mesh.render();
     glEnable(GL_DEPTH_TEST);

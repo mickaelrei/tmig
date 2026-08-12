@@ -1,4 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
+#include <cmath>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 
@@ -115,6 +117,10 @@ void SmoothFirstPersonCameraController::update(render::Camera& camera, float dt)
         targetPosition = camera.getPosition();
         targetRotation = camera.getRotation();
         lastMousePos = currentMousePos;
+
+        glm::vec3 forward = camera.getForward();
+        yaw = std::atan2(-forward.x, -forward.z);
+        pitch = std::asin(glm::clamp(forward.y, -1.0f, 1.0f));
         firstMouse = false;
     }
 
@@ -276,14 +282,14 @@ void SmoothFreeFlyCameraController::update(render::Camera& camera, float dt) {
     }
 
     // Roll
-    float rollDeta = 0.0f;
+    float rollDelta = 0.0f;
     if (isKeyDown(core::input::Key::Q))
-        rollDeta -= rollSpeed * dt;
+        rollDelta -= rollSpeed * dt;
     if (isKeyDown(core::input::Key::E))
-        rollDeta += rollSpeed * dt;
+        rollDelta += rollSpeed * dt;
 
     glm::vec3 forward = glm::normalize(targetRotation * glm::vec3(0.0f, 0.0f, -1.0f));
-    glm::quat rollQuat = glm::angleAxis(rollDeta, forward);
+    glm::quat rollQuat = glm::angleAxis(rollDelta, forward);
     targetRotation = glm::normalize(rollQuat * targetRotation);
 
     lastMousePos = currentMousePos;

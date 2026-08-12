@@ -5,6 +5,7 @@ out vec4 FragColor;
 in vec3 fragNormal;
 in vec3 fragPos;
 in vec4 meshColor;
+in vec2 texUV;
 
 // General info
 layout(std140, binding = 0) uniform Scene {

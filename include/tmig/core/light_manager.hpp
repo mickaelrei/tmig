@@ -147,7 +147,7 @@ struct LightsUBO {
     int numSpotLights;
 };
 
-/// @brief Manages a list of lights and syncs them with the GPu
+/// @brief Manages a list of lights and syncs them with the GPU
 ///
 /// This class provides a centralized system for handling lights. Adding a light
 /// returns a handle (e.g., SpotLightHandle), which is used to modify the light's

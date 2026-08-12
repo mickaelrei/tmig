@@ -126,8 +126,7 @@ void main() {
     vec3 viewDir = normalize(viewPos - fragPos);
     vec3 result = vec3(0.0f);
 
-    // Ambient light
-    vec3 ambient = vec3(0.1f) * objectColor;
+    vec3 ambient = vec3(0.06f);
 
     // Sum contributions from all lights
     for (int i = 0; i < numDirectionalLights; i++) {

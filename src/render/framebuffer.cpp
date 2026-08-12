@@ -1,6 +1,6 @@
 #include <vector>
 #include <unordered_set>
-#include <map>
+#include <stdexcept>
 
 #include "glad/glad.h"
 
@@ -71,12 +71,14 @@ Framebuffer::Framebuffer(Framebuffer&& other) noexcept
     : _id{other._id},
       _width{other._width},
       _height{other._height},
+      setupCalled{other.setupCalled},
       _colorAttachments{std::move(other._colorAttachments)},
       _depthAttachment{std::move(other._depthAttachment)}
 {
     other._id = 0;
     other._width = 0;
     other._height = 0;
+    other.setupCalled = false;
 }
 
 Framebuffer& Framebuffer::operator=(Framebuffer&& other) noexcept {
@@ -88,12 +90,14 @@ Framebuffer& Framebuffer::operator=(Framebuffer&& other) noexcept {
         _id = other._id;
         _width = other._width;
         _height = other._height;
+        setupCalled = other.setupCalled;
         _colorAttachments = std::move(other._colorAttachments);
         _depthAttachment = std::move(other._depthAttachment);
 
         other._id = 0;
         other._width = 0;
         other._height = 0;
+        other.setupCalled = false;
     }
     return *this;
 }
@@ -121,12 +125,15 @@ Framebuffer::Status Framebuffer::setup(const FramebufferConfig& config) {
     }
     std::vector<GLenum> drawBuffers(maxIndex + 1, GL_NONE);
 
+    GLint maxColorAttachments = 8;
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
+
     // Attach draw buffers
     for (auto& [index, attachment] : config.colorAttachments) {
         // Ensure valid texture and not duplicate
         if (!attachment.texture) return Status::NULL_ATTACHMENT;
         if (usedTextures.count(attachment.texture)) return Status::DUPLICATE_ATTACHMENT;
-        if (index >= 8) return Status::INVALID_COLOR_INDEX; // TODO: 8 is not always the limit; query for the real limit
+        if (index >= static_cast<uint32_t>(maxColorAttachments)) return Status::INVALID_COLOR_INDEX;
         usedTextures.insert(attachment.texture);
 
         // Resize and apply format
@@ -236,11 +243,18 @@ void Framebuffer::resize(uint32_t width, uint32_t height) {
 
     for (auto& [index, attachment] : _colorAttachments) {
         attachment.texture->resize(width, height, attachment.format);
+        glNamedFramebufferTexture(_id, GL_COLOR_ATTACHMENT0 + index, attachment.texture->id(), 0);
     }
 
     if (_depthAttachment.has_value()) {
         auto& attachment = _depthAttachment.value();
         attachment.texture->resize(width, height, depthFormatToTextureFormat(attachment.format));
+        glNamedFramebufferTexture(
+            _id,
+            depthFormatToAttachmentPoint(attachment.format),
+            attachment.texture->id(),
+            0
+        );
     }
 }
 

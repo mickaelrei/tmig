@@ -26,9 +26,13 @@ void clearBuffers(); // TODO: Add an option to choose which buffers to clear (co
 /// @note Depends on `render::init()`
 void setLineWidth(float width);
 
-/// @brief Sets the line width when rendering on wireframe mode
-/// @param width Line width in pixels
+/// @brief Sets the point size when rendering points
+/// @param size Point size in pixels
 /// @note Depends on `render::init()`
 void setPointSize(float size);
+
+/// @brief Enable or disable vertical sync
+/// @note Depends on `render::init()`. Disabled vsync is required to measure FPS differences
+void setVSync(bool enabled);
 
 } // namespace tmig::render

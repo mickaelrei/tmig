@@ -16,6 +16,7 @@ layout(std140, binding = 0) uniform Scene {
 
 // Renderable info
 uniform sampler2D tex;
+uniform bool applyTexture = true;
 
 // Directional light info
 const float lightIntensity = 0.6f;
@@ -41,13 +42,15 @@ vec3 calculateLighting() {
 }
 
 void main() {
-    vec4 texColor = texture(tex, texUV);
-    // vec4 texColor = vec4(texUV, 0.0f, 1.0f);
-    // If texture alpha is not 100%, starting mixing with mesh color
-    if (texColor.a < 1.0f) {
-        texColor = vec4(mix(texColor.rgb, meshColor.rgb, 1.0f - texColor.a), meshColor.a);
+    vec4 color = meshColor;
+    if (applyTexture) {
+        vec4 texColor = texture(tex, texUV);
+        if (texColor.a < 1.0f) {
+            color = vec4(mix(texColor.rgb, meshColor.rgb, 1.0f - texColor.a), meshColor.a);
+        } else {
+            color = texColor * meshColor;
+        }
     }
 
-    FragColor = texColor * vec4(calculateLighting(), 1.0f);
-    // FragColor = vec4(fragNormal * 0.5f + 0.5f, 1.0f);
+    FragColor = color * vec4(calculateLighting(), 1.0f);
 }

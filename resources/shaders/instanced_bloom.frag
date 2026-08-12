@@ -46,12 +46,16 @@ void main() {
     vec4 color = meshColor;
     if (applyTexture) {
         color = texture(tex, texUV);
-        // If texture alpha is not 100%, starting mixing with mesh color
         if (color.a < 1.0f) {
             color = vec4(mix(color.rgb, meshColor.rgb, 1.0f - color.a), meshColor.a);
         }
     }
 
-    FragColor = color * vec4(calculateLighting(), 1.0f);
-    // FragColor = vec4(fragNormal * 0.5f + 0.5f, 1.0f);
+    float peak = max(max(color.r, color.g), color.b);
+    if (peak > 1.0f) {
+        // HDR / emissive: keep intensity so bloom can extract it
+        FragColor = color;
+    } else {
+        FragColor = color * vec4(calculateLighting(), 1.0f);
+    }
 }

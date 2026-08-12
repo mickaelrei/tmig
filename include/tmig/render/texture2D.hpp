@@ -185,8 +185,8 @@ public:
     void setWrapT(TextureWrapMode wrap);
 
     /// @brief Set minification filter (used when the texture is scaled down)
-    /// @note If using mipmap filters (e.g., `LINEAR_MIPMAP_NEAREST`), `generateMipmaps` must be called first.
-    /// Otherwise it throws a `runtime_error`
+    /// @note If using a mipmap filter (e.g., `LINEAR_MIPMAP_LINEAR`), call `generateMipmaps`
+    /// before sampling the texture, otherwise the result is undefined
     void setMinFilter(TextureMinFilter filter);
 
     /// @brief Set magnification filter (used when the texture is scaled up)
@@ -223,6 +223,12 @@ public:
     static bool isFormatCompatible(TextureFormat internal, TextureFormat source);
 
 private:
+    /// @brief Recreate the GL texture object. Needed because `glTextureStorage2D` is immutable
+    void recreateTextureObject();
+
+    /// @brief Re-apply cached sampler state after the texture object is recreated
+    void applySamplerState() const;
+
     /// @brief Texture OpenGL identifier
     uint32_t _id = 0;
 
@@ -237,6 +243,12 @@ private:
 
     /// @brief Current internal format
     TextureFormat _internalFormat = TextureFormat::UNDEFINED;
+
+    TextureWrapMode _wrapS = TextureWrapMode::REPEAT;
+    TextureWrapMode _wrapT = TextureWrapMode::REPEAT;
+    TextureMinFilter _minFilter = TextureMinFilter::LINEAR;
+    TextureMagFilter _magFilter = TextureMagFilter::LINEAR;
+    glm::vec4 _borderColor{0.0f};
 };
 
 } // namespace tmig::render

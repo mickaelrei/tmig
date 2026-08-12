@@ -2,7 +2,6 @@
 
 #include <ostream>
 #include <unordered_map>
-#include <memory>
 #include <optional>
 
 #include "tmig/core/non_copyable.hpp"

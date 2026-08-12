@@ -25,6 +25,7 @@ static std::shared_ptr<GLFWwindow> glfwWindow = nullptr;
 // Struct for terminating GLFW resources when window shared pointer gets deleted
 struct WindowDeleter {
     void operator()(GLFWwindow* window) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwDestroyWindow(window);
         glfwTerminate();
         initialized = false;
@@ -94,6 +95,9 @@ void setShouldClose(bool close) {
     if (!initialized) return;
 #endif
 
+    if (close) {
+        glfwSetInputMode(glfwWindow.get(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
     glfwSetWindowShouldClose(glfwWindow.get(), static_cast<int>(close));
 }
 
