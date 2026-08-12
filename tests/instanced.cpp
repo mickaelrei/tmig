@@ -58,7 +58,7 @@ int main() {
 
     render::ShaderProgram instancedShader;
     if (!instancedShader.compileFromFiles(
-        util::getResourcePath("shaders/instanced.vert"),
+        util::getResourcePath("shaders/instanced_perf.vert"),
         util::getResourcePath("shaders/instanced.frag")
     )) {
         std::cerr << "Failed loading instanced shader\n";
@@ -67,8 +67,8 @@ int main() {
 
     render::ShaderProgram nonInstancedShader;
     if (!nonInstancedShader.compileFromFiles(
-        util::getResourcePath("shaders/non_instanced.vert"),
-        util::getResourcePath("shaders/non_instanced.frag")
+        util::getResourcePath("shaders/non_instanced_perf.vert"),
+        util::getResourcePath("shaders/non_instanced_perf.frag")
     )) {
         std::cerr << "Failed loading non-instanced shader\n";
         return 1;

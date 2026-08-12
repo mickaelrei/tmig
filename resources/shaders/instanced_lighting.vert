@@ -5,7 +5,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 
 // Per-instance attributes
-layout (location = 2) in vec3 color;
+layout (location = 2) in vec4 color;
 layout (location = 3) in mat4 model;
 
 // General info UBO
@@ -24,7 +24,7 @@ void main() {
     // Transform normal and position to world space
     fragNormal = transpose(inverse(mat3(model))) * aNormal;
     fragPos = vec3(model * vec4(aPos, 1.0f));
-    objectColor = color;
+    objectColor = color.rgb;
 
     // Final vertex position
     gl_Position = projection * view * vec4(fragPos, 1.0f);

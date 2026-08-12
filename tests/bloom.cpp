@@ -62,7 +62,7 @@ int main() {
 
     render::Camera camera;
     camera.maxDist = 500.0f;
-    camera.setPosition(glm::vec3{0.0f, 6.0f, 18.0f});
+    camera.setPosition(glm::vec3{0.0f, 4.0f, 23.0f});
     camera.lookAt({0.0f, 1.5f, 0.0f});
 
     render::ShaderProgram meshShader;
